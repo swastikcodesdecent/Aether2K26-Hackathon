@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AETHER 2K26 — Participant Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+/* ===================== CSS VARIABLES ===================== */
+:root {
+  --saffron:        #FF6B00;
+  --saffron-light:  #FF9040;
+  --saffron-glow:   rgba(255,107,0,0.35);
+  --saffron-pale:   rgba(255,107,0,0.08);
+  --white:          #FFFFFF;
+  --off-white:      #FFF8F2;
+  --glass-bg:       rgba(255,255,255,0.06);
+  --glass-border:   rgba(255,255,255,0.13);
+  --glass-heavy:    rgba(255,255,255,0.10);
+  --dark-base:      #0A0500;
+  --dark-mid:       #120800;
+  --dark-card:      #1A0D00;
+  --text-primary:   #FFFFFF;
+  --text-secondary: rgba(255,255,255,0.65);
+  --text-muted:     rgba(255,255,255,0.38);
+  --success:        #00E5A0;
+  --error:          #FF3B6B;
+  --warning:        #FFD600;
+  --font-display:   'Exo 2', sans-serif;
+  --font-body:      'DM Sans', sans-serif;
+  --font-mono:      'Fira Code', monospace;
+  --radius-sm:      8px;
+  --radius-md:      14px;
+  --radius-lg:      22px;
+  --radius-xl:      32px;
+  --sidebar-w:      280px;
+  --topbar-h:       66px;
+  --transition:     cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ===================== RESET ===================== */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: var(--font-display);
+  background: var(--dark-base);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Ambient background */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(255,107,0,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 70% at 90% 100%, rgba(255,144,64,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, #120800 0%, #0A0500 100%);
+  pointer-events:none;
+}
+
+/* Animated grid */
+body::after {
+  content:'';
+  position:fixed; inset:0; z-index:0;
+  background-image:
+    linear-gradient(rgba(255,107,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,0,0.03) 1px, transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none;
+  animation:gridDrift 25s linear infinite;
+}
+@keyframes gridDrift { 0%{transform:translate(0,0)} 100%{transform:translate(60px,60px)} }
+
+/* ===================== SCROLLBAR ===================== */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--saffron); border-radius:3px; opacity:.6; }
+
+/* ===================== UTILITY ===================== */
+.hidden { display:none !important; }
+.mono { font-family:var(--font-mono); }
+
+/* ===================== GLASS ===================== */
+.glass {
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-radius:var(--radius-lg);
+}
+.glass-heavy {
+  background:var(--glass-heavy);
+  border:1px solid rgba(255,255,255,0.18);
+  backdrop-filter:blur(28px);
+  -webkit-backdrop-filter:blur(28px);
+  border-radius:var(--radius-lg);
+}
+
+
+/* ===================== TOAST ===================== */
+#toast-container {
+  position:fixed; bottom:28px; right:28px;
+  z-index:9998; display:flex; flex-direction:column; gap:10px;
+}
+.toast {
+  padding:13px 20px;
+  border-radius:var(--radius-md);
+  font-size:.86rem; font-weight:600; font-family:var(--font-body);
+  backdrop-filter:blur(20px);
+  animation:toastIn .4s var(--transition) forwards;
+  max-width:300px; display:flex; align-items:center; gap:10px;
+  border:1px solid transparent;
+}
+.toast.success { background:rgba(0,229,160,.12); border-color:var(--success); color:var(--success); }
+.toast.error   { background:rgba(255,59,107,.12); border-color:var(--error);   color:var(--error); }
+.toast.info    { background:rgba(255,107,0,.12);  border-color:var(--saffron); color:var(--saffron-light); }
+.toast.warning { background:rgba(255,214,0,.12);  border-color:var(--warning); color:var(--warning); }
+@keyframes toastIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+
+/* ===================== TOPBAR ===================== */
+#topbar {
+  position:fixed; top:0; left:var(--sidebar-w); right:0; z-index:100;
+  height:var(--topbar-h);
+  background:rgba(10,5,0,0.75);
+  border-bottom:1px solid rgba(255,107,0,0.1);
+  backdrop-filter:blur(24px);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px;
+  transition:left .35s var(--transition);
+}
+#topbar.sidebar-collapsed { left:72px; }
+.topbar-left { display:flex; align-items:center; gap:16px; }
+.topbar-panel-name {
+  font-size:1.05rem; font-weight:800; letter-spacing:.06em;
+  color:var(--text-primary);
+}
+.topbar-breadcrumb {
+  font-size:.72rem; letter-spacing:.15em; color:var(--text-muted);
+  font-family:var(--font-mono); text-transform:uppercase;
+}
+.topbar-right { display:flex; align-items:center; gap:14px; }
+.topbar-time {
+  font-family:var(--font-mono); font-size:.85rem;
+  color:var(--saffron); letter-spacing:.1em;
+  background:rgba(255,107,0,.07);
+  border:1px solid rgba(255,107,0,.2);
+  padding:5px 14px; border-radius:50px;
+}
+.topbar-user {
+  display:flex; align-items:center; gap:10px;
+  padding:6px 14px 6px 8px;
+  background:var(--glass-bg);
+  border:1px solid var(--glass-border);
+  border-radius:50px;
+  cursor:pointer;
+  transition:border-color .25s;
+}
+.topbar-user:hover { border-color:var(--saffron); }
+.user-avatar {
+  width:32px; height:32px;
+  background:linear-gradient(135deg, var(--saffron), var(--saffron-light));
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.8rem; font-weight:800; color:#fff;
+  box-shadow:0 0 14px var(--saffron-glow);
+  flex-shrink:0;
+}
+.user-chip-name {
+  font-size:.83rem; font-weight:700; color:var(--text-secondary);
+  max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
+/* ===================== SIDEBAR ===================== */
+#sidebar {
+  position:fixed; left:0; top:0; bottom:0;
+  width:var(--sidebar-w);
+  background:rgba(10,5,0,0.88);
+  border-right:1px solid rgba(255,107,0,0.12);
+  backdrop-filter:blur(28px);
+  z-index:200;
+  display:flex; flex-direction:column;
+  transition:width .35s var(--transition);
+  overflow:hidden;
+}
+#sidebar.collapsed { width:72px; }
+
+.sidebar-header {
+  padding:22px 20px 18px;
+  border-bottom:1px solid rgba(255,107,0,0.08);
+  display:flex; align-items:center; gap:12px;
+  min-height:var(--topbar-h);
+}
+.sidebar-logo-icon {
+  width:36px; height:36px;
+  background:linear-gradient(135deg, var(--saffron), var(--saffron-light));
+  border-radius:9px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 18px var(--saffron-glow);
+  font-size:1rem; font-weight:900; color:#fff;
+}
+.sidebar-brand { overflow:hidden; transition:opacity .2s; white-space:nowrap; }
+#sidebar.collapsed .sidebar-brand { opacity:0; width:0; }
+.sidebar-brand-name {
+  font-family:var(--font-display); font-size:.95rem; font-weight:900;
+  color:var(--saffron); letter-spacing:.1em;
+}
+.sidebar-brand-sub {
+  font-size:.63rem; color:var(--text-muted); letter-spacing:.18em;
+  text-transform:uppercase; font-family:var(--font-mono);
+}
+.sidebar-toggle {
+  margin-left:auto; flex-shrink:0;
+  background:none; border:1px solid rgba(255,107,0,0.2); border-radius:7px;
+  width:28px; height:28px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text-muted); transition:all .25s;
+}
+.sidebar-toggle:hover { border-color:var(--saffron); color:var(--saffron); }
+
+/* Profile section */
+.sidebar-profile {
+  padding:20px 20px 16px;
+  border-bottom:1px solid rgba(255,107,0,0.08);
+  text-align:center;
+  overflow:hidden;
+}
+.profile-avatar {
+  width:60px; height:60px;
+  background:linear-gradient(135deg, var(--saffron), var(--saffron-light));
+  border-radius:50%; margin:0 auto 10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; font-weight:900; color:#fff;
+  box-shadow:0 0 24px var(--saffron-glow);
+  border:2px solid rgba(255,107,0,.3);
+  flex-shrink:0;
+}
+.profile-name {
+  font-size:.88rem; font-weight:800; letter-spacing:.03em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition:opacity .2s;
+}
+.profile-pid {
+  font-family:var(--font-mono); font-size:.7rem; color:var(--saffron);
+  letter-spacing:.1em; margin-top:2px;
+  transition:opacity .2s;
+}
+#sidebar.collapsed .sidebar-profile { padding:16px 8px; }
+#sidebar.collapsed .profile-avatar { width:44px; height:44px; font-size:1rem; margin-bottom:0; }
+#sidebar.collapsed .profile-name,
+#sidebar.collapsed .profile-pid { opacity:0; height:0; overflow:hidden; margin:0; }
+
+/* Nav items */
+.sidebar-nav { flex:1; padding:14px 10px; overflow-y:auto; overflow-x:hidden; }
+.nav-section-label {
+  font-size:.6rem; letter-spacing:.2em; color:rgba(255,107,0,0.4);
+  text-transform:uppercase; padding:10px 10px 5px;
+  white-space:nowrap; font-family:var(--font-mono);
+  transition:opacity .2s;
+}
+#sidebar.collapsed .nav-section-label { opacity:0; }
+.nav-item {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 12px; border-radius:var(--radius-md);
+  color:var(--text-secondary); cursor:pointer;
+  transition:all .25s ease;
+  margin-bottom:2px;
+  border:1px solid transparent;
+  white-space:nowrap; overflow:hidden;
+  position:relative;
+}
+.nav-item:hover { background:var(--glass-bg); color:var(--text-primary); }
+.nav-item.active {
+  background:rgba(255,107,0,0.12);
+  border-color:rgba(255,107,0,0.3);
+  color:var(--saffron);
+  box-shadow:0 0 20px rgba(255,107,0,0.08);
+}
+.nav-item.active::before {
+  content:''; position:absolute; left:0; top:50%;
+  transform:translateY(-50%);
+  width:3px; height:60%;
+  background:var(--saffron); border-radius:0 2px 2px 0;
+  box-shadow:0 0 8px var(--saffron);
+}
+.nav-icon {
+  width:20px; height:20px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:1rem;
+}
+.nav-label { font-size:.85rem; font-weight:700; letter-spacing:.04em; transition:opacity .2s; }
+#sidebar.collapsed .nav-label { opacity:0; }
+.nav-badge {
+  margin-left:auto; background:var(--saffron); color:#fff;
+  font-size:.6rem; font-weight:800; padding:2px 7px;
+  border-radius:10px; flex-shrink:0; transition:opacity .2s;
+}
+#sidebar.collapsed .nav-badge { opacity:0; }
+.nav-logout-wrap {
+  padding:12px 10px; border-top:1px solid rgba(255,107,0,0.08);
+}
+.nav-item.logout { color:var(--error); }
+.nav-item.logout:hover { background:rgba(255,59,107,0.08); border-color:rgba(255,59,107,0.2); }
+
+/* ===================== MAIN CONTENT ===================== */
+#main {
+  margin-left:var(--sidebar-w);
+  padding-top:var(--topbar-h);
+  min-height:100vh;
+  position:relative; z-index:1;
+  transition:margin-left .35s var(--transition);
+}
+#main.sidebar-collapsed { margin-left:72px; }
+
+.dash-content { padding:28px 32px; }
+
+/* Panel system */
+.panel { display:none; animation:panelIn .45s var(--transition); }
+.panel.active { display:block; }
+@keyframes panelIn {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.panel-heading {
+  font-size:1.35rem; font-weight:900; letter-spacing:.04em;
+  color:var(--white); margin-bottom:4px;
+}
+.panel-sub {
+  font-size:.82rem; color:var(--text-muted); margin-bottom:26px;
+  font-family:var(--font-body); letter-spacing:.02em;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px 26px; border-radius:50px; border:none; cursor:pointer;
+  font-family:var(--font-body); font-weight:700; font-size:.87rem;
+  letter-spacing:.07em; text-transform:uppercase;
+  transition:all .3s var(--transition);
+  position:relative; overflow:hidden; text-decoration:none;
+}
+.btn::before {
+  content:''; position:absolute; inset:0;
+  background:rgba(255,255,255,0.1);
+  transform:translateX(-100%);
+  transition:transform .35s var(--transition);
+  border-radius:inherit;
+}
+.btn:hover::before { transform:translateX(0); }
+.btn-primary {
+  background:linear-gradient(135deg, var(--saffron) 0%, var(--saffron-light) 100%);
+  color:#fff; box-shadow:0 0 20px var(--saffron-glow), 0 4px 16px rgba(0,0,0,.4);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 35px var(--saffron-glow), 0 8px 24px rgba(0,0,0,.5); }
+.btn-ghost {
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  color:var(--text-secondary); backdrop-filter:blur(10px);
+}
+.btn-ghost:hover { border-color:var(--saffron); color:var(--saffron); box-shadow:0 0 18px var(--saffron-glow); }
+.btn-danger { background:linear-gradient(135deg, var(--error), #FF6B8A); color:#fff; }
+.btn-success { background:linear-gradient(135deg, var(--success), #00C87A); color:#000; }
+.btn-sm { padding:7px 16px; font-size:.75rem; }
+.btn:disabled { opacity:.45; cursor:not-allowed; transform:none !important; }
+
+/* ===================== FORM ===================== */
+.form-group { display:flex; flex-direction:column; gap:7px; }
+.form-label {
+  font-size:.7rem; font-weight:800; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--saffron-light); font-family:var(--font-body);
+}
+.form-input, .form-select, .form-textarea {
+  width:100%; padding:13px 16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:var(--radius-md);
+  color:var(--text-primary);
+  font-family:var(--font-body); font-size:.93rem;
+  transition:all .3s ease; outline:none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color:var(--saffron);
+  box-shadow:0 0 0 3px var(--saffron-glow), 0 0 18px rgba(255,107,0,0.1);
+  background:rgba(255,107,0,0.05);
+}
+.form-input::placeholder { color:var(--text-muted); }
+.form-select option { background:var(--dark-card); color:var(--text-primary); }
+.form-textarea { resize:vertical; min-height:88px; }
+
+/* ===================== OVERVIEW PANEL ===================== */
+.overview-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(170px, 1fr));
+  gap:14px; margin-bottom:24px;
+}
+.ov-card {
+  padding:22px 20px; text-align:center;
+  cursor:default; transition:transform .3s var(--transition), box-shadow .3s ease;
+  position:relative; overflow:hidden;
+}
+.ov-card::before {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(255,107,0,0.05), transparent);
+  opacity:0; transition:opacity .3s;
+  border-radius:inherit;
+}
+.ov-card:hover::before { opacity:1; }
+.ov-card:hover { transform:translateY(-5px); box-shadow:0 16px 48px rgba(0,0,0,.35), 0 0 30px var(--saffron-glow); }
+.ov-icon { font-size:1.8rem; margin-bottom:10px; display:block; }
+.ov-val {
+  font-family:var(--font-display); font-size:1.2rem; font-weight:900;
+  color:var(--saffron); margin-bottom:3px; letter-spacing:.02em;
+  text-shadow:0 0 20px var(--saffron-glow);
+}
+.ov-lbl { font-size:.68rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.14em; }
+
+/* Countdown mini */
+.countdown-mini {
+  padding:22px 24px; margin-bottom:22px;
+}
+.countdown-mini-label {
+  font-size:.68rem; letter-spacing:.22em; color:var(--text-muted);
+  text-transform:uppercase; font-family:var(--font-mono); margin-bottom:14px;
+}
+.countdown-units { display:flex; gap:18px; flex-wrap:wrap; align-items:center; }
+.cd-unit { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.cd-num {
+  font-family:var(--font-display); font-size:2rem; font-weight:900;
+  color:var(--saffron); min-width:52px; text-align:center; line-height:1;
+  text-shadow:0 0 24px var(--saffron-glow);
+}
+.cd-lbl { font-size:.6rem; letter-spacing:.18em; color:var(--text-muted); text-transform:uppercase; }
+.cd-sep {
+  font-family:var(--font-display); font-size:1.8rem; color:var(--saffron);
+  opacity:.35; padding-bottom:12px;
+  animation:blink 1s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:.35} 50%{opacity:.1} }
+
+/* Recent announcements on overview */
+.ann-mini-title {
+  font-size:.7rem; letter-spacing:.18em; color:var(--saffron-light);
+  text-transform:uppercase; font-family:var(--font-mono); margin-bottom:12px;
+}
+
+/* ===================== PROFILE PANEL ===================== */
+.profile-card { padding:28px; max-width:600px; }
+.profile-header {
+  display:flex; align-items:center; gap:20px; margin-bottom:28px;
+  padding-bottom:22px; border-bottom:1px solid rgba(255,107,0,0.12);
+}
+.profile-avatar-lg {
+  width:80px; height:80px;
+  background:linear-gradient(135deg, var(--saffron), var(--saffron-light));
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.8rem; font-weight:900; color:#fff;
+  box-shadow:0 0 32px var(--saffron-glow);
+  border:2px solid rgba(255,107,0,.4); flex-shrink:0;
+}
+.profile-info-name {
+  font-size:1.25rem; font-weight:900; letter-spacing:.03em; margin-bottom:4px;
+}
+.profile-info-pid {
+  font-family:var(--font-mono); font-size:.82rem; color:var(--saffron); letter-spacing:.12em;
+}
+.profile-fields { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.profile-field {
+  padding:14px 16px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius-md);
+}
+.pf-label { font-size:.65rem; color:var(--text-muted); letter-spacing:.14em; text-transform:uppercase; font-family:var(--font-mono); margin-bottom:5px; }
+.pf-val { font-size:.9rem; font-weight:700; color:var(--text-primary); }
+
+/* ===================== PAYMENT PANEL ===================== */
+.payment-card { padding:28px; max-width:500px; }
+.payment-amount {
+  font-family:var(--font-display); font-size:2.8rem; font-weight:900;
+  color:var(--saffron); text-align:center; margin-bottom:4px;
+  text-shadow:0 0 24px var(--saffron-glow);
+}
+.payment-label { text-align:center; color:var(--text-muted); font-size:.83rem; margin-bottom:24px; }
+.payment-qr-box {
+  width:180px; height:180px; margin:0 auto 20px;
+  background:#fff; border-radius:var(--radius-md);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; border:3px solid var(--saffron);
+  box-shadow:0 0 28px var(--saffron-glow); padding:12px;
+}
+.payment-qr-box canvas, .payment-qr-box img { max-width:100%; max-height:100%; }
+.payment-info {
+  background:rgba(255,107,0,0.05); border:1px solid rgba(255,107,0,0.18);
+  border-radius:var(--radius-md); padding:14px 16px; margin-bottom:16px;
+}
+.payment-info-row {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.83rem; padding:4px 0;
+}
+.payment-info-row span:first-child { color:var(--text-muted); font-family:var(--font-body); }
+.payment-info-row span:last-child { font-weight:800; font-family:var(--font-mono); }
+
+/* ===================== STATUS BADGES ===================== */
+.status-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 13px; border-radius:50px; font-size:.75rem; font-weight:800;
+  letter-spacing:.05em;
+}
+.status-pending { background:rgba(255,214,0,.1); border:1px solid rgba(255,214,0,.3); color:var(--warning); }
+.status-paid    { background:rgba(0,229,160,.1); border:1px solid rgba(0,229,160,.3); color:var(--success); }
+.status-reject  { background:rgba(255,59,107,.1); border:1px solid rgba(255,59,107,.3); color:var(--error); }
+.status-active  { background:rgba(255,107,0,.1); border:1px solid rgba(255,107,0,.3); color:var(--saffron); }
+
+/* ===================== ENTRY QR PANEL ===================== */
+.qr-panel-wrap { display:flex; gap:28px; flex-wrap:wrap; }
+.qr-card-box {
+  padding:28px; text-align:center;
+  min-width:240px;
+}
+.entry-qr-container { position:relative; display:inline-block; margin-bottom:18px; }
+.entry-qr-box {
+  width:200px; height:200px;
+  background:#fff; border-radius:var(--radius-md);
+  padding:12px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  border:3px solid rgba(255,255,255,0.18);
+  box-shadow:0 0 20px rgba(0,0,0,.4);
+}
+.entry-qr-box canvas, .entry-qr-box img { max-width:100%; max-height:100%; }
+.qr-lock-overlay {
+  position:absolute; inset:0;
+  background:rgba(10,5,0,0.88);
+  backdrop-filter:blur(10px);
+  border-radius:var(--radius-md);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:8px; z-index:2;
+}
+.lock-icon { font-size:2.2rem; }
+.lock-text {
+  font-size:.73rem; color:var(--warning); font-weight:800;
+  letter-spacing:.1em; text-align:center; line-height:1.5;
+}
+.qr-pid-display {
+  background:rgba(0,0,0,.35); border-radius:var(--radius-md);
+  padding:10px 14px; margin-bottom:16px;
+}
+.qr-pid-label { font-size:.63rem; color:var(--text-muted); letter-spacing:.12em; text-transform:uppercase; font-family:var(--font-mono); margin-bottom:3px; }
+.qr-pid-val { font-family:var(--font-mono); font-size:1rem; font-weight:700; color:var(--saffron); }
+.qr-actions { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+/* QR info sidebar */
+.qr-info-panel { flex:1; min-width:240px; }
+.qr-info-card { padding:22px; margin-bottom:14px; }
+.qr-info-title { font-size:.78rem; font-weight:800; color:var(--saffron-light); letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; }
+.qr-data-row { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+.qr-data-row:last-child { border-bottom:none; }
+.qr-data-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
+.qr-data-key { font-size:.68rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.1em; font-family:var(--font-mono); margin-bottom:2px; }
+.qr-data-val { font-size:.88rem; font-weight:700; color:var(--text-primary); }
+
+/* QR Fullscreen Modal */
+#qr-fullscreen-modal {
+  position:fixed; inset:0; z-index:9000;
+  background:rgba(0,0,0,.92); backdrop-filter:blur(16px);
+  display:none; align-items:center; justify-content:center;
+  animation:fadeIn .3s ease;
+}
+#qr-fullscreen-modal.open { display:flex; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.qr-fullscreen-inner {
+  text-align:center; padding:40px 32px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,107,0,.2);
+  border-radius:var(--radius-xl);
+  backdrop-filter:blur(24px);
+  animation:scaleIn .35s var(--transition);
+}
+@keyframes scaleIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+.qr-fullscreen-box {
+  width:280px; height:280px;
+  background:#fff; border-radius:var(--radius-md);
+  padding:16px; display:flex; align-items:center; justify-content:center;
+  margin:0 auto 20px;
+  border:4px solid var(--saffron);
+  box-shadow:0 0 60px var(--saffron-glow);
+}
+.qr-fullscreen-box canvas { max-width:100%; max-height:100%; }
+.qr-fs-name { font-size:1.1rem; font-weight:800; margin-bottom:4px; }
+.qr-fs-pid { font-family:var(--font-mono); color:var(--saffron); font-size:.9rem; letter-spacing:.1em; margin-bottom:20px; }
+
+/* ===================== ID CARD PANEL ===================== */
+.id-card {
+  background:linear-gradient(135deg, #1A0D00 0%, #2D1800 50%, #1A0D00 100%);
+  border:1px solid rgba(255,107,0,0.3);
+  border-radius:var(--radius-xl); padding:30px;
+  position:relative; overflow:hidden; max-width:420px;
+}
+.id-card::before {
+  content:'AETHER';
+  position:absolute; right:-12px; top:50%; transform:translateY(-50%) rotate(90deg);
+  font-family:var(--font-display); font-size:5rem; font-weight:900;
+  color:rgba(255,107,0,0.04); letter-spacing:.3em; pointer-events:none;
+}
+.id-card-header { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+.id-card-logo { font-family:var(--font-display); font-size:.95rem; font-weight:900; color:var(--saffron); line-height:1.1; }
+.id-card-event { font-size:.63rem; color:var(--text-muted); letter-spacing:.1em; }
+.id-divider { flex:1; height:1px; background:rgba(255,107,0,0.2); }
+.id-school-badge {
+  font-size:.62rem; font-weight:800; letter-spacing:.1em;
+  padding:3px 10px; border-radius:20px;
+  background:rgba(255,107,0,0.1); border:1px solid rgba(255,107,0,0.3); color:var(--saffron);
+}
+.id-body { margin-bottom:20px; }
+.id-name { font-size:1.25rem; font-weight:800; margin-bottom:3px; }
+.id-class { color:var(--text-secondary); font-size:.82rem; margin-bottom:14px; }
+.id-code-box {
+  background:rgba(0,0,0,.3); border:1px solid rgba(255,107,0,.3);
+  border-radius:var(--radius-md); padding:13px 16px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.id-code-label { font-size:.65rem; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase; font-family:var(--font-mono); }
+.id-code-value {
+  font-family:var(--font-mono); font-size:1.25rem; font-weight:700;
+  color:var(--saffron); letter-spacing:.1em;
+  text-shadow:0 0 14px var(--saffron-glow);
+}
+
+/* ===================== TEAM PANEL ===================== */
+.team-card { padding:26px; margin-bottom:18px; }
+.team-empty { text-align:center; padding:36px 20px; color:var(--text-muted); font-family:var(--font-body); }
+.team-empty-icon { font-size:2.8rem; margin-bottom:12px; display:block; }
+.team-actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:18px; }
+.team-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+.team-name-label { font-size:.65rem; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase; font-family:var(--font-mono); margin-bottom:3px; }
+.team-name-val { font-family:var(--font-display); font-size:1.05rem; font-weight:800; color:var(--saffron); }
+.team-code-display {
+  display:flex; align-items:center; gap:12px;
+  background:rgba(0,0,0,.3); border:1px solid rgba(255,107,0,.3);
+  border-radius:var(--radius-md); padding:13px 16px; margin-bottom:18px;
+}
+.team-code-label { font-size:.68rem; color:var(--text-muted); letter-spacing:.1em; text-transform:uppercase; font-family:var(--font-mono); }
+.team-code-val { font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--saffron); letter-spacing:.12em; flex:1; }
+.team-members { display:flex; flex-direction:column; gap:10px; margin-bottom:18px; }
+.member-row {
+  display:flex; align-items:center; gap:12px;
+  padding:13px 14px; border-radius:var(--radius-md);
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+}
+.member-avatar {
+  width:36px; height:36px;
+  background:linear-gradient(135deg, var(--saffron), var(--saffron-light));
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:.85rem; flex-shrink:0; color:#fff;
+}
+.member-info { flex:1; }
+.member-name { font-weight:800; font-size:.87rem; }
+.member-id { font-family:var(--font-mono); font-size:.7rem; color:var(--text-muted); }
+.member-role {
+  font-size:.65rem; font-weight:800; letter-spacing:.1em;
+  padding:3px 9px; border-radius:20px;
+  background:rgba(255,107,0,.1); border:1px solid rgba(255,107,0,.3); color:var(--saffron);
+}
+.member-slot {
+  border:1px dashed rgba(255,255,255,0.13);
+  border-radius:var(--radius-md); padding:13px;
+  text-align:center; color:var(--text-muted); font-size:.82rem; font-family:var(--font-body);
+}
+
+/* ===================== PROJECT PANEL ===================== */
+.project-card { padding:26px; margin-bottom:18px; }
+.project-form { display:flex; flex-direction:column; gap:16px; }
+.tech-tag {
+  padding:4px 11px; border-radius:20px;
+  background:rgba(255,107,0,.1); border:1px solid rgba(255,107,0,.3);
+  color:var(--saffron-light); font-size:.77rem; font-weight:700;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.tech-tag .rm { cursor:pointer; opacity:.6; }
+.tech-tag .rm:hover { opacity:1; color:var(--error); }
+.tag-wrap { display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; }
+
+/* ===================== NOTICES PANEL ===================== */
+.notice-item {
+  display:flex; gap:14px; padding:15px 16px;
+  border-radius:var(--radius-md);
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  margin-bottom:10px; transition:border-color .25s;
+  animation:noticeIn .4s var(--transition);
+}
+.notice-item:hover { border-color:rgba(255,107,0,.3); }
+@keyframes noticeIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+.notice-urgency { width:4px; border-radius:2px; flex-shrink:0; align-self:stretch; }
+.notice-urgency.high { background:var(--error); box-shadow:0 0 8px rgba(255,59,107,.4); }
+.notice-urgency.med  { background:var(--warning); box-shadow:0 0 8px rgba(255,214,0,.4); }
+.notice-urgency.low  { background:var(--success); box-shadow:0 0 8px rgba(0,229,160,.4); }
+.notice-title { font-weight:800; font-size:.88rem; margin-bottom:4px; }
+.notice-body  { color:var(--text-secondary); font-size:.82rem; font-family:var(--font-body); line-height:1.55; }
+.notice-time  { font-size:.68rem; color:var(--text-muted); font-family:var(--font-mono); margin-top:6px; }
+.notice-empty { text-align:center; padding:40px 20px; color:var(--text-muted); font-family:var(--font-body); }
+.notice-prio {
+  font-size:.65rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+  padding:3px 9px; border-radius:20px; align-self:flex-start; flex-shrink:0;
+  font-family:var(--font-mono);
+}
+.prio-urgent  { background:rgba(255,59,107,.12); color:var(--error); }
+.prio-important { background:rgba(255,214,0,.12); color:var(--warning); }
+.prio-normal  { background:rgba(0,229,160,.12); color:var(--success); }
+
+/* ===================== MODAL ===================== */
+.modal-overlay {
+  position:fixed; inset:0; z-index:800;
+  background:rgba(0,0,0,.75); backdrop-filter:blur(10px);
+  display:none; align-items:center; justify-content:center; padding:20px;
+}
+.modal-overlay.open { display:flex; animation:fadeIn .3s ease; }
+.modal-box {
+  width:100%; max-width:460px; padding:34px;
+  animation:scaleIn .4s var(--transition);
+}
+.modal-title { font-size:1.05rem; font-weight:900; margin-bottom:7px; }
+.modal-desc { color:var(--text-muted); font-size:.82rem; margin-bottom:22px; font-family:var(--font-body); }
+.modal-actions { display:flex; gap:10px; margin-top:22px; }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 72px; }
+  #sidebar .sidebar-brand,
+  #sidebar .nav-label,
+  #sidebar .nav-badge,
+  #sidebar .nav-section-label,
+  #sidebar .profile-name,
+  #sidebar .profile-pid { opacity:0; width:0; height:0; overflow:hidden; }
+  #sidebar .profile-avatar { width:40px; height:40px; font-size:.9rem; margin-bottom:0; }
+  #sidebar .sidebar-profile { padding:14px 8px; }
+  #sidebar .sidebar-toggle { display:none; }
+  .dash-content { padding:20px 16px; }
+  #topbar { padding:0 18px; }
+  .topbar-time { display:none; }
+  .profile-fields { grid-template-columns:1fr; }
+}
+@media (max-width: 600px) {
+  .overview-grid { grid-template-columns:1fr 1fr; }
+  .qr-panel-wrap { flex-direction:column; }
+  .modal-box { padding:24px 18px; }
+}
+
+/* ===================== COPY BUTTON ===================== */
+.copy-btn {
+  background:var(--glass-bg); border:1px solid var(--glass-border);
+  border-radius:6px; padding:4px 10px; color:var(--saffron);
+  font-size:.72rem; cursor:pointer; font-family:var(--font-body);
+  font-weight:800; transition:all .2s;
+}
+.copy-btn:hover { background:rgba(255,107,0,.15); }
+
+/* ===================== STAGGER ANIM ===================== */
+.stagger > * { animation:panelIn .5s var(--transition) both; }
+.stagger > *:nth-child(1) { animation-delay:.05s; }
+.stagger > *:nth-child(2) { animation-delay:.1s; }
+.stagger > *:nth-child(3) { animation-delay:.15s; }
+.stagger > *:nth-child(4) { animation-delay:.2s; }
+.stagger > *:nth-child(5) { animation-delay:.25s; }
+.stagger > *:nth-child(6) { animation-delay:.3s; }
+
+/* ===================== GLOW DIVIDER ===================== */
+.glow-divider { height:1px; background:linear-gradient(90deg, transparent, var(--saffron), transparent); opacity:.3; margin:24px 0; }
+</style>
+</head>
+<body>
+
+
+<!-- ============================================================
+     TOAST CONTAINER
+     ============================================================ -->
+<div id="toast-container"></div>
+
+<!-- ============================================================
+     SIDEBAR
+     ============================================================ -->
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo-icon">A</div>
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">AETHER</div>
+      <div class="sidebar-brand-sub">2K26 · Student Portal</div>
+    </div>
+    <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle Sidebar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path id="toggle-icon-path" d="M15 18L9 12L15 6"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="sidebar-profile">
+    <div class="profile-avatar" id="sb-avatar">—</div>
+    <div class="profile-name" id="sb-name">Loading…</div>
+    <div class="profile-pid" id="sb-pid">—</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <div class="nav-item active" onclick="switchPanel('overview', this)">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Overview</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('profile', this)">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">My Profile</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('myid', this)">
+      <span class="nav-icon">🪪</span>
+      <span class="nav-label">ID Card</span>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:8px">Event</div>
+    <div class="nav-item" onclick="switchPanel('payment', this)">
+      <span class="nav-icon">💳</span>
+      <span class="nav-label">Payment</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('entry', this)">
+      <span class="nav-icon">🎟️</span>
+      <span class="nav-label">Entry QR Pass</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('team', this)">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">My Team</span>
+    </div>
+    <div class="nav-item" onclick="switchPanel('project', this)">
+      <span class="nav-icon">🚀</span>
+      <span class="nav-label">Project Idea</span>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:8px">Info</div>
+    <div class="nav-item" onclick="switchPanel('notices', this)">
+      <span class="nav-icon">📢</span>
+      <span class="nav-label">Announcements</span>
+      <span class="nav-badge" id="ann-badge" style="display:none">0</span>
+    </div>
+  </nav>
+
+  <div class="nav-logout-wrap">
+    <div class="nav-item logout" onclick="handleLogout()">
+      <span class="nav-icon">🚪</span>
+      <span class="nav-label">Logout</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================================
+     TOPBAR
+     ============================================================ -->
+<header id="topbar">
+  <div class="topbar-left">
+    <div>
+      <div class="topbar-panel-name" id="topbar-title">Overview</div>
+      <div class="topbar-breadcrumb">AETHER 2K26 · Participant Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-time" id="live-clock">00:00:00</div>
+    <div class="topbar-user">
+      <div class="user-avatar" id="topbar-avatar">—</div>
+      <div class="user-chip-name" id="topbar-name">Loading</div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main id="main">
+  <div class="dash-content">
+
+    <!-- ═══════════════ OVERVIEW PANEL ═══════════════ -->
+    <div class="panel active" id="panel-overview">
+      <div class="panel-heading" id="ov-greeting">Welcome back 👋</div>
+      <div class="panel-sub">Here's your complete hackathon status at a glance.</div>
+
+      <div class="overview-grid stagger">
+        <div class="glass ov-card">
+          <span class="ov-icon">🪪</span>
+          <div class="ov-val" id="ov-pid">—</div>
+          <div class="ov-lbl">Participant ID</div>
+        </div>
+        <div class="glass ov-card">
+          <span class="ov-icon">💳</span>
+          <div class="ov-val" id="ov-pay">Pending</div>
+          <div class="ov-lbl">Payment Status</div>
+        </div>
+        <div class="glass ov-card">
+          <span class="ov-icon">👥</span>
+          <div class="ov-val" id="ov-team">No Team</div>
+          <div class="ov-lbl">Team Status</div>
+        </div>
+        <div class="glass ov-card">
+          <span class="ov-icon">🚀</span>
+          <div class="ov-val" id="ov-proj">None</div>
+          <div class="ov-lbl">Idea Submitted</div>
+        </div>
+        <div class="glass ov-card">
+          <span class="ov-icon">🏫</span>
+          <div class="ov-val" id="ov-school" style="font-size:.85rem">—</div>
+          <div class="ov-lbl">School</div>
+        </div>
+        <div class="glass ov-card">
+          <span class="ov-icon">📚</span>
+          <div class="ov-val" id="ov-class">—</div>
+          <div class="ov-lbl">Class</div>
+        </div>
+      </div>
+
+      <!-- Countdown -->
+      <div class="glass countdown-mini">
+        <div class="countdown-mini-label">⏱ Time Until Event · August 15, 2026 · 09:00 AM</div>
+        <div class="countdown-units">
+          <div class="cd-unit"><div class="cd-num" id="cd-d">00</div><div class="cd-lbl">Days</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><div class="cd-num" id="cd-h">00</div><div class="cd-lbl">Hours</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><div class="cd-num" id="cd-m">00</div><div class="cd-lbl">Mins</div></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><div class="cd-num" id="cd-s">00</div><div class="cd-lbl">Secs</div></div>
+        </div>
+      </div>
+
+      <!-- Recent Announcements -->
+      <div class="ann-mini-title">📢 Recent Announcements</div>
+      <div id="ov-notices"></div>
+    </div>
+
+    <!-- ═══════════════ PROFILE PANEL ═══════════════ -->
+    <div class="panel" id="panel-profile">
+      <div class="panel-heading">My Profile</div>
+      <div class="panel-sub">Your complete participant information registered for AETHER 2K26.</div>
+
+      <div class="glass profile-card">
+        <div class="profile-header">
+          <div class="profile-avatar-lg" id="pf-avatar">—</div>
+          <div>
+            <div class="profile-info-name" id="pf-name">—</div>
+            <div class="profile-info-pid" id="pf-pid">—</div>
+          </div>
+        </div>
+        <div class="profile-fields stagger">
+          <div class="profile-field">
+            <div class="pf-label">Full Name</div>
+            <div class="pf-val" id="pf-fullname">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="pf-label">Participant ID</div>
+            <div class="pf-val mono" id="pf-participantid" style="color:var(--saffron)">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="pf-label">School Name</div>
+            <div class="pf-val" id="pf-school">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="pf-label">Class</div>
+            <div class="pf-val" id="pf-class">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="pf-label">Email Address</div>
+            <div class="pf-val" id="pf-email" style="font-size:.82rem">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="pf-label">Phone Number</div>
+            <div class="pf-val mono" id="pf-phone">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="pf-label">Payment Status</div>
+            <div class="pf-val" id="pf-payment">—</div>
+          </div>
+          <div class="profile-field">
+            <div class="pf-label">Team Status</div>
+            <div class="pf-val" id="pf-teamstatus">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ID CARD PANEL ═══════════════ -->
+    <div class="panel" id="panel-myid">
+      <div class="panel-heading">My ID Card</div>
+      <div class="panel-sub">Your official AETHER 2K26 participant identity card.</div>
+
+      <div class="id-card" id="id-card-el">
+        <div class="id-card-header">
+          <div>
+            <div class="id-card-logo">AETHER<br>2K26</div>
+            <div class="id-card-event">National Tech Hackathon · De Paul School</div>
+          </div>
+          <div class="id-divider"></div>
+          <div class="id-school-badge" id="id-school-badge">—</div>
+        </div>
+        <div class="id-body">
+          <div class="id-name" id="id-fullname">—</div>
+          <div class="id-class" id="id-class">—</div>
+          <div class="id-code-box">
+            <div>
+              <div class="id-code-label">Participant ID</div>
+              <div class="id-code-value" id="id-pid">—</div>
+            </div>
+            <button class="copy-btn" onclick="copyText(document.getElementById('id-pid').textContent)">Copy</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div style="font-size:.65rem;color:var(--text-muted);font-family:var(--font-mono)">De Paul School · Aether 2K26</div>
+          <div id="id-pay-badge" class="status-badge status-pending">⏳ Payment Pending</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PAYMENT PANEL ═══════════════ -->
+    <div class="panel" id="panel-payment">
+      <div class="panel-heading">Payment</div>
+      <div class="panel-sub">Pay ₹100 venue entry fee to unlock your QR pass.</div>
+
+      <div class="glass payment-card">
+        <div class="payment-amount">₹100</div>
+        <div class="payment-label">Venue Entry Fee — AETHER 2K26</div>
+        <div style="text-align:center;margin-bottom:18px">
+          <div style="font-size:.7rem;color:var(--text-muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono)">Scan to Pay · UPI</div>
+          <div style="display:flex;justify-content:center">
+            <div class="payment-qr-box"><div id="pay-qr-code"></div></div>
+          </div>
+          <div style="font-size:.73rem;color:var(--text-muted);margin-top:10px;font-family:var(--font-body)">
+            UPI ID: <span style="color:var(--saffron);font-family:var(--font-mono)">aether2k26@paytm</span>
+          </div>
+        </div>
+        <div class="payment-info">
+          <div class="payment-info-row"><span>Amount</span><span style="color:var(--saffron)">₹100.00</span></div>
+          <div class="payment-info-row"><span>Participant ID</span><span id="pay-pid">—</span></div>
+          <div class="payment-info-row"><span>Event</span><span>AETHER 2K26</span></div>
+          <div class="payment-info-row"><span>Status</span><span id="pay-status-txt">—</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+          <div id="pay-badge-el"></div>
+          <div style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-body)">Admin verifies within 2–4 hrs</div>
+        </div>
+        <div style="padding:11px 14px;background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.18);border-radius:var(--radius-md);font-size:.8rem;color:var(--text-secondary);font-family:var(--font-body);line-height:1.6">
+          ⚠️ After payment, mention your Participant ID in the UPI remarks. Admin will verify and unlock your entry QR automatically.
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ENTRY QR PANEL ═══════════════ -->
+    <div class="panel" id="panel-entry">
+      <div class="panel-heading">Entry QR Pass</div>
+      <div class="panel-sub">Show this at the venue gate for check-in.</div>
+
+      <div class="qr-panel-wrap">
+        <!-- QR Card -->
+        <div class="glass qr-card-box">
+          <div style="font-size:.68rem;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase;font-family:var(--font-mono);margin-bottom:18px">Venue Entry Pass</div>
+
+          <div class="entry-qr-container">
+            <div class="entry-qr-box" id="entry-qr-el">
+              <div id="entry-qr-code"></div>
+            </div>
+            <div class="qr-lock-overlay" id="qr-lock-overlay">
+              <div class="lock-icon">🔒</div>
+              <div class="lock-text">PAYMENT PENDING<br><span style="font-size:.65rem;font-weight:400;opacity:.8">Complete payment to unlock</span></div>
+            </div>
+          </div>
+
+          <div class="qr-pid-display">
+            <div class="qr-pid-label">Participant ID</div>
+            <div class="qr-pid-val" id="entry-pid">—</div>
+          </div>
+
+          <div class="qr-actions">
+            <button class="btn btn-primary btn-sm" id="btn-download-qr" onclick="downloadEntryQR()" disabled>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+            <button class="btn btn-ghost btn-sm" id="btn-expand-qr" onclick="openQRFullscreen()" disabled>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+              Fullscreen
+            </button>
+          </div>
+          <p style="font-size:.68rem;color:var(--text-muted);margin-top:10px;font-family:var(--font-body)">Unlocks after payment verification</p>
+        </div>
+
+        <!-- QR Info -->
+        <div class="qr-info-panel">
+          <div class="glass qr-info-card">
+            <div class="qr-info-title">QR Code Data</div>
+            <div class="qr-data-row">
+              <div class="qr-data-icon">🪪</div>
+              <div><div class="qr-data-key">Participant ID</div><div class="qr-data-val mono" id="qr-info-pid">—</div></div>
+            </div>
+            <div class="qr-data-row">
+              <div class="qr-data-icon">👤</div>
+              <div><div class="qr-data-key">Name</div><div class="qr-data-val" id="qr-info-name">—</div></div>
+            </div>
+            <div class="qr-data-row">
+              <div class="qr-data-icon">👥</div>
+              <div><div class="qr-data-key">Team ID</div><div class="qr-data-val mono" id="qr-info-team">—</div></div>
+            </div>
+            <div class="qr-data-row">
+              <div class="qr-data-icon">🏫</div>
+              <div><div class="qr-data-key">School</div><div class="qr-data-val" id="qr-info-school">—</div></div>
+            </div>
+            <div class="qr-data-row">
+              <div class="qr-data-icon">🔒</div>
+              <div><div class="qr-data-key">Status</div><div class="qr-data-val" id="qr-info-status">—</div></div>
+            </div>
+          </div>
+
+          <div class="glass qr-info-card">
+            <div class="qr-info-title">How to Use</div>
+            <div style="font-family:var(--font-body);font-size:.83rem;color:var(--text-secondary);line-height:1.7;display:flex;flex-direction:column;gap:10px">
+              <div>① Complete payment of ₹100 via UPI</div>
+              <div>② Mention your Participant ID in remarks</div>
+              <div>③ Wait for admin verification (2–4 hrs)</div>
+              <div>④ QR auto-unlocks once verified</div>
+              <div>⑤ Download and show at venue gate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TEAM PANEL ═══════════════ -->
+    <div class="panel" id="panel-team">
+      <div class="panel-heading">Team Management</div>
+      <div class="panel-sub">Teams of exactly 2 members. Create or join a team using a team code.</div>
+
+      <div id="team-no-team">
+        <div class="glass team-card">
+          <div class="team-empty">
+            <span class="team-empty-icon">👥</span>
+            <p style="font-weight:700;margin-bottom:6px">You're not in a team yet</p>
+            <p style="font-size:.82rem">Create a new team or join with a partner's code.</p>
+          </div>
+          <div class="team-actions">
+            <button class="btn btn-primary" onclick="openModal('modal-create-team')">+ Create Team</button>
+            <button class="btn btn-ghost" onclick="openModal('modal-join-team')">Join with Code</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="team-has-team" class="hidden">
+        <div class="glass team-card">
+          <div class="team-header">
+            <div>
+              <div class="team-name-label">Team Name</div>
+              <div class="team-name-val" id="team-name-display">—</div>
+            </div>
+            <div class="status-badge status-active" id="team-leader-badge">👑 Leader</div>
+          </div>
+
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;font-family:var(--font-mono);margin-bottom:8px">Team Code — Share with your partner</div>
+          <div class="team-code-display">
+            <div>
+              <div class="team-code-label">Invite Code</div>
+              <div class="team-code-val" id="team-code-display">—</div>
+            </div>
+            <button class="copy-btn" onclick="copyText(document.getElementById('team-code-display').textContent)">📋 Copy</button>
+          </div>
+
+          <div style="font-size:.65rem;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;font-family:var(--font-mono);margin-bottom:10px">Members</div>
+          <div class="team-members" id="team-members-list"></div>
+          <div id="team-member-slot" class="member-slot hidden">⏳ Waiting for second member to join using the team code…</div>
+          <div id="team-full-badge" class="hidden" style="margin-top:4px">
+            <div class="status-badge status-paid" style="width:fit-content">✅ Team Complete — 2/2 Members</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PROJECT PANEL ═══════════════ -->
+    <div class="panel" id="panel-project">
+      <div class="panel-heading">Project Idea Submission</div>
+      <div class="panel-sub">Submit your project idea before the event. Only team leaders can submit.</div>
+
+      <div id="project-no-team" class="glass" style="padding:28px;text-align:center;max-width:480px">
+        <div style="font-size:2.5rem;margin-bottom:14px">🚀</div>
+        <div style="font-weight:800;margin-bottom:6px">No Team Yet</div>
+        <div style="color:var(--text-muted);font-size:.85rem;font-family:var(--font-body)">Create or join a team first to unlock project submission.</div>
+      </div>
+
+      <div id="project-not-leader" class="glass hidden" style="padding:28px;text-align:center;max-width:480px">
+        <div style="font-size:2.5rem;margin-bottom:14px">🔒</div>
+        <div style="font-weight:800;margin-bottom:6px">Leader Access Only</div>
+        <div style="color:var(--text-muted);font-size:.85rem;font-family:var(--font-body)">Only the team leader can submit the project idea.</div>
+      </div>
+
+      <div id="project-form-container" class="hidden">
+        <div id="project-submitted-view" class="glass hidden" style="padding:26px;max-width:580px;margin-bottom:18px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div style="font-size:.82rem;color:var(--saffron);font-weight:800;letter-spacing:.05em">SUBMITTED PROJECT</div>
+            <div class="status-badge status-paid">✅ Submitted</div>
+          </div>
+          <div id="project-view-content"></div>
+          <button class="btn btn-ghost btn-sm" style="margin-top:14px" onclick="editProject()">✏️ Edit Submission</button>
+        </div>
+
+        <div id="project-form-view" class="glass project-card">
+          <form class="project-form" onsubmit="handleProjectSubmit(event)">
+            <div class="form-group">
+              <label class="form-label">Project Title *</label>
+              <input class="form-input" type="text" id="proj-title" placeholder="e.g. EcoSense — AI Waste Management" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Problem Statement *</label>
+              <textarea class="form-textarea" id="proj-problem" placeholder="What problem does your project solve?" required></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Brief Idea Description *</label>
+              <textarea class="form-textarea" id="proj-desc" placeholder="Describe your solution approach…" required style="min-height:100px"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tech Stack</label>
+              <div style="display:flex;gap:10px">
+                <input class="form-input" type="text" id="tech-input" placeholder="Add technology (press Enter)" onkeydown="addTech(event)"/>
+                <button type="button" class="btn btn-ghost" onclick="addTechBtn()" style="flex-shrink:0;padding:11px 18px">+ Add</button>
+              </div>
+              <div class="tag-wrap" id="tech-tags"></div>
+            </div>
+            <button class="btn btn-primary" type="submit" style="width:100%">🚀 Submit Project Idea</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ NOTICES PANEL ═══════════════ -->
+    <div class="panel" id="panel-notices">
+      <div class="panel-heading">Announcements</div>
+      <div class="panel-sub">Live announcements from AETHER 2K26 organizers — updates in real-time.</div>
+      <div id="dash-notices-list">
+        <div class="notice-empty">
+          <div style="font-size:2.5rem;margin-bottom:12px">📡</div>
+          <div style="font-weight:700;margin-bottom:6px">Connecting to live feed…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ============================================================
+     QR FULLSCREEN MODAL
+     ============================================================ -->
+<div id="qr-fullscreen-modal">
+  <div class="qr-fullscreen-inner">
+    <div style="font-size:.68rem;color:var(--text-muted);letter-spacing:.2em;text-transform:uppercase;font-family:var(--font-mono);margin-bottom:16px">AETHER 2K26 · VENUE ENTRY PASS</div>
+    <div class="qr-fullscreen-box"><div id="qr-fullscreen-canvas"></div></div>
+    <div class="qr-fs-name" id="qr-fs-name">—</div>
+    <div class="qr-fs-pid" id="qr-fs-pid">—</div>
+    <div style="display:flex;gap:12px;justify-content:center">
+      <button class="btn btn-primary btn-sm" onclick="downloadEntryQR()">⬇ Download</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeQRFullscreen()">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+<!-- Create Team -->
+<div class="modal-overlay" id="modal-create-team">
+  <div class="glass-heavy modal-box">
+    <h3 class="modal-title">Create a Team</h3>
+    <p class="modal-desc">You'll become the team leader. Share the generated code with your partner.</p>
+    <div class="form-group">
+      <label class="form-label">Team Name *</label>
+      <input class="form-input" type="text" id="create-team-name" placeholder="e.g. NeuralNinjas"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-create-team')">Cancel</button>
+      <button class="btn btn-primary" onclick="handleCreateTeam()">Create Team</button>
+    </div>
+  </div>
+</div>
+
+<!-- Join Team -->
+<div class="modal-overlay" id="modal-join-team">
+  <div class="glass-heavy modal-box">
+    <h3 class="modal-title">Join a Team</h3>
+    <p class="modal-desc">Enter the team code shared by your partner.</p>
+    <div class="form-group">
+      <label class="form-label">Team Code *</label>
+      <input class="form-input" type="text" id="join-team-code" placeholder="e.g. TM-ABC123" style="text-transform:uppercase;font-family:var(--font-mono);letter-spacing:.1em"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('modal-join-team')">Cancel</button>
+      <button class="btn btn-primary" onclick="handleJoinTeam()">Join Team</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     FIREBASE + LOGIC
+     ============================================================ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getAuth, onAuthStateChanged, signOut
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, addDoc,
+  collection, query, where, getDocs, onSnapshot,
+  serverTimestamp, orderBy, limit
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── Firebase Config ──────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCpcUM2MUsFJ7BRXYQPF4I2Qo01Au77v4A",
+  authDomain: "aether-contact-us.firebaseapp.com",
+  projectId: "aether-contact-us",
+  storageBucket: "aether-contact-us.firebasestorage.app",
+  messagingSenderId: "471798414451",
+  appId: "1:471798414451:web:d9660f107f76a0f5537e06"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let currentUser     = null;
+let currentUserData = null;
+let teamUnsubscribe = null;
+let annUnsubscribe  = null;
+let techStack       = [];
+
+// ── Helpers ──────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(()=>{
+    t.style.transition='opacity .35s,transform .35s';
+    t.style.opacity='0'; t.style.transform='translateX(20px)';
+    setTimeout(()=>t.remove(), 350);
+  }, 3400);
+}
+window.showToast = showToast;
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(()=>showToast('Copied!','success'));
+}
+window.copyText = copyText;
+
+function pad(n){ return String(n).padStart(2,'0'); }
+
+function generateTeamCode() {
+  const L='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let s='TM-';
+  for(let i=0;i<3;i++) s+=L[Math.floor(Math.random()*26)];
+  return s+Math.floor(100+Math.random()*900);
+}
+
+// ── Clock ─────────────────────────────────────────────────────
+function startClock(){
+  function tick(){
+    const n=new Date();
+    document.getElementById('live-clock').textContent=`${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+  }
+  tick(); setInterval(tick,1000);
+}
+
+// ── Countdown ────────────────────────────────────────────────
+const EVENT_DATE = new Date('2026-08-15T09:00:00');
+function updateCountdown(){
+  let diff = EVENT_DATE - new Date();
+  if(diff<0) diff=0;
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  document.getElementById('cd-d').textContent=pad(d);
+  document.getElementById('cd-h').textContent=pad(h);
+  document.getElementById('cd-m').textContent=pad(m);
+  document.getElementById('cd-s').textContent=pad(s);
+}
+setInterval(updateCountdown,1000);
+updateCountdown();
+
+// ── Sidebar Toggle ────────────────────────────────────────────
+document.getElementById('sidebar-toggle').addEventListener('click',()=>{
+  const sb=document.getElementById('sidebar');
+  const main=document.getElementById('main');
+  const bar=document.getElementById('topbar');
+  sb.classList.toggle('collapsed');
+  main.classList.toggle('sidebar-collapsed');
+  bar.classList.toggle('sidebar-collapsed');
+  const path=document.getElementById('toggle-icon-path');
+  path.setAttribute('d', sb.classList.contains('collapsed') ? 'M9 18L15 12L9 6' : 'M15 18L9 12L15 6');
+});
+
+// ── Panel Switcher ────────────────────────────────────────────
+const panelTitles = {
+  overview:'Overview', profile:'My Profile', myid:'ID Card',
+  payment:'Payment', entry:'Entry QR Pass', team:'Team Management',
+  project:'Project Idea', notices:'Announcements'
+};
+window.switchPanel = function(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('topbar-title').textContent = panelTitles[id]||id;
+  // If project panel — reload view
+  if(id==='project' && currentUserData?.projectSubmitted && currentUserData?.project){
+    renderProjectView(currentUserData.project);
+  }
+};
+
+// ── QR Helpers ────────────────────────────────────────────────
+function makeQR(containerId, text, size=140){
+  const el=document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML='';
+  try {
+    new QRCode(el,{text:text||'AETHER2K26',width:size,height:size,
+      colorDark:'#FF6B00',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.M});
+  } catch(e){
+    el.innerHTML='<div style="font-size:.65rem;color:#FF6B00;text-align:center;padding:8px">QR Ready</div>';
+  }
+}
+
+// ── Modal Helpers ─────────────────────────────────────────────
+window.openModal  = id => { document.getElementById(id).classList.add('open'); };
+window.closeModal = id => { document.getElementById(id).classList.remove('open'); };
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click', e=>{ if(e.target===el) el.classList.remove('open'); });
+});
+
+// ── QR Fullscreen ─────────────────────────────────────────────
+window.openQRFullscreen = function(){
+  const el = document.getElementById('qr-fullscreen-canvas');
+  el.innerHTML='';
+  if(currentUserData){
+    const qrData = JSON.stringify({
+      pid: currentUserData.participantId,
+      name: currentUserData.name,
+      teamId: currentUserData.teamId || null,
+      school: currentUserData.school,
+      event: 'AETHER2K26',
+      ts: Date.now()
+    });
+    try {
+      new QRCode(el,{text:qrData,width:240,height:240,colorDark:'#FF6B00',colorLight:'#FFFFFF',correctLevel:QRCode.CorrectLevel.M});
+    } catch(e){}
+    document.getElementById('qr-fs-name').textContent = currentUserData.name||'—';
+    document.getElementById('qr-fs-pid').textContent  = currentUserData.participantId||'—';
+  }
+  document.getElementById('qr-fullscreen-modal').classList.add('open');
+};
+window.closeQRFullscreen = function(){
+  document.getElementById('qr-fullscreen-modal').classList.remove('open');
+};
+document.getElementById('qr-fullscreen-modal').addEventListener('click', e=>{
+  if(e.target.id==='qr-fullscreen-modal') closeQRFullscreen();
+});
+
+// ── Download QR ───────────────────────────────────────────────
+window.downloadEntryQR = function(){
+  const canvas = document.querySelector('#entry-qr-el canvas') || document.querySelector('#entry-qr-el img');
+  if(!canvas){ showToast('QR not ready yet','error'); return; }
+  const link = document.createElement('a');
+  link.download = `AETHER2K26-Entry-${currentUserData?.participantId||'Pass'}.png`;
+  link.href = canvas.toDataURL ? canvas.toDataURL() : canvas.src;
+  link.click();
+  showToast('Entry pass downloaded!','success');
+};
+
+// ── Auth State ────────────────────────────────────────────────
+// Guard: don't redirect until Firebase has resolved the auth state
+let authResolved = false;
+const authRedirectTimeout = setTimeout(() => {
+  if (!authResolved) {
+    // Auth took too long — likely not logged in
+    window.location.href = 'register.html';
+  }
+}, 5000);
+
+onAuthStateChanged(auth, async user=>{
+  authResolved = true;
+  clearTimeout(authRedirectTimeout);
+  if(!user){
+    // Not logged in — redirect back to register page
+    window.location.href = 'register.html';
+    return;
+  }
+  currentUser = user;
+  try {
+    const snap = await getDoc(doc(db,'participants',user.uid));
+    if(snap.exists()){
+      currentUserData = snap.data();
+      initDashboard();
+    } else {
+      showToast('Participant data not found.','error');
+      setTimeout(()=>{ window.location.href='register.html'; }, 2000);
+    }
+  } catch(e){
+    console.error(e);
+    showToast('Failed to load data. Check connection.','error');
+  }
+});
+
+// ── Dashboard Init ────────────────────────────────────────────
+function initDashboard(){
+  const data = currentUserData;
+
+
+  // Sidebar profile
+  const initials = data.name?.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)||'A';
+  document.getElementById('sb-avatar').textContent   = initials;
+  document.getElementById('sb-name').textContent     = data.name||'—';
+  document.getElementById('sb-pid').textContent      = data.participantId||'—';
+  document.getElementById('topbar-avatar').textContent = initials;
+  document.getElementById('topbar-name').textContent   = (data.name||'').split(' ')[0];
+
+  // Overview
+  document.getElementById('ov-greeting').textContent = `Welcome back, ${data.name?.split(' ')[0] || 'Participant'} 👋`;
+  document.getElementById('ov-pid').textContent      = data.participantId||'—';
+  document.getElementById('ov-pay').textContent      = (data.paymentStatus==='paid'||data.paymentStatus==='verified') ? 'Paid ✅' : data.paymentStatus==='rejected' ? 'Rejected ❌' : 'Pending ⏳';
+  document.getElementById('ov-school').textContent   = data.school||'—';
+  document.getElementById('ov-class').textContent    = `Class ${data.class||'—'}`;
+
+  // Profile panel
+  document.getElementById('pf-avatar').textContent     = initials;
+  document.getElementById('pf-name').textContent       = data.name||'—';
+  document.getElementById('pf-pid').textContent        = data.participantId||'—';
+  document.getElementById('pf-fullname').textContent   = data.name||'—';
+  document.getElementById('pf-participantid').textContent = data.participantId||'—';
+  document.getElementById('pf-school').textContent     = data.school||'—';
+  document.getElementById('pf-class').textContent      = `Class ${data.class||'—'}`;
+  document.getElementById('pf-email').textContent      = data.email||'—';
+  document.getElementById('pf-phone').textContent      = data.phone||'—';
+  renderPaymentBadge('pf-payment', data.paymentStatus);
+
+  // ID Card
+  document.getElementById('id-fullname').textContent  = data.name||'—';
+  document.getElementById('id-class').textContent     = `Class ${data.class} · ${data.school}`;
+  document.getElementById('id-pid').textContent       = data.participantId||'—';
+  document.getElementById('id-school-badge').textContent = data.school||'—';
+  renderPaymentBadgeEl('id-pay-badge', data.paymentStatus);
+
+  // Payment panel
+  document.getElementById('pay-pid').textContent = data.participantId||'—';
+  makeQR('pay-qr-code', `upi://pay?pa=aether2k26@paytm&pn=AETHER2K26&am=100&cu=INR&tn=${data.participantId}`, 144);
+  renderPaymentStatus(data.paymentStatus);
+
+  // Entry QR
+  renderEntryQR(data);
+
+  // Start clock
+  startClock();
+
+  // Load team
+  loadTeam(data);
+
+  // Load project
+  loadProject(data);
+
+  // Load announcements (realtime)
+  loadAnnouncements();
+
+  // Realtime participant listener (payment updates)
+  onSnapshot(doc(db,'participants',currentUser.uid), snap=>{
+    if(snap.exists()){
+      const d = snap.data();
+      currentUserData = d;
+      // Payment update
+      renderPaymentStatus(d.paymentStatus);
+      renderEntryQR(d);
+      renderPaymentBadgeEl('id-pay-badge', d.paymentStatus);
+      document.getElementById('ov-pay').textContent = (d.paymentStatus==='paid'||d.paymentStatus==='verified') ? 'Paid ✅' : d.paymentStatus==='rejected' ? 'Rejected ❌' : 'Pending ⏳';
+      renderPaymentBadge('pf-payment', d.paymentStatus);
+      // Team update
+      loadTeam(d);
+    }
+  });
+}
+
+// ── Payment Renderers ─────────────────────────────────────────
+function renderPaymentStatus(status){
+  const txt = document.getElementById('pay-status-txt');
+  const bdg = document.getElementById('pay-badge-el');
+  if(status==='paid'||status==='verified'){
+    txt.textContent='Verified ✅'; txt.style.color='var(--success)';
+    bdg.innerHTML='<div class="status-badge status-paid">✅ Payment Verified</div>';
+  } else if(status==='rejected'){
+    txt.textContent='Rejected ❌'; txt.style.color='var(--error)';
+    bdg.innerHTML='<div class="status-badge status-reject">❌ Payment Rejected</div>';
+  } else {
+    txt.textContent='Pending Review ⏳'; txt.style.color='var(--warning)';
+    bdg.innerHTML='<div class="status-badge status-pending">⏳ Pending Verification</div>';
+  }
+}
+
+function renderPaymentBadgeEl(elId, status){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  if(status==='paid'||status==='verified'){ el.className='status-badge status-paid'; el.textContent='✅ Payment Verified'; }
+  else if(status==='rejected'){ el.className='status-badge status-reject'; el.textContent='❌ Payment Rejected'; }
+  else { el.className='status-badge status-pending'; el.textContent='⏳ Payment Pending'; }
+}
+
+function renderPaymentBadge(elId, status){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  if(status==='paid'||status==='verified') el.innerHTML='<div class="status-badge status-paid" style="font-size:.75rem">✅ Verified</div>';
+  else if(status==='rejected') el.innerHTML='<div class="status-badge status-reject" style="font-size:.75rem">❌ Rejected</div>';
+  else el.innerHTML='<div class="status-badge status-pending" style="font-size:.75rem">⏳ Pending</div>';
+}
+
+// ── Entry QR ──────────────────────────────────────────────────
+function renderEntryQR(data){
+  const lock    = document.getElementById('qr-lock-overlay');
+  const dlBtn   = document.getElementById('btn-download-qr');
+  const expBtn  = document.getElementById('btn-expand-qr');
+  const pidEl   = document.getElementById('entry-pid');
+  const qrInfo  = {
+    pid:    document.getElementById('qr-info-pid'),
+    name:   document.getElementById('qr-info-name'),
+    team:   document.getElementById('qr-info-team'),
+    school: document.getElementById('qr-info-school'),
+    status: document.getElementById('qr-info-status'),
+  };
+
+  pidEl.textContent = data.participantId||'—';
+  if(qrInfo.pid) qrInfo.pid.textContent    = data.participantId||'—';
+  if(qrInfo.name) qrInfo.name.textContent  = data.name||'—';
+  if(qrInfo.team) qrInfo.team.textContent  = data.teamId||'Not in a team';
+  if(qrInfo.school) qrInfo.school.textContent = data.school||'—';
+
+  const qrData = JSON.stringify({
+    pid: data.participantId, name: data.name,
+    teamId: data.teamId||null, school: data.school,
+    event: 'AETHER2K26', ts: Date.now()
+  });
+  makeQR('entry-qr-code', qrData, 170);
+
+  if(data.paymentStatus==='paid'||data.paymentStatus==='verified'){
+    lock.style.display='none';
+    dlBtn.disabled=false; expBtn.disabled=false;
+    if(qrInfo.status) qrInfo.status.innerHTML='<span style="color:var(--success);font-weight:800">✅ Unlocked</span>';
+  } else {
+    lock.style.display='flex';
+    dlBtn.disabled=true; expBtn.disabled=true;
+    if(qrInfo.status) qrInfo.status.innerHTML='<span style="color:var(--warning);font-weight:800">⏳ Locked — Pending Payment</span>';
+  }
+}
+
+// ── Announcements ─────────────────────────────────────────────
+function loadAnnouncements(){
+  const list   = document.getElementById('dash-notices-list');
+  const ovList = document.getElementById('ov-notices');
+  const annBadge = document.getElementById('ann-badge');
+
+  const q = query(collection(db,'announcements'), orderBy('createdAt','desc'), limit(30));
+  if(annUnsubscribe) annUnsubscribe();
+  annUnsubscribe = onSnapshot(q, snap=>{
+    const items = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Badge
+    if(items.length>0){ annBadge.style.display=''; annBadge.textContent=items.length; }
+    else { annBadge.style.display='none'; }
+    // Render main list
+    renderNotices(items, list);
+    // Render overview (top 3)
+    renderNotices(items.slice(0,3), ovList, true);
+  });
+}
+
+function renderNotices(items, container, mini=false){
+  if(!container) return;
+  if(!items.length){
+    container.innerHTML=`<div class="notice-empty"><div style="font-size:2rem;margin-bottom:10px">📭</div><div style="font-weight:700;margin-bottom:4px">No announcements yet</div><div style="font-size:.82rem">Check back soon for updates from organizers.</div></div>`;
+    return;
+  }
+  const urgencyMap = {urgent:'high', important:'med', normal:'low'};
+  const prioClass  = {urgent:'prio-urgent', important:'prio-important', normal:'prio-normal'};
+  container.innerHTML = items.map(n=>{
+    const u = urgencyMap[n.priority]||'low';
+    const pc = prioClass[n.priority]||'prio-normal';
+    const timeStr = n.createdAt?.toDate
+      ? n.createdAt.toDate().toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      : 'Recently';
+    if(mini){
+      return `<div class="notice-item">
+        <div class="notice-urgency ${u}"></div>
+        <div style="flex:1">
+          <div class="notice-title">${n.title}</div>
+          <div class="notice-time">${timeStr}</div>
+        </div>
+      </div>`;
+    }
+    return `<div class="notice-item">
+      <div class="notice-urgency ${u}"></div>
+      <div style="flex:1">
+        <div class="notice-title">${n.title}</div>
+        <div class="notice-body">${n.body||''}</div>
+        <div class="notice-time">${timeStr}</div>
+      </div>
+      <div class="notice-prio ${pc}">${n.priority||'normal'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Team ──────────────────────────────────────────────────────
+async function loadTeam(data){
+  document.getElementById('ov-team').textContent = data.teamId ? 'In Team' : 'No Team';
+
+  if(!data.teamId){
+    document.getElementById('team-no-team').classList.remove('hidden');
+    document.getElementById('team-has-team').classList.add('hidden');
+    document.getElementById('project-no-team').classList.remove('hidden');
+    document.getElementById('project-form-container').classList.add('hidden');
+    document.getElementById('project-not-leader').classList.add('hidden');
+    document.getElementById('pf-teamstatus').innerHTML='<span style="color:var(--text-muted)">No Team</span>';
+    return;
+  }
+
+  document.getElementById('team-no-team').classList.add('hidden');
+  document.getElementById('team-has-team').classList.remove('hidden');
+
+  try {
+    const snap = await getDoc(doc(db,'teams',data.teamId));
+    if(!snap.exists()) return;
+    const teamData = snap.data();
+    const uid      = currentUser.uid;
+    const isLeader = teamData.leaderId===uid;
+
+    document.getElementById('team-name-display').textContent  = teamData.name||'—';
+    document.getElementById('team-code-display').textContent  = teamData.teamCode||'—';
+    document.getElementById('team-leader-badge').textContent  = isLeader ? '👑 Leader' : '👤 Member';
+    document.getElementById('ov-team').textContent            = teamData.name || 'In Team';
+    document.getElementById('pf-teamstatus').innerHTML        = `<span style="color:var(--success);font-weight:800">${teamData.name}</span>`;
+
+    const members = teamData.members||[];
+    const mList   = document.getElementById('team-members-list');
+    mList.innerHTML = members.map(m=>`
+      <div class="member-row">
+        <div class="member-avatar">${(m.name||'U')[0]}</div>
+        <div class="member-info">
+          <div class="member-name">${m.name}</div>
+          <div class="member-id">${m.participantId||'—'}</div>
+        </div>
+        <div class="member-role">${m.role||'Member'}</div>
+      </div>`).join('');
+
+    const isFull = members.length>=2;
+    document.getElementById('team-member-slot').classList.toggle('hidden', isFull);
+    document.getElementById('team-full-badge').classList.toggle('hidden', !isFull);
+    if(isFull) document.getElementById('ov-team').textContent = `${teamData.name} ✅`;
+
+    // Project access
+    document.getElementById('project-no-team').classList.add('hidden');
+    if(isLeader){
+      document.getElementById('project-not-leader').classList.add('hidden');
+      document.getElementById('project-form-container').classList.remove('hidden');
+    } else {
+      document.getElementById('project-not-leader').classList.remove('hidden');
+      document.getElementById('project-form-container').classList.add('hidden');
+    }
+
+    // QR team info
+    const qrTeam = document.getElementById('qr-info-team');
+    if(qrTeam) qrTeam.textContent = data.teamId||'—';
+
+    // Realtime team listener
+    if(teamUnsubscribe) teamUnsubscribe();
+    teamUnsubscribe = onSnapshot(doc(db,'teams',data.teamId), snap=>{
+      if(snap.exists()) loadTeam(currentUserData);
+    });
+  } catch(e){ console.error(e); }
+}
+
+// ── Create Team ───────────────────────────────────────────────
+window.handleCreateTeam = async function(){
+  const name = document.getElementById('create-team-name').value.trim();
+  if(!name){ showToast('Enter a team name','error'); return; }
+  const uid  = currentUser.uid;
+  const code = generateTeamCode();
+  const teamData = {
+    name, teamCode:code, leaderId:uid,
+    members:[{name:currentUserData.name, participantId:currentUserData.participantId, uid, role:'Leader'}],
+    projectSubmitted:false,
+    createdAt:serverTimestamp()
+  };
+  try {
+    const ref = await addDoc(collection(db,'teams'), teamData);
+    await updateDoc(doc(db,'participants',uid),{teamId:ref.id, teamCode:code});
+    currentUserData.teamId = ref.id; currentUserData.teamCode = code;
+    closeModal('modal-create-team');
+    showToast(`Team created! Share code: ${code}`,'success');
+    loadTeam(currentUserData);
+  } catch(e){ showToast('Failed to create team','error'); }
+};
+
+// ── Join Team ─────────────────────────────────────────────────
+window.handleJoinTeam = async function(){
+  const code = document.getElementById('join-team-code').value.trim().toUpperCase();
+  if(!code){ showToast('Enter a team code','error'); return; }
+  try {
+    const q    = query(collection(db,'teams'),where('teamCode','==',code));
+    const snap = await getDocs(q);
+    if(snap.empty){ showToast('Team code not found','error'); return; }
+    const teamDoc  = snap.docs[0];
+    const teamData = teamDoc.data();
+    if(teamData.members.length>=2){ showToast('Team is already full (max 2)','error'); return; }
+    const updatedMembers = [...teamData.members,{
+      name:currentUserData.name, participantId:currentUserData.participantId,
+      uid:currentUser.uid, role:'Member'
+    }];
+    await updateDoc(doc(db,'teams',teamDoc.id),{members:updatedMembers});
+    await updateDoc(doc(db,'participants',currentUser.uid),{teamId:teamDoc.id});
+    currentUserData.teamId = teamDoc.id;
+    closeModal('modal-join-team');
+    showToast(`Joined team: ${teamData.name}`,'success');
+    loadTeam(currentUserData);
+  } catch(e){ showToast('Failed to join team','error'); }
+};
+
+// ── Project ───────────────────────────────────────────────────
+function loadProject(data){
+  document.getElementById('ov-proj').textContent = data.projectSubmitted ? 'Submitted ✅' : 'None';
+  if(data.projectSubmitted && data.project) renderProjectView(data.project);
+}
+
+window.addTech = function(e){ if(e.key==='Enter'){ e.preventDefault(); addTechBtn(); } };
+window.addTechBtn = function(){
+  const input = document.getElementById('tech-input');
+  const val   = input.value.trim();
+  if(!val || techStack.includes(val)) return;
+  techStack.push(val); renderTechTags(); input.value='';
+};
+function renderTechTags(){
+  document.getElementById('tech-tags').innerHTML = techStack.map((t,i)=>
+    `<div class="tech-tag">${t}<span class="rm" onclick="removeTech(${i})">✕</span></div>`
+  ).join('');
+}
+window.removeTech = i=>{ techStack.splice(i,1); renderTechTags(); };
+
+window.handleProjectSubmit = async function(e){
+  e.preventDefault();
+  const title   = document.getElementById('proj-title').value.trim();
+  const problem = document.getElementById('proj-problem').value.trim();
+  const desc    = document.getElementById('proj-desc').value.trim();
+  if(!title||!problem||!desc){ showToast('Fill all required fields','error'); return; }
+  const uid         = currentUser.uid;
+  const projectData = {title, problem, description:desc, techStack, submittedAt:serverTimestamp()};
+  try {
+    await updateDoc(doc(db,'participants',uid),{projectSubmitted:true, project:projectData});
+    if(currentUserData.teamId){
+      await updateDoc(doc(db,'teams',currentUserData.teamId),{projectSubmitted:true, project:projectData});
+    }
+    currentUserData.projectSubmitted=true; currentUserData.project=projectData;
+    showToast('Project idea submitted!','success');
+    document.getElementById('ov-proj').textContent='Submitted ✅';
+    renderProjectView(projectData);
+  } catch(err){ showToast('Submission failed. Try again.','error'); }
+};
+
+function renderProjectView(p){
+  document.getElementById('project-submitted-view').classList.remove('hidden');
+  document.getElementById('project-form-view').classList.add('hidden');
+  document.getElementById('project-view-content').innerHTML=`
+    <div style="margin-bottom:14px">
+      <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:4px">Title</div>
+      <div style="font-weight:800;font-size:1rem">${p.title}</div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:4px">Problem Statement</div>
+      <div style="color:var(--text-secondary);font-size:.88rem;font-family:var(--font-body);line-height:1.6">${p.problem}</div>
+    </div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:4px">Description</div>
+      <div style="color:var(--text-secondary);font-size:.88rem;font-family:var(--font-body);line-height:1.6">${p.description}</div>
+    </div>
+    ${p.techStack?.length ? `<div><div style="font-size:.65rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;font-family:var(--font-mono);margin-bottom:8px">Tech Stack</div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px">${p.techStack.map(t=>`<div class="tech-tag">${t}</div>`).join('')}</div></div>`:''}
+  `;
+}
+
+window.editProject = function(){
+  document.getElementById('project-submitted-view').classList.add('hidden');
+  document.getElementById('project-form-view').classList.remove('hidden');
+  if(currentUserData?.project){
+    const p = currentUserData.project;
+    document.getElementById('proj-title').value   = p.title||'';
+    document.getElementById('proj-problem').value = p.problem||'';
+    document.getElementById('proj-desc').value    = p.description||'';
+    techStack = p.techStack||[]; renderTechTags();
+  }
+};
+
+// ── Logout ────────────────────────────────────────────────────
+window.handleLogout = async function(){
+  if(teamUnsubscribe) teamUnsubscribe();
+  if(annUnsubscribe)  annUnsubscribe();
+  await signOut(auth);
+  window.location.href = 'register.html';
+};
+
+</script>
+</body>
+</html>

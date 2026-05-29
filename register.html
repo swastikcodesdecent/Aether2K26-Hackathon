@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AETHER 2K26 — De Paul School Hackathon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+/* ===================== CSS VARIABLES ===================== */
+:root {
+  --saffron:        #FF6B00;
+  --saffron-light:  #FF9040;
+  --saffron-glow:   rgba(255,107,0,0.35);
+  --saffron-pale:   rgba(255,107,0,0.08);
+  --white:          #FFFFFF;
+  --off-white:      #FFF8F2;
+  --glass-bg:       rgba(255,255,255,0.07);
+  --glass-border:   rgba(255,255,255,0.15);
+  --glass-heavy:    rgba(255,255,255,0.12);
+  --dark-base:      #0A0500;
+  --dark-mid:       #120800;
+  --dark-card:      #1A0D00;
+  --text-primary:   #FFFFFF;
+  --text-secondary: rgba(255,255,255,0.65);
+  --text-muted:     rgba(255,255,255,0.38);
+  --success:        #00E5A0;
+  --error:          #FF3B6B;
+  --warning:        #FFD600;
+  --font-display:   'Exo 2', sans-serif;
+  --font-body:      'DM Sans', sans-serif;
+  --font-mono:      'Fira Code', monospace;
+  --radius-sm:      8px;
+  --radius-md:      16px;
+  --radius-lg:      24px;
+  --radius-xl:      36px;
+  --transition:     cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ===================== RESET & BASE ===================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--dark-base);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255,107,0,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(255,144,64,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 100% at 50% 50%, rgba(18,8,0,1) 0%, rgba(10,5,0,1) 100%);
+  pointer-events: none;
+}
+/* Animated grid background */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,107,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,107,0,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  animation: gridDrift 20s linear infinite;
+}
+@keyframes gridDrift {
+  0%   { transform: translate(0,0); }
+  100% { transform: translate(60px, 60px); }
+}
+
+/* ===================== SCROLLBAR ===================== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--dark-base); }
+::-webkit-scrollbar-thumb { background: var(--saffron); border-radius: 3px; }
+
+/* ===================== UTILITY ===================== */
+.hidden  { display: none !important; }
+.flex    { display: flex; }
+.center  { align-items: center; justify-content: center; }
+.col     { flex-direction: column; }
+.gap-1   { gap: 8px; }
+.gap-2   { gap: 16px; }
+.gap-3   { gap: 24px; }
+.relative{ position: relative; }
+.z1      { position: relative; z-index: 1; }
+
+/* ===================== TYPOGRAPHY ===================== */
+h1,h2,h3 { font-family: var(--font-display); letter-spacing: 0.02em; }
+.mono { font-family: var(--font-mono); }
+
+/* ===================== GLASS CARD ===================== */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+}
+.glass-heavy {
+  background: var(--glass-heavy);
+  border: 1px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: var(--radius-lg);
+}
+
+/* ===================== BUTTONS ===================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 28px;
+  border-radius: 50px;
+  border: none; cursor: pointer;
+  font-family: var(--font-body); font-weight: 700; font-size: 0.9rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  transition: all 0.3s var(--transition);
+  position: relative; overflow: hidden;
+  text-decoration: none;
+}
+.btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: rgba(255,255,255,0.1);
+  transform: translateX(-100%);
+  transition: transform 0.4s var(--transition);
+  border-radius: inherit;
+}
+.btn:hover::before { transform: translateX(0); }
+.btn-primary {
+  background: linear-gradient(135deg, var(--saffron) 0%, var(--saffron-light) 100%);
+  color: #fff;
+  box-shadow: 0 0 20px var(--saffron-glow), 0 4px 20px rgba(0,0,0,0.4);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px var(--saffron-glow), 0 8px 30px rgba(0,0,0,0.5);
+}
+.btn-ghost {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  backdrop-filter: blur(10px);
+}
+.btn-ghost:hover {
+  border-color: var(--saffron);
+  color: var(--saffron);
+  box-shadow: 0 0 20px var(--saffron-glow);
+}
+.btn-sm { padding: 8px 18px; font-size: 0.8rem; }
+.btn-danger {
+  background: linear-gradient(135deg, var(--error) 0%, #FF6B8A 100%);
+  color: #fff;
+}
+.btn-success {
+  background: linear-gradient(135deg, var(--success) 0%, #00C87A 100%);
+  color: #000;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ===================== FORM ELEMENTS ===================== */
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-label {
+  font-size: 0.78rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--saffron-light);
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-body); font-size: 0.95rem;
+  transition: all 0.3s ease;
+  outline: none;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--saffron);
+  box-shadow: 0 0 0 3px var(--saffron-glow), 0 0 20px rgba(255,107,0,0.1);
+  background: rgba(255,107,0,0.06);
+}
+.form-input::placeholder { color: var(--text-muted); }
+.form-select { cursor: pointer; }
+.form-select option { background: var(--dark-card); color: var(--text-primary); }
+.form-textarea { resize: vertical; min-height: 90px; }
+.form-error { font-size: 0.8rem; color: var(--error); }
+
+/* ===================== TOAST ===================== */
+#toast-container {
+  position: fixed; bottom: 30px; right: 30px;
+  z-index: 9999; display: flex; flex-direction: column; gap: 10px;
+}
+.toast {
+  padding: 14px 22px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem; font-weight: 600;
+  backdrop-filter: blur(20px);
+  animation: toastIn 0.4s var(--transition) forwards;
+  max-width: 320px;
+}
+.toast.success { background: rgba(0,229,160,0.15); border: 1px solid var(--success); color: var(--success); }
+.toast.error   { background: rgba(255,59,107,0.15); border: 1px solid var(--error);   color: var(--error); }
+.toast.info    { background: rgba(255,107,0,0.15);  border: 1px solid var(--saffron); color: var(--saffron-light); }
+@keyframes toastIn {
+  from { opacity:0; transform: translateX(30px); }
+  to   { opacity:1; transform: translateX(0); }
+}
+
+
+/* ===================== PAGE SYSTEM ===================== */
+.page { display: none; min-height: 100vh; position: relative; z-index: 1; }
+.page.active { display: block; animation: fadeUp 0.5s var(--transition); }
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ===================== NAVBAR ===================== */
+#navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 0 5%;
+  height: 70px; display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,5,0,0.7);
+  border-bottom: 1px solid rgba(255,107,0,0.1);
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+}
+.nav-logo {
+  font-family: var(--font-display); font-weight: 800; font-size: 1.3rem;
+  color: var(--saffron); letter-spacing: 0.08em;
+  text-decoration: none;
+}
+.nav-logo span { color: var(--white); }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.nav-user-chip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 50px;
+  font-size: 0.85rem; color: var(--text-secondary);
+}
+.nav-avatar {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--saffron), var(--saffron-light));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; color: #fff;
+}
+
+/* ===================== LANDING PAGE ===================== */
+#page-landing {
+  padding-top: 70px;
+}
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  text-align: center; padding: 60px 5%;
+  position: relative; overflow: hidden;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px;
+  background: rgba(255,107,0,0.1);
+  border: 1px solid rgba(255,107,0,0.3);
+  border-radius: 50px;
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--saffron-light); text-transform: uppercase;
+  margin-bottom: 30px;
+  animation: badgePulse 3s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { box-shadow: 0 0 10px var(--saffron-glow); }
+  50%      { box-shadow: 0 0 25px var(--saffron-glow), 0 0 50px rgba(255,107,0,0.15); }
+}
+.badge-dot {
+  width: 8px; height: 8px;
+  background: var(--saffron);
+  border-radius: 50%;
+  animation: blink 1s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero-title {
+  font-size: clamp(3.5rem, 10vw, 8rem);
+  font-weight: 900; line-height: 0.95;
+  background: linear-gradient(135deg, #fff 0%, var(--saffron-light) 50%, var(--saffron) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 40px var(--saffron-glow));
+}
+.hero-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 3vw, 1.8rem);
+  color: var(--text-secondary); letter-spacing: 0.22em;
+  margin-bottom: 24px;
+  font-weight: 300; text-transform: uppercase;
+}
+.hero-desc {
+  max-width: 580px; margin: 0 auto 40px;
+  color: var(--text-secondary); font-size: 1.05rem; line-height: 1.7;
+}
+.hero-cta { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.hero-glow {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(255,107,0,0.1) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,0,0.15), transparent 70%);
+  animation: floatOrb 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes floatOrb {
+  0%,100% { transform: translateY(0) scale(1); }
+  50%      { transform: translateY(-30px) scale(1.1); }
+}
+
+/* ===================== COUNTDOWN ===================== */
+.countdown-section {
+  padding: 60px 5%;
+  display: flex; justify-content: center;
+}
+.countdown-card {
+  display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;
+  padding: 40px 50px;
+}
+.countdown-unit {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.countdown-number {
+  font-family: var(--font-display); font-size: 3.5rem; font-weight: 800;
+  color: var(--saffron); line-height: 1;
+  text-shadow: 0 0 30px var(--saffron-glow);
+  min-width: 80px; text-align: center;
+}
+.countdown-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--text-muted);
+}
+.countdown-sep {
+  font-family: var(--font-display); font-size: 3rem; color: var(--saffron);
+  align-self: center; padding-bottom: 20px; opacity: 0.4;
+  animation: blink 1s ease-in-out infinite;
+}
+
+/* ===================== FEATURES SECTION ===================== */
+.section {
+  padding: 80px 5%;
+  max-width: 1200px; margin: 0 auto;
+}
+.section-title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  text-align: center; margin-bottom: 10px;
+  color: var(--white);
+}
+.section-sub {
+  text-align: center; color: var(--text-secondary);
+  margin-bottom: 50px; font-size: 1rem;
+}
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; }
+.feature-card {
+  padding: 30px; cursor: default;
+  transition: transform 0.3s var(--transition), box-shadow 0.3s ease;
+}
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 40px var(--saffron-glow);
+}
+.feature-icon {
+  font-size: 2.2rem; margin-bottom: 18px;
+  display: block;
+}
+.feature-title {
+  font-family: var(--font-display); font-size: 0.95rem;
+  color: var(--saffron-light); margin-bottom: 10px;
+  letter-spacing: 0.04em; font-weight: 700;
+}
+.feature-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.65; }
+
+/* Prizes */
+.prize-card {
+  padding: 36px; text-align: center;
+  position: relative; overflow: hidden;
+  transition: transform 0.3s var(--transition);
+}
+.prize-card:hover { transform: translateY(-4px); }
+.prize-card.gold { border-color: #FFD600; }
+.prize-card.gold .prize-amount { color: #FFD600; text-shadow: 0 0 20px rgba(255,214,0,0.5); }
+.prize-card.silver { border-color: rgba(192,192,192,0.4); }
+.prize-card.silver .prize-amount { color: #C0C0C0; }
+.prize-card.bronze { border-color: rgba(205,127,50,0.4); }
+.prize-card.bronze .prize-amount { color: #CD7F32; }
+.prize-rank {
+  font-family: var(--font-display); font-size: 0.75rem;
+  letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.prize-crown { font-size: 3rem; margin-bottom: 12px; display: block; }
+.prize-amount {
+  font-family: var(--font-display); font-size: 2.2rem; font-weight: 900;
+  margin-bottom: 8px;
+}
+.prize-label { color: var(--text-secondary); font-size: 0.88rem; }
+
+/* Timeline */
+.timeline { position: relative; padding: 0 0 0 30px; }
+.timeline::before {
+  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--saffron), transparent);
+}
+.timeline-item { position: relative; margin-bottom: 32px; }
+.timeline-dot {
+  position: absolute; left: -26px; top: 4px;
+  width: 14px; height: 14px;
+  background: var(--saffron);
+  border-radius: 50%;
+  box-shadow: 0 0 12px var(--saffron-glow);
+}
+.timeline-time {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  color: var(--saffron); margin-bottom: 4px;
+}
+.timeline-title { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; }
+.timeline-desc { color: var(--text-muted); font-size: 0.85rem; }
+
+/* Stats Bar */
+.stats-bar {
+  display: flex; gap: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px);
+}
+.stat-item {
+  flex: 1; padding: 28px 20px; text-align: center;
+  background: var(--glass-bg);
+  border-right: 1px solid var(--glass-border);
+  transition: background 0.3s ease;
+}
+.stat-item:last-child { border-right: none; }
+.stat-item:hover { background: var(--glass-heavy); }
+.stat-num {
+  font-family: var(--font-display); font-size: 1.8rem; font-weight: 900;
+  color: var(--saffron); line-height: 1;
+  text-shadow: 0 0 20px var(--saffron-glow);
+}
+.stat-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; letter-spacing: 0.1em; }
+
+/* Announcements */
+.announcement-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
+}
+.announcement-item:hover { border-color: var(--saffron); background: var(--saffron-pale); }
+.ann-icon { font-size: 1.4rem; flex-shrink: 0; }
+.ann-content { flex: 1; }
+.ann-title { font-weight: 700; margin-bottom: 4px; font-size: 0.92rem; }
+.ann-time { font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); }
+.ann-badge {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+  padding: 3px 10px; border-radius: 20px;
+  background: rgba(255,107,0,0.15); color: var(--saffron);
+  border: 1px solid rgba(255,107,0,0.3);
+  flex-shrink: 0;
+}
+
+/* Footer */
+footer {
+  text-align: center; padding: 40px 5%;
+  border-top: 1px solid rgba(255,107,0,0.1);
+  color: var(--text-muted); font-size: 0.85rem;
+  position: relative; z-index: 1;
+}
+footer span { color: var(--saffron); }
+
+/* ===================== AUTH PAGE ===================== */
+#page-auth {
+  min-height: 100vh; display: flex;
+  align-items: center; justify-content: center;
+  padding: 90px 20px 40px;
+}
+.auth-container {
+  width: 100%; max-width: 480px;
+}
+.auth-card {
+  padding: 44px 40px;
+}
+.auth-header { text-align: center; margin-bottom: 34px; }
+.auth-logo {
+  font-family: var(--font-display); font-size: 1.5rem; font-weight: 800;
+  color: var(--saffron); margin-bottom: 6px; letter-spacing: 0.08em;
+}
+.auth-title { font-size: 1.4rem; margin-bottom: 8px; }
+.auth-desc { color: var(--text-muted); font-size: 0.88rem; }
+.auth-tabs {
+  display: flex; gap: 0;
+  background: rgba(0,0,0,0.3);
+  border-radius: 50px; padding: 4px;
+  margin-bottom: 28px;
+}
+.auth-tab {
+  flex: 1; padding: 10px;
+  border-radius: 50px; border: none;
+  background: transparent; color: var(--text-muted);
+  font-family: var(--font-body); font-weight: 700; font-size: 0.85rem;
+  cursor: pointer; transition: all 0.3s ease;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.auth-tab.active {
+  background: linear-gradient(135deg, var(--saffron), var(--saffron-light));
+  color: #fff;
+  box-shadow: 0 0 20px var(--saffron-glow);
+}
+.auth-form { display: flex; flex-direction: column; gap: 18px; }
+.auth-divider {
+  text-align: center; color: var(--text-muted); font-size: 0.8rem;
+  position: relative; margin: 4px 0;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; position: absolute; top: 50%;
+  width: calc(50% - 20px); height: 1px;
+  background: var(--glass-border);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after { right: 0; }
+.school-radio-group { display: flex; gap: 12px; }
+.school-radio {
+  flex: 1; padding: 12px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  cursor: pointer; transition: all 0.25s ease;
+  display: flex; align-items: center; gap: 10px;
+}
+.school-radio.selected {
+  border-color: var(--saffron);
+  background: rgba(255,107,0,0.08);
+  box-shadow: 0 0 15px var(--saffron-glow);
+}
+.school-radio input { display: none; }
+.radio-label { font-size: 0.85rem; font-weight: 600; }
+.radio-dot {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%; flex-shrink: 0;
+  transition: all 0.25s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.school-radio.selected .radio-dot {
+  border-color: var(--saffron);
+  background: var(--saffron);
+  box-shadow: 0 0 8px var(--saffron-glow);
+}
+.radio-dot::after {
+  content: ''; width: 6px; height: 6px;
+  background: #fff; border-radius: 50%; opacity: 0;
+  transition: opacity 0.2s;
+}
+.school-radio.selected .radio-dot::after { opacity: 1; }
+
+
+
+
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.modal {
+  width: 100%; max-width: 460px;
+  padding: 36px;
+  animation: fadeUp 0.4s var(--transition);
+}
+.modal-title { font-size: 1.1rem; margin-bottom: 8px; }
+.modal-desc { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 24px; }
+.modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 900px) {
+  .stats-bar { flex-direction: column; }
+  .stat-item { border-right: none; border-bottom: 1px solid var(--glass-border); }
+  .stat-item:last-child { border-bottom: none; }
+}
+@media (max-width: 600px) {
+  .auth-card { padding: 30px 22px; }
+  .school-radio-group { flex-direction: column; }
+  .countdown-card { padding: 30px 20px; gap: 16px; }
+  .countdown-number { font-size: 2.5rem; min-width: 60px; }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .dashboard-main { padding: 20px 16px; }
+  .id-card { padding: 24px 20px; }
+  .modal { padding: 24px 18px; }
+}
+
+/* ===================== SCROLLING TICKER ===================== */
+.ticker-wrap {
+  overflow: hidden; border-top: 1px solid rgba(255,107,0,0.1);
+  border-bottom: 1px solid rgba(255,107,0,0.1);
+  background: rgba(255,107,0,0.04);
+  padding: 10px 0;
+}
+.ticker {
+  display: flex; gap: 0;
+  animation: ticker 30s linear infinite;
+  white-space: nowrap; width: max-content;
+}
+.ticker:hover { animation-play-state: paused; }
+.ticker-item {
+  padding: 0 40px; font-size: 0.8rem;
+  color: var(--text-secondary); letter-spacing: 0.08em;
+  display: flex; align-items: center; gap: 12px;
+}
+.ticker-item::before { content: '◆'; color: var(--saffron); font-size: 0.5rem; }
+@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ===================== GLOW LINES ===================== */
+.glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--saffron), transparent);
+  opacity: 0.4; margin: 0;
+}
+
+/* ===================== SUCCESS SCREEN ===================== */
+.success-screen {
+  text-align: center; padding: 50px 30px;
+}
+.success-icon { font-size: 4rem; margin-bottom: 20px; }
+.success-title {
+  font-family: var(--font-display); font-size: 1.5rem;
+  color: var(--success); margin-bottom: 10px;
+}
+.success-id {
+  font-family: var(--font-mono); font-size: 2rem; font-weight: 700;
+  color: var(--saffron); letter-spacing: 0.2em;
+  text-shadow: 0 0 20px var(--saffron-glow);
+  margin: 16px 0;
+}
+
+/* Input with copy button */
+.input-copy-wrap { position: relative; }
+.copy-btn {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: 6px; padding: 4px 10px; color: var(--saffron);
+  font-size: 0.75rem; cursor: pointer; font-family: var(--font-body);
+  font-weight: 700; transition: all 0.2s;
+}
+.copy-btn:hover { background: rgba(255,107,0,0.15); }
+
+/* ===================== FLOATING PARTICLES ===================== */
+.particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.particle {
+  position: absolute; width: 2px; height: 2px;
+  background: var(--saffron); border-radius: 50%;
+  animation: particleFloat linear infinite;
+  opacity: 0;
+}
+@keyframes particleFloat {
+  0%   { transform: translateY(100vh) translateX(0); opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.4; }
+  100% { transform: translateY(-100px) translateX(40px); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a class="nav-logo" href="#" onclick="showPage('landing')">AETHER<span>2K26</span></a>
+  <div class="nav-actions" id="nav-actions">
+    <button class="btn btn-ghost btn-sm" onclick="showPage('auth')">Login / Register</button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     PAGE: LANDING
+     ============================================================ -->
+<div id="page-landing" class="page active">
+  <!-- Particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="floating-orb" style="width:300px;height:300px;top:10%;left:5%;animation-duration:8s;"></div>
+    <div class="floating-orb" style="width:200px;height:200px;bottom:15%;right:8%;animation-duration:6s;animation-delay:-3s;"></div>
+
+    <div class="hero-badge z1">
+      <span class="badge-dot"></span>
+      Registrations Open — De Paul School
+    </div>
+    <h1 class="hero-title z1">AETHER<br>2K26</h1>
+    <p class="hero-subtitle z1">NATIONAL TECH HACKATHON</p>
+    <p class="hero-desc z1">
+      A 6-hour innovation marathon where the brightest young minds build tomorrow's solutions.
+      Code, create, compete — and claim your place in the future.
+    </p>
+    <div class="hero-cta z1">
+      <button class="btn btn-primary" onclick="showPage('auth')" style="font-size:1rem;padding:16px 40px">
+        ⚡ Register Now
+      </button>
+      <button class="btn btn-ghost" onclick="document.getElementById('about-section').scrollIntoView({behavior:'smooth'})">
+        Learn More ↓
+      </button>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker">
+      <span class="ticker-item">AETHER 2K26 — 6 HOUR HACKATHON</span>
+      <span class="ticker-item">REGISTRATIONS OPEN NOW</span>
+      <span class="ticker-item">₹100 ENTRY FEE FOR VENUE ACCESS</span>
+      <span class="ticker-item">TEAMS OF 2 — FORM YOUR CREW</span>
+      <span class="ticker-item">TROPHIES &amp; CERTIFICATES FOR WINNERS</span>
+      <span class="ticker-item">HOSTED BY DE PAUL SCHOOL</span>
+      <span class="ticker-item">BUILD SOMETHING LEGENDARY</span>
+      <span class="ticker-item">AETHER 2K26 — 6 HOUR HACKATHON</span>
+      <span class="ticker-item">REGISTRATIONS OPEN NOW</span>
+      <span class="ticker-item">₹100 ENTRY FEE FOR VENUE ACCESS</span>
+      <span class="ticker-item">TEAMS OF 2 — FORM YOUR CREW</span>
+      <span class="ticker-item">TROPHIES &amp; CERTIFICATES FOR WINNERS</span>
+      <span class="ticker-item">HOSTED BY DE PAUL SCHOOL</span>
+      <span class="ticker-item">BUILD SOMETHING LEGENDARY</span>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="countdown-section">
+    <div class="glass countdown-card" style="max-width:700px;width:100%">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-family:var(--font-display);font-size:0.75rem;letter-spacing:0.3em;color:var(--text-muted);text-transform:uppercase">Event Countdown</div>
+        <div style="font-size:0.9rem;color:var(--saffron-light);margin-top:4px;font-family:var(--font-mono)" id="event-date-display">—</div>
+      </div>
+      <div style="display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px">
+        <div class="countdown-unit">
+          <div class="countdown-number" id="cd-days">00</div>
+          <div class="countdown-label">Days</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit">
+          <div class="countdown-number" id="cd-hours">00</div>
+          <div class="countdown-label">Hours</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit">
+          <div class="countdown-number" id="cd-mins">00</div>
+          <div class="countdown-label">Minutes</div>
+        </div>
+        <div class="countdown-sep">:</div>
+        <div class="countdown-unit">
+          <div class="countdown-number" id="cd-secs">00</div>
+          <div class="countdown-label">Seconds</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div style="padding:0 5% 60px;max-width:1200px;margin:0 auto">
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-num" id="stat-reg">—</div><div class="stat-lbl">Registered</div></div>
+      <div class="stat-item"><div class="stat-num">6</div><div class="stat-lbl">Hours</div></div>
+      <div class="stat-item"><div class="stat-num">🏆</div><div class="stat-lbl">Trophies & Certs</div></div>
+      <div class="stat-item"><div class="stat-num">2</div><div class="stat-lbl">Per Team</div></div>
+      <div class="stat-item"><div class="stat-num">1</div><div class="stat-lbl">Venue</div></div>
+    </div>
+  </div>
+
+  <div class="glow-line"></div>
+
+  <!-- ABOUT / FEATURES -->
+  <div class="section" id="about-section">
+    <h2 class="section-title">Why <span style="color:var(--saffron)">AETHER</span>?</h2>
+    <p class="section-sub">More than a competition — a launchpad for your ideas.</p>
+    <div class="grid-3">
+      <div class="glass feature-card">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-title">6-Hour Sprint</div>
+        <div class="feature-desc">An intense, high-energy marathon that pushes your limits and forces creative breakthrough under real constraints.</div>
+      </div>
+      <div class="glass feature-card">
+        <span class="feature-icon">🤝</span>
+        <div class="feature-title">Team of Two</div>
+        <div class="feature-desc">Partner up with one collaborator. Tight teams mean clearer communication, sharper focus, and faster execution.</div>
+      </div>
+      <div class="glass feature-card">
+        <span class="feature-icon">🏆</span>
+        <div class="feature-title">Real Recognition</div>
+        <div class="feature-desc">Compete for trophies and certificates across categories. Top performers earn prestigious recognition and bragging rights.</div>
+      </div>
+      <div class="glass feature-card">
+        <span class="feature-icon">🎓</span>
+        <div class="feature-title">All Classes Welcome</div>
+        <div class="feature-desc">Open to students from Class 9 to 12. Whether you're a veteran coder or curious beginner — there's a place for you.</div>
+      </div>
+      <div class="glass feature-card">
+        <span class="feature-icon">🛡️</span>
+        <div class="feature-title">Digital Identity</div>
+        <div class="feature-desc">Every participant gets a unique ID and an encrypted QR entry pass — your digital passport to the event.</div>
+      </div>
+      <div class="glass feature-card">
+        <span class="feature-icon">🔥</span>
+        <div class="feature-title">Expert Mentors</div>
+        <div class="feature-desc">Get real-time guidance from industry professionals and educators who've been where you want to go.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glow-line"></div>
+
+  <!-- PRIZES -->
+  <div class="section">
+    <h2 class="section-title">Awards &amp; <span style="color:var(--saffron)">Recognition</span></h2>
+    <p class="section-sub">The top teams take home serious recognition and rewards.</p>
+    <div class="grid-3" style="max-width:800px;margin:0 auto">
+      <div class="glass prize-card gold">
+        <span class="prize-crown">👑</span>
+        <div class="prize-rank">First Place</div>
+        <div class="prize-amount" style="font-size:2.2rem">🏆</div>
+        <div class="prize-label">Winner's Trophy</div>
+        <div class="prize-label">+ Certificates</div>
+      </div>
+      <div class="glass prize-card silver">
+        <span class="prize-crown">🥈</span>
+        <div class="prize-rank">Second Place</div>
+        <div class="prize-amount" style="font-size:2.2rem">🥈</div>
+        <div class="prize-label">Runner-Up Trophy</div>
+        <div class="prize-label">+ Certificates</div>
+      </div>
+      <div class="glass prize-card bronze">
+        <span class="prize-crown">🥉</span>
+        <div class="prize-rank">Third Place</div>
+        <div class="prize-amount" style="font-size:2.2rem">🥉</div>
+        <div class="prize-label">Merit Trophy</div>
+        <div class="prize-label">+ Certificates</div>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:20px;color:var(--text-muted);font-size:0.85rem">
+      + Participation certificates for all · Special category awards for best UI/UX, most innovative idea, and more
+    </p>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="section" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px">
+    <div>
+      <h2 class="section-title" style="text-align:left;margin-bottom:8px">Event <span style="color:var(--saffron)">Schedule</span></h2>
+      <p class="section-sub" style="text-align:left;margin-bottom:28px">Key milestones for the day.</p>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">08:00 AM</div>
+          <div class="timeline-title">Venue Opens & Check-In</div>
+          <div class="timeline-desc">QR scan at entry, collect your kit and badge.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">09:00 AM</div>
+          <div class="timeline-title">Opening Ceremony</div>
+          <div class="timeline-desc">Keynote, problem statements released, hacking begins.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">11:30 AM</div>
+          <div class="timeline-title">Midpoint Mentoring</div>
+          <div class="timeline-desc">Mentor rounds, feedback sessions, short break.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">03:00 PM</div>
+          <div class="timeline-title">Code Freeze</div>
+          <div class="timeline-desc">Submissions close. Prepare for demos.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">03:30 PM</div>
+          <div class="timeline-title">Demos & Judging</div>
+          <div class="timeline-desc">5-minute pitch + Q&A with the panel.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-time">05:00 PM</div>
+          <div class="timeline-title">Award Ceremony</div>
+          <div class="timeline-desc">Winners announced, trophies and certificates distributed.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h2 class="section-title" style="text-align:left;margin-bottom:8px">Latest <span style="color:var(--saffron)">Announcements</span></h2>
+      <p class="section-sub" style="text-align:left;margin-bottom:28px">Stay updated in real-time.</p>
+      <div id="landing-announcements">
+        <div class="announcement-item" style="opacity:0.5">
+          <div class="ann-icon">📡</div>
+          <div class="ann-content">
+            <div class="ann-title">Loading announcements...</div>
+            <div class="ann-time">Connecting to live feed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glow-line"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;color:var(--saffron);margin-bottom:10px;letter-spacing:0.15em">AETHER 2K26</div>
+    <p>Hosted by <span>De Paul School</span> · All Rights Reserved · Built with ❤️ for Innovation</p>
+    <p style="margin-top:8px;font-size:0.75rem">Secured with Firebase · Glassmorphism UI</p>
+  </footer>
+</div><!-- /page-landing -->
+
+<!-- ============================================================
+     PAGE: AUTH
+     ============================================================ -->
+<div id="page-auth" class="page">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:90px 20px 40px;position:relative;z-index:1">
+    <div style="width:100%;max-width:480px">
+
+      <!-- Back button -->
+      <button class="btn btn-ghost btn-sm" onclick="showPage('landing')" style="margin-bottom:20px">← Back to Home</button>
+
+      <div class="glass-heavy auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">AETHER 2K26</div>
+          <h2 class="auth-title">Participant Portal</h2>
+          <p class="auth-desc">Register or sign in to manage your hackathon journey</p>
+        </div>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+          <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <form id="form-register" class="auth-form" onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input class="form-input" type="text" id="reg-name" placeholder="Your full name" required />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="form-group">
+              <label class="form-label">Class *</label>
+              <select class="form-select" id="reg-class" required>
+                <option value="">Select</option>
+                <option value="9">Class 9</option>
+                <option value="10">Class 10</option>
+                <option value="11">Class 11</option>
+                <option value="12">Class 12</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone *</label>
+              <input class="form-input" type="tel" id="reg-phone" placeholder="10-digit" required maxlength="10" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address *</label>
+            <input class="form-input" type="email" id="reg-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input class="form-input" type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">School *</label>
+            <div class="school-radio-group">
+              <div class="school-radio selected" id="radio-dps" onclick="selectSchool('DPS')">
+                <input type="radio" name="school-type" value="DPS" checked />
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="radio-label">De Paul School</div>
+                  <div style="font-size:0.72rem;color:var(--text-muted)">Host School</div>
+                </div>
+              </div>
+              <div class="school-radio" id="radio-other" onclick="selectSchool('OTHER')">
+                <input type="radio" name="school-type" value="OTHER" />
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="radio-label">Other School</div>
+                  <div style="font-size:0.72rem;color:var(--text-muted)">Visiting</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group hidden" id="other-school-field">
+            <label class="form-label">School Name *</label>
+            <input class="form-input" type="text" id="reg-school-name" placeholder="Enter your school name" />
+          </div>
+
+          <button class="btn btn-primary" type="submit" id="btn-register" style="width:100%;padding:15px">
+            Create Account & Register
+          </button>
+          <p style="text-align:center;font-size:0.78rem;color:var(--text-muted)">
+            By registering you agree to the event terms and conditions.
+          </p>
+        </form>
+
+        <!-- LOGIN FORM -->
+        <form id="form-login" class="auth-form hidden" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input class="form-input" type="email" id="login-email" placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" id="login-password" placeholder="Your password" required />
+          </div>
+          <button class="btn btn-primary" type="submit" id="btn-login" style="width:100%;padding:15px">
+            Sign In to Dashboard
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-auth -->
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+<!-- Registration Success Modal -->
+<div class="modal-overlay hidden" id="modal-reg-success" onclick="hideModalOutside(event,'modal-reg-success')">
+  <div class="glass-heavy modal" style="text-align:center;padding:44px 36px">
+    <div style="font-size:3.5rem;margin-bottom:16px">🎉</div>
+    <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--success);margin-bottom:10px">REGISTERED SUCCESSFULLY!</div>
+    <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:20px">Your participant ID has been generated</p>
+    <div style="font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--saffron);letter-spacing:0.2em;text-shadow:0 0 20px var(--saffron-glow);margin-bottom:24px" id="modal-success-pid">—</div>
+    <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:24px">Save this ID. You'll need it for payment and entry.</p>
+    <button class="btn btn-primary" style="width:100%" onclick="window.location.href='dashboard.html'">
+      Go to Dashboard →
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================
+     FIREBASE + APP LOGIC
+     ============================================================ -->
+<script type="module">
+// ==================== FIREBASE CONFIG ====================
+// Replace these with your actual Firebase config values
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getAuth, createUserWithEmailAndPassword,
+  signInWithEmailAndPassword, signOut, onAuthStateChanged
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import {
+  getFirestore, doc, setDoc, getDoc, updateDoc,
+  collection, query, where, getDocs, onSnapshot,
+  serverTimestamp, increment, addDoc, orderBy, limit
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyCpcUM2MUsFJ7BRXYQPF4I2Qo01Au77v4A",
+  authDomain: "aether-contact-us.firebaseapp.com",
+  projectId: "aether-contact-us",
+  storageBucket: "aether-contact-us.firebasestorage.app",
+  messagingSenderId: "471798414451",
+  appId: "1:471798414451:web:d9660f107f76a0f5537e06"
+};
+
+// ==================== INIT ====================
+let app, auth, db, currentUser = null, currentUserData = null;
+Object.defineProperty(window, 'currentUserData', {
+  get() { return currentUserData; },
+  set(v) { currentUserData = v; }
+});
+let teamUnsubscribe = null;
+
+// Demo mode flag — set true if Firebase not configured
+let DEMO_MODE = false;
+
+// ==================== LANDING PAGE ANNOUNCEMENTS ====================
+function loadLandingAnnouncements() {
+  const landingList = document.getElementById('landing-announcements');
+  if(!landingList) return;
+  if(DEMO_MODE) {
+    landingList.innerHTML = `<div class="announcement-item"><div class="ann-icon">📢</div><div class="ann-content"><div class="ann-title">No announcements yet</div><div class="ann-time">Check back soon</div></div></div>`;
+    return;
+  }
+  try {
+    const q = query(collection(db,'announcements'), orderBy('createdAt','desc'), limit(5));
+    onSnapshot(q, snap => {
+      if(!snap.docs.length) {
+        landingList.innerHTML = `<div class="announcement-item"><div class="ann-icon">📢</div><div class="ann-content"><div class="ann-title">No announcements yet</div><div class="ann-time">Check back soon</div></div></div>`;
+        return;
+      }
+      landingList.innerHTML = '';
+      snap.docs.forEach(d => {
+        const n = d.data();
+        const timeStr = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Recently';
+        const prioIcon = n.priority==='urgent' ? '🚨' : n.priority==='important' ? '⚠️' : '📢';
+        const prioBadge = n.priority==='urgent' ? 'URGENT' : n.priority==='important' ? 'IMPORTANT' : 'INFO';
+        landingList.insertAdjacentHTML('beforeend', `<div class="announcement-item">
+          <div class="ann-icon">${prioIcon}</div>
+          <div class="ann-content">
+            <div class="ann-title">${n.title}</div>
+            <div class="ann-time">${timeStr}</div>
+          </div>
+          <div class="ann-badge">${prioBadge}</div>
+        </div>`);
+      });
+    });
+  } catch(e) { console.warn('Could not load landing announcements', e); }
+}
+
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+  // Load announcements for landing page immediately (no auth required)
+  setTimeout(() => loadLandingAnnouncements(), 500);
+} catch(e) {
+  console.warn('Firebase init failed — running in DEMO mode');
+  DEMO_MODE = true;
+}
+
+// ==================== HELPERS ====================
+window.showToast = function(msg, type='info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+};
+
+window.showPage = function(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${page}`).classList.add('active');
+  window.scrollTo(0,0);
+};
+
+window.switchAuthTab = function(tab) {
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('form-register').classList.toggle('hidden', tab!=='register');
+  document.getElementById('form-login').classList.toggle('hidden', tab!=='login');
+};
+
+window.selectSchool = function(type) {
+  document.getElementById('radio-dps').classList.toggle('selected', type==='DPS');
+  document.getElementById('radio-other').classList.toggle('selected', type==='OTHER');
+  document.getElementById('other-school-field').classList.toggle('hidden', type!=='OTHER');
+  const sn = document.getElementById('reg-school-name');
+  sn.required = type==='OTHER';
+};
+
+window.showModal = function(id) { document.getElementById(id).classList.remove('hidden'); };
+window.hideModal = function(id) { document.getElementById(id).classList.add('hidden'); };
+window.hideModalOutside = function(e, id) { if(e.target.id===id) hideModal(id); };
+
+window.copyText = function(text) {
+  navigator.clipboard.writeText(text).then(()=>showToast('Copied to clipboard!','success'));
+};
+
+// ==================== ID GENERATORS ====================
+function generateDPSId() {
+  return 'DPS-' + String(Math.floor(1000 + Math.random()*9000));
+}
+function generateOtherSchoolId() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let prefix = '';
+  for(let i=0;i<3;i++) prefix += letters[Math.floor(Math.random()*26)];
+  const num = String(Math.floor(1000 + Math.random()*9000));
+  return `${prefix}-${num}`;
+}
+function generateTeamCode() {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let s = 'TM-';
+  for(let i=0;i<3;i++) s += letters[Math.floor(Math.random()*26)];
+  s += Math.floor(100+Math.random()*900);
+  return s;
+}
+
+// ==================== COUNTDOWN ====================
+const EVENT_DATE = new Date('2026-08-15T09:00:00');
+function updateCountdown() {
+  const now = new Date();
+  let diff = EVENT_DATE - now;
+  if(diff < 0) diff = 0;
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor((diff%86400000)/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  const s = Math.floor((diff%60000)/1000);
+  const pad = n=>String(n).padStart(2,'0');
+  ['days','hours','mins','secs'].forEach((u,i)=>{
+    const v=[d,h,m,s][i];
+    ['cd','m-cd'].forEach(prefix=>{
+      const el=document.getElementById(`${prefix}-${u}`);
+      if(el) el.textContent=pad(v);
+    });
+  });
+}
+setInterval(updateCountdown,1000);
+updateCountdown();
+const edEl=document.getElementById('event-date-display');
+if(edEl) edEl.textContent='August 15, 2026 · 09:00 AM';
+
+// ==================== PARTICLES ====================
+function initParticles() {
+  const container = document.getElementById('particles');
+  if(!container) return;
+  for(let i=0;i<25;i++) {
+    const p=document.createElement('div');
+    p.className='particle';
+    p.style.left=Math.random()*100+'%';
+    p.style.animationDuration=(8+Math.random()*12)+'s';
+    p.style.animationDelay=(-Math.random()*12)+'s';
+    p.style.width=p.style.height=(1+Math.random()*3)+'px';
+    container.appendChild(p);
+  }
+}
+initParticles();
+
+// ==================== QR CODE HELPERS ====================
+function makeQR(containerId, text, size=140) {
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML='';
+  try {
+    new QRCode(el, { text: text||'AETHER2K26', width: size, height: size,
+      colorDark:'#FF6B00', colorLight:'#FFFFFF', correctLevel: QRCode.CorrectLevel.M });
+  } catch(e) {
+    el.innerHTML=`<div style="font-size:0.7rem;color:#FF6B00;text-align:center;padding:10px">QR Ready</div>`;
+  }
+}
+
+// ==================== DEMO DATA ====================
+let demoUser = null;
+let demoTeams = {};
+
+// ==================== AUTH HANDLERS ====================
+window.handleRegister = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true; btn.textContent = 'Registering...';
+
+  const name = document.getElementById('reg-name').value.trim();
+  const cls  = document.getElementById('reg-class').value;
+  const phone= document.getElementById('reg-phone').value.trim();
+  const email= document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-password').value;
+  const isOther = document.getElementById('radio-other').classList.contains('selected');
+  const schoolName = isOther ? document.getElementById('reg-school-name').value.trim() : 'De Paul School';
+
+  if(!name||!cls||!phone||!email||!pass) {
+    showToast('Please fill all required fields','error');
+    btn.disabled=false; btn.textContent='Create Account & Register'; return;
+  }
+  if(phone.length!==10||isNaN(phone)){
+    showToast('Enter a valid 10-digit phone number','error');
+    btn.disabled=false; btn.textContent='Create Account & Register'; return;
+  }
+  if(isOther && !schoolName){
+    showToast('Please enter your school name','error');
+    btn.disabled=false; btn.textContent='Create Account & Register'; return;
+  }
+
+  const pid = isOther ? generateOtherSchoolId() : generateDPSId();
+  const userData = {
+    name, class: cls, phone, email,
+    school: isOther ? schoolName : 'De Paul School',
+    schoolType: isOther ? 'OTHER' : 'DPS',
+    participantId: pid,
+    paymentStatus: 'pending',
+    teamCode: null, teamId: null,
+    projectSubmitted: false,
+    createdAt: new Date().toISOString()
+  };
+
+  if(DEMO_MODE) {
+    demoUser = { uid: 'demo-'+Date.now(), email, ...userData };
+    currentUser = demoUser;
+    currentUserData = userData;
+    updateNavbar(userData);
+    // Show success modal, then redirect to dashboard
+    document.getElementById('modal-success-pid').textContent = pid;
+    showModal('modal-reg-success');
+    btn.disabled=false; btn.textContent='Create Account & Register';
+    return;
+  }
+
+  try {
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    userData.uid = cred.user.uid;
+    await setDoc(doc(db, 'participants', cred.user.uid), userData);
+    // Update stats counter
+    const statsRef = doc(db,'meta','stats');
+    try { await updateDoc(statsRef,{registered:increment(1)}); } catch(_){}
+    currentUserData = userData;
+    updateNavbar(userData);
+    // Show success then redirect to dashboard
+    document.getElementById('modal-success-pid').textContent = pid;
+    showModal('modal-reg-success');
+  } catch(err) {
+    let msg = 'Registration failed. Try again.';
+    if(err.code==='auth/email-already-in-use') msg='Email already registered. Please sign in.';
+    if(err.code==='auth/weak-password') msg='Password must be at least 6 characters.';
+    showToast(msg,'error');
+  }
+  btn.disabled=false; btn.textContent='Create Account & Register';
+};
+
+window.handleLogin = async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-login');
+  btn.disabled=true; btn.textContent='Signing in...';
+
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+
+  if(DEMO_MODE) {
+    // Demo login
+    if(demoUser && demoUser.email===email) {
+      currentUser=demoUser; currentUserData={...demoUser};
+      updateNavbar(currentUserData);
+      window.location.href='dashboard.html';
+    } else {
+      // Create a demo returning user
+      const pid = generateDPSId();
+      currentUserData = { name:'Demo Student', class:'10', phone:'9999999999', email,
+        school:'De Paul School', schoolType:'DPS', participantId:pid,
+        paymentStatus:'pending', teamCode:null, teamId:null, projectSubmitted:false };
+      currentUser={ uid:'demo', email, ...currentUserData };
+      updateNavbar(currentUserData);
+      window.location.href='dashboard.html';
+    }
+    btn.disabled=false; btn.textContent='Sign In to Dashboard'; return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+    // onAuthStateChanged handles the rest
+  } catch(err) {
+    let msg='Login failed.';
+    if(err.code==='auth/user-not-found'||err.code==='auth/wrong-password') msg='Invalid email or password.';
+    if(err.code==='auth/too-many-requests') msg='Too many attempts. Try later.';
+    showToast(msg,'error');
+  }
+  btn.disabled=false; btn.textContent='Sign In to Dashboard';
+};
+
+window.handleLogout = async function() {
+  if(!DEMO_MODE) await signOut(auth);
+  currentUser=null; currentUserData=null;
+  if(teamUnsubscribe){ teamUnsubscribe(); teamUnsubscribe=null; }
+  updateNavbar(null);
+  showPage('landing');
+  showToast('Logged out successfully','info');
+};
+
+// ==================== AUTH STATE OBSERVER ====================
+if(!DEMO_MODE) {
+  onAuthStateChanged(auth, async(user) => {
+    if(user) {
+      currentUser=user;
+      try {
+        const snap = await getDoc(doc(db,'participants',user.uid));
+        if(snap.exists()) {
+          currentUserData = snap.data();
+          updateNavbar(currentUserData);
+          // Redirect to separate dashboard page
+          window.location.href='dashboard.html';
+        }
+      } catch(e){ console.error(e); }
+    }
+  });
+}
+
+
+
+// ==================== NAV =====================
+function updateNavbar(userData) {
+  const nav = document.getElementById('nav-actions');
+  if(userData) {
+    nav.innerHTML=`
+      <div class="nav-user-chip">
+        <div class="nav-avatar">${(userData.name||'U')[0].toUpperCase()}</div>
+        <span>${userData.name.split(' ')[0]}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="window.location.href='dashboard.html'">Dashboard</button>
+    `;
+  } else {
+    nav.innerHTML=`<button class="btn btn-ghost btn-sm" onclick="showPage('auth')">Login / Register</button>`;
+  }
+}
+
+</script>
+</body>
+</html>

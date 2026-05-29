@@ -1,0 +1,3323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AETHER 2K26 — Admin Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold-light: #FFE555;
+    --gold-dim: #B8960C;
+    --gold-glow: rgba(255,215,0,0.25);
+    --gold-glow-strong: rgba(255,215,0,0.5);
+    --white: #FFFFFF;
+    --white-90: rgba(255,255,255,0.9);
+    --white-70: rgba(255,255,255,0.7);
+    --white-40: rgba(255,255,255,0.4);
+    --white-20: rgba(255,255,255,0.2);
+    --white-10: rgba(255,255,255,0.1);
+    --white-05: rgba(255,255,255,0.05);
+    --bg-deep: #020408;
+    --bg-dark: #050A12;
+    --bg-card: rgba(8,16,30,0.85);
+    --bg-glass: rgba(255,215,0,0.04);
+    --border-gold: rgba(255,215,0,0.3);
+    --border-glass: rgba(255,255,255,0.08);
+    --danger: #FF4444;
+    --success: #00FF88;
+    --warning: #FFB800;
+    --info: #00CCFF;
+    --sidebar-w: 260px;
+    --sidebar-collapsed: 72px;
+    --transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg-deep);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── ANIMATED BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(255,215,0,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,215,0,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(0,204,255,0.02) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── GRID OVERLAY ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,215,0,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,215,0,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+  /* ────────────────────────────────────────
+     LOGIN SCREEN
+  ──────────────────────────────────────── */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-deep);
+  }
+
+  .login-bg-anim {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .login-bg-anim span {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.12;
+    animation: floatOrb 8s ease-in-out infinite alternate;
+  }
+
+  .login-bg-anim span:nth-child(1) { width: 500px; height: 500px; background: #FFD700; top: -150px; left: -150px; animation-delay: 0s; }
+  .login-bg-anim span:nth-child(2) { width: 400px; height: 400px; background: #FFD700; bottom: -100px; right: -100px; animation-delay: -3s; }
+  .login-bg-anim span:nth-child(3) { width: 300px; height: 300px; background: #00CCFF; top: 40%; left: 60%; animation-delay: -5s; opacity: 0.06; }
+
+  @keyframes floatOrb {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(40px,30px) scale(1.1); }
+  }
+
+  .login-card {
+    position: relative;
+    z-index: 1;
+    background: rgba(8,16,30,0.9);
+    border: 1px solid var(--border-gold);
+    border-radius: 24px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 440px;
+    backdrop-filter: blur(24px);
+    box-shadow: 0 0 60px rgba(255,215,0,0.08), 0 0 120px rgba(255,215,0,0.04), inset 0 1px 0 rgba(255,215,0,0.15);
+  }
+
+  .login-logo {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .login-logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .login-logo-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 20px var(--gold-glow-strong);
+  }
+
+  .login-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dim));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 3px;
+  }
+
+  .login-subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--white-40);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .login-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+    margin-bottom: 32px;
+  }
+
+  .login-section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white-70);
+    margin-bottom: 8px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(255,215,0,0.04);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .form-input:focus {
+    border-color: var(--gold);
+    background: rgba(255,215,0,0.07);
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.1), 0 0 20px rgba(255,215,0,0.1);
+  }
+
+  .form-input::placeholder { color: rgba(255,255,255,0.25); }
+
+  .input-wrapper { position: relative; }
+
+  .pw-toggle {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--white-40);
+    padding: 4px;
+    display: flex;
+    transition: color 0.2s;
+  }
+
+  .pw-toggle:hover { color: var(--gold); }
+
+  .btn-login {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+    margin-top: 8px;
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+
+  .btn-login::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-login:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(255,215,0,0.5); }
+  .btn-login:hover::before { opacity: 1; }
+  .btn-login:active { transform: translateY(0); }
+  .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-login-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── TOAST ── */
+  #toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .toast {
+    background: rgba(8,16,30,0.95);
+    border: 1px solid var(--border-gold);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+    max-width: 380px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    animation: toastIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .toast.success { border-color: var(--success); box-shadow: 0 4px 24px rgba(0,255,136,0.15); }
+  .toast.error { border-color: var(--danger); box-shadow: 0 4px 24px rgba(255,68,68,0.15); }
+  .toast.warning { border-color: var(--warning); box-shadow: 0 4px 24px rgba(255,184,0,0.15); }
+  .toast.info { border-color: var(--info); box-shadow: 0 4px 24px rgba(0,204,255,0.15); }
+
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .toast.success .toast-dot { background: var(--success); box-shadow: 0 0 8px var(--success); }
+  .toast.error .toast-dot { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+  .toast.warning .toast-dot { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+  .toast.info .toast-dot { background: var(--info); box-shadow: 0 0 8px var(--info); }
+
+  @keyframes toastIn { from { opacity: 0; transform: translateX(40px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+
+  /* ────────────────────────────────────────
+     MAIN DASHBOARD LAYOUT
+  ──────────────────────────────────────── */
+  #dashboard {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--sidebar-w);
+    background: rgba(5,10,20,0.92);
+    border-right: 1px solid rgba(255,215,0,0.12);
+    backdrop-filter: blur(24px);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+
+  .sidebar.collapsed { width: var(--sidebar-collapsed); }
+
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,215,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 80px;
+  }
+
+  .sidebar-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 16px var(--gold-glow-strong);
+  }
+
+  .sidebar-brand {
+    overflow: hidden;
+    transition: opacity 0.2s, width 0.2s;
+    white-space: nowrap;
+  }
+
+  .sidebar.collapsed .sidebar-brand { opacity: 0; width: 0; }
+
+  .sidebar-brand-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  .sidebar-brand-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: var(--white-40);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .sidebar-toggle {
+    margin-left: auto;
+    background: none;
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white-70);
+    transition: var(--transition);
+    flex-shrink: 0;
+  }
+
+  .sidebar-toggle:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-glow); }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 16px 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .nav-section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(255,215,0,0.35);
+    text-transform: uppercase;
+    padding: 12px 8px 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity 0.2s;
+  }
+
+  .sidebar.collapsed .nav-section-label { opacity: 0; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 2px;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    border: 1px solid transparent;
+  }
+
+  .nav-item:hover {
+    background: var(--gold-glow);
+    border-color: rgba(255,215,0,0.15);
+  }
+
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+    border-color: rgba(255,215,0,0.3);
+    box-shadow: 0 0 20px rgba(255,215,0,0.1), inset 0 1px 0 rgba(255,215,0,0.2);
+  }
+
+  .nav-item.active .nav-icon { color: var(--gold); filter: drop-shadow(0 0 6px var(--gold)); }
+  .nav-item.active .nav-label { color: var(--gold); }
+  .nav-item:hover .nav-icon { color: var(--gold-light); }
+  .nav-item:hover .nav-label { color: var(--white); }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: var(--gold);
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 8px var(--gold);
+  }
+
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--white-40);
+    transition: color 0.2s, filter 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--white-70);
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+  }
+
+  .sidebar.collapsed .nav-label { opacity: 0; }
+
+  .nav-badge {
+    margin-left: auto;
+    background: var(--gold);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+
+  .sidebar.collapsed .nav-badge { opacity: 0; }
+
+  .nav-logout {
+    border-top: 1px solid rgba(255,215,0,0.08);
+    padding: 16px 12px;
+  }
+
+  .nav-logout .nav-item { color: var(--danger); }
+  .nav-logout .nav-item:hover { background: rgba(255,68,68,0.08); border-color: rgba(255,68,68,0.2); }
+  .nav-logout .nav-item:hover .nav-icon,
+  .nav-logout .nav-item:hover .nav-label { color: var(--danger); }
+
+  .sidebar-admin-info {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,215,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .admin-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 800;
+    color: #000;
+  }
+
+  .admin-info-text { overflow: hidden; transition: opacity 0.2s; }
+  .sidebar.collapsed .admin-info-text { opacity: 0; }
+
+  .admin-name { font-size: 13px; font-weight: 700; color: var(--white-90); white-space: nowrap; }
+  .admin-role { font-size: 10px; color: var(--gold); letter-spacing: 1px; font-family: 'Space Mono', monospace; }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    margin-left: var(--sidebar-w);
+    transition: margin-left 0.35s cubic-bezier(0.4,0,0.2,1);
+    min-height: 100vh;
+    padding: 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed); }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+
+  .topbar-left { }
+
+  .page-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: 2px;
+  }
+
+  .page-breadcrumb {
+    font-size: 12px;
+    color: var(--white-40);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .page-breadcrumb span { color: var(--gold); }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-time {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--white-70);
+    background: rgba(255,215,0,0.05);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+    padding: 8px 14px;
+  }
+
+  .topbar-time #live-time { color: var(--gold); }
+
+  /* ── SECTIONS ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── ANALYTICS CARDS ── */
+  .analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-gold);
+    border-radius: 16px;
+    padding: 24px 20px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: var(--transition);
+    backdrop-filter: blur(16px);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,215,0,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .stat-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(255,215,0,0.15), 0 0 60px rgba(255,215,0,0.05);
+  }
+
+  .stat-card-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.05));
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    margin-bottom: 16px;
+    box-shadow: 0 0 12px rgba(255,215,0,0.1);
+  }
+
+  .stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--white-70);
+    letter-spacing: 1px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .stat-change {
+    font-size: 11px;
+    margin-top: 8px;
+    font-family: 'Space Mono', monospace;
+    color: var(--success);
+  }
+
+  .stat-glow {
+    position: absolute;
+    bottom: -20px;
+    right: -20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255,215,0,0.08);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  /* ── GLASS CARD ── */
+  .glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.3), transparent);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,215,0,0.08);
+  }
+
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--gold);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 8px var(--gold); }
+    50% { box-shadow: 0 0 16px var(--gold), 0 0 24px rgba(255,215,0,0.4); }
+  }
+
+  /* ── SEARCH & FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+
+  .search-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .search-input-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--white-40);
+    pointer-events: none;
+  }
+
+  .search-inp {
+    width: 100%;
+    background: rgba(255,215,0,0.04);
+    border: 1px solid var(--border-gold);
+    border-radius: 10px;
+    padding: 11px 14px 11px 38px;
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .search-inp:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,215,0,0.08); }
+  .search-inp::placeholder { color: rgba(255,255,255,0.2); }
+
+  .filter-select {
+    background: rgba(255,215,0,0.04);
+    border: 1px solid var(--border-gold);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .filter-select:focus { border-color: var(--gold); }
+  .filter-select option { background: #050A12; }
+
+  /* ── TABLE ── */
+  .data-table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid rgba(255,215,0,0.1);
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .data-table thead tr {
+    background: rgba(255,215,0,0.06);
+    border-bottom: 1px solid rgba(255,215,0,0.15);
+  }
+
+  .data-table th {
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--white-70);
+    vertical-align: middle;
+  }
+
+  .data-table tbody tr {
+    transition: background 0.2s;
+    animation: rowIn 0.3s ease forwards;
+  }
+
+  .data-table tbody tr:hover { background: rgba(255,215,0,0.04); }
+
+  @keyframes rowIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+
+  .data-table td:first-child { color: var(--white-90); font-weight: 600; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Space Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .badge-success { background: rgba(0,255,136,0.12); color: var(--success); border: 1px solid rgba(0,255,136,0.25); }
+  .badge-warning { background: rgba(255,184,0,0.12); color: var(--warning); border: 1px solid rgba(255,184,0,0.25); }
+  .badge-danger { background: rgba(255,68,68,0.12); color: var(--danger); border: 1px solid rgba(255,68,68,0.25); }
+  .badge-info { background: rgba(0,204,255,0.12); color: var(--info); border: 1px solid rgba(0,204,255,0.25); }
+  .badge-gold { background: rgba(255,215,0,0.12); color: var(--gold); border: 1px solid rgba(255,215,0,0.25); }
+  .badge-neutral { background: rgba(255,255,255,0.06); color: var(--white-70); border: 1px solid rgba(255,255,255,0.12); }
+
+  /* ── ACTION BUTTONS ── */
+  .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid;
+    transition: var(--transition);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  .btn-verify { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.3); color: var(--success); }
+  .btn-verify:hover { background: rgba(0,255,136,0.2); box-shadow: 0 0 12px rgba(0,255,136,0.2); }
+
+  .btn-reject { background: rgba(255,68,68,0.1); border-color: rgba(255,68,68,0.3); color: var(--danger); }
+  .btn-reject:hover { background: rgba(255,68,68,0.2); box-shadow: 0 0 12px rgba(255,68,68,0.2); }
+
+  .btn-view { background: rgba(255,215,0,0.08); border-color: rgba(255,215,0,0.3); color: var(--gold); }
+  .btn-view:hover { background: rgba(255,215,0,0.15); box-shadow: 0 0 12px rgba(255,215,0,0.2); }
+
+  .btn-edit { background: rgba(0,204,255,0.08); border-color: rgba(0,204,255,0.3); color: var(--info); }
+  .btn-edit:hover { background: rgba(0,204,255,0.15); box-shadow: 0 0 12px rgba(0,204,255,0.2); }
+
+  .btn-delete { background: rgba(255,68,68,0.08); border-color: rgba(255,68,68,0.25); color: var(--danger); }
+  .btn-delete:hover { background: rgba(255,68,68,0.15); box-shadow: 0 0 12px rgba(255,68,68,0.15); }
+
+  .btn-shortlist { background: rgba(255,215,0,0.08); border-color: var(--border-gold); color: var(--gold); }
+  .btn-shortlist:hover { background: rgba(255,215,0,0.15); }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    border: none;
+    border-radius: 10px;
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+  }
+
+  .btn-primary:hover { box-shadow: 0 0 24px rgba(255,215,0,0.4); transform: translateY(-1px); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: rgba(8,16,30,0.98);
+    border: 1px solid var(--border-gold);
+    border-radius: 20px;
+    padding: 32px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 0 80px rgba(255,215,0,0.12);
+    animation: modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+  }
+
+  @keyframes modalIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(255,215,0,0.1);
+  }
+
+  .modal-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+
+  .modal-close {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--white-70);
+    transition: var(--transition);
+  }
+
+  .modal-close:hover { background: rgba(255,68,68,0.1); border-color: rgba(255,68,68,0.3); color: var(--danger); }
+
+  .modal-body {}
+
+  .modal-field {
+    margin-bottom: 18px;
+  }
+
+  .modal-field label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white-40);
+    margin-bottom: 6px;
+  }
+
+  .modal-input {
+    width: 100%;
+    background: rgba(255,215,0,0.04);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: var(--transition);
+  }
+
+  .modal-input:focus { border-color: var(--gold); }
+  .modal-textarea { resize: vertical; min-height: 100px; }
+
+  .modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,215,0,0.08);
+  }
+
+  /* ── PROFILE ROW ── */
+  .profile-detail-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+
+  .profile-detail-key {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--white-40);
+    text-transform: uppercase;
+    min-width: 130px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+
+  .profile-detail-val {
+    font-size: 14px;
+    color: var(--white-90);
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  /* ── QR CODE ── */
+  .qr-box {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    display: inline-block;
+    box-shadow: 0 0 32px rgba(255,215,0,0.25);
+  }
+
+  /* ── ANNOUNCEMENT CARD ── */
+  .announcement-card {
+    background: rgba(255,215,0,0.04);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: var(--transition);
+    animation: rowIn 0.3s ease forwards;
+  }
+
+  .announcement-card:hover { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.08); }
+
+  .announcement-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .announcement-title { font-size: 16px; font-weight: 700; color: var(--white-90); }
+  .announcement-time { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--white-40); }
+  .announcement-body { font-size: 14px; color: var(--white-70); line-height: 1.6; }
+  .announcement-priority { margin-top: 10px; }
+
+  /* ── ATTENDANCE ── */
+  .attendance-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .att-stat {
+    background: rgba(255,215,0,0.04);
+    border: 1px solid var(--border-gold);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .att-stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  .att-stat-label { font-size: 12px; color: var(--white-70); margin-top: 4px; }
+
+  /* ── SETTINGS ── */
+  .settings-section { margin-bottom: 32px; }
+
+  .settings-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,215,0,0.1);
+  }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .toggle-label { font-size: 14px; font-weight: 600; color: var(--white-90); }
+  .toggle-desc { font-size: 12px; color: var(--white-40); margin-top: 2px; }
+
+  .toggle-switch {
+    width: 44px;
+    height: 24px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    border: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+
+  .toggle-switch.on { background: rgba(255,215,0,0.3); border-color: rgba(255,215,0,0.5); }
+
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--white-70);
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.3s, background 0.3s;
+  }
+
+  .toggle-switch.on::after { transform: translateX(20px); background: var(--gold); }
+
+  /* ── LOADING OVERLAY ── */
+  #loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-deep);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    transition: opacity 0.5s;
+  }
+
+  .loader-ring {
+    width: 60px;
+    height: 60px;
+    border: 3px solid rgba(255,215,0,0.1);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    box-shadow: 0 0 20px rgba(255,215,0,0.2);
+  }
+
+  .loader-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 4px;
+    animation: pulse-text 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-text { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  /* ── PAYMENT IMG ── */
+  .payment-ss-wrap {
+    border: 1px solid var(--border-gold);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255,215,0,0.03);
+    max-width: 280px;
+  }
+
+  .payment-ss-wrap img {
+    width: 100%;
+    display: block;
+    border-radius: 9px;
+  }
+
+  /* ── SUBMISSION CARD ── */
+  .submission-card {
+    background: rgba(255,215,0,0.03);
+    border: 1px solid rgba(255,215,0,0.12);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: var(--transition);
+    animation: rowIn 0.3s ease forwards;
+  }
+
+  .submission-card:hover { border-color: rgba(255,215,0,0.3); box-shadow: 0 0 24px rgba(255,215,0,0.06); }
+
+  .submission-title { font-size: 18px; font-weight: 700; color: var(--white-90); margin-bottom: 6px; }
+  .submission-team { font-size: 13px; color: var(--gold); margin-bottom: 10px; font-family: 'Space Mono', monospace; }
+  .submission-desc { font-size: 14px; color: var(--white-70); line-height: 1.6; margin-bottom: 14px; }
+  .submission-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--white-40);
+  }
+
+  .empty-state svg { margin: 0 auto 16px; opacity: 0.3; display: block; }
+  .empty-state p { font-size: 14px; letter-spacing: 1px; }
+
+  /* ── CHART CONTAINERS ── */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  @media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+
+  .chart-container { height: 240px; position: relative; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 72px; }
+    .main-content { padding: 20px; margin-left: 72px; }
+    .sidebar.collapsed { width: 0; }
+    .sidebar:not(.collapsed) ~ .main-content { margin-left: 260px; }
+    .analytics-grid { grid-template-columns: repeat(2,1fr); }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .topbar-right { width: 100%; }
+  }
+
+  /* ── REALTIME STATUS ── */
+  .realtime-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 6px;
+    box-shadow: 0 0 8px var(--success);
+  }
+
+  /* ── GRADIENT TEXT ── */
+  .text-gold {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── SECTION ENTER ANIMATION ── */
+  .section.active {
+    animation: sectionIn 0.4s ease;
+  }
+
+  @keyframes sectionIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── QR MANAGEMENT ── */
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .qr-card {
+    background: rgba(255,215,0,0.03);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+    animation: rowIn 0.3s ease forwards;
+  }
+
+  .qr-card:hover { border-color: var(--gold); box-shadow: 0 0 24px rgba(255,215,0,0.1); }
+  .qr-card-name { font-size: 14px; font-weight: 700; color: var(--white-90); margin-bottom: 4px; margin-top: 12px; }
+  .qr-card-id { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--gold); margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay">
+  <div class="loader-ring"></div>
+  <div class="loader-text">INITIALIZING AETHER</div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- ══════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-bg-anim">
+    <span></span><span></span><span></span>
+  </div>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-badge">
+        <div class="login-logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="login-title">AETHER 2K26</div>
+      <div class="login-subtitle">Admin Control Center &bull; De Paul School</div>
+    </div>
+    <div class="login-divider"></div>
+    <div class="login-section-label">Secure Administrator Access</div>
+
+    <div class="form-group">
+      <label class="form-label">Admin Email</label>
+      <input type="email" id="login-email" class="form-input" placeholder="admin@hackaether2k26.space" autocomplete="email">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <div class="input-wrapper">
+        <input type="password" id="login-password" class="form-input" placeholder="Enter secure password" style="padding-right:48px" autocomplete="current-password">
+        <button class="pw-toggle" id="pw-toggle-btn" type="button" title="Toggle visibility">
+          <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn-login" id="login-btn" onclick="handleLogin()">
+      <span id="login-btn-text">ACCESS CONTROL CENTER</span>
+      <div class="btn-login-spinner" id="login-spinner"></div>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════ -->
+<div id="dashboard">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#000" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+          <path d="M2 12L12 17L22 12" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-name">AETHER</div>
+        <div class="sidebar-brand-sub">Admin Panel</div>
+      </div>
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle Sidebar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M15 18L9 12L15 6"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+
+      <div class="nav-item active" onclick="navigateTo('home', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9L12 2L21 9V20A1 1 0 0120 21H15V15H9V21H4A1 1 0 013 20V9Z"/>
+          </svg>
+        </span>
+        <span class="nav-label">Dashboard</span>
+      </div>
+
+      <div class="nav-item" onclick="navigateTo('students', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21V19C17 17.9 16.6 16.9 15.8 16.2C15.1 15.4 14.1 15 13 15H5C3.9 15 2.9 15.4 2.2 16.2C1.4 16.9 1 17.9 1 19V21"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21V19C23 17.1 21.7 15.5 20 15.1"/>
+            <path d="M16 3.1C17.7 3.5 19 5.1 19 7C19 8.9 17.7 10.5 16 10.9"/>
+          </svg>
+        </span>
+        <span class="nav-label">Students</span>
+        <span class="nav-badge" id="badge-students">0</span>
+      </div>
+
+      <div class="nav-item" onclick="navigateTo('teams', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </span>
+        <span class="nav-label">Teams</span>
+        <span class="nav-badge" id="badge-teams">0</span>
+      </div>
+
+      <div class="nav-section-label">Content</div>
+
+      <div class="nav-item" onclick="navigateTo('submissions', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6A2 2 0 004 4V20A2 2 0 006 22H18A2 2 0 0020 20V8L14 2Z"/>
+            <path d="M14 2V8H20"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>
+          </svg>
+        </span>
+        <span class="nav-label">Submissions</span>
+        <span class="nav-badge" id="badge-submissions">0</span>
+      </div>
+
+      <div class="nav-item" onclick="navigateTo('payments', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        </span>
+        <span class="nav-label">Payments</span>
+        <span class="nav-badge" id="badge-pending-pay" style="background:#FFB800">0</span>
+      </div>
+
+      <div class="nav-item" onclick="navigateTo('qr', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/>
+            <rect x="3" y="16" width="5" height="5"/>
+            <path d="M16 16H21V21"/><path d="M16 21H21"/><path d="M21 16V16"/>
+            <path d="M10 3H13V6H10Z"/><path d="M3 10V13H6V10Z"/>
+            <path d="M10 10H13V13H10Z"/><path d="M16 10H19"/>
+          </svg>
+        </span>
+        <span class="nav-label">QR Management</span>
+      </div>
+
+      <div class="nav-section-label">Operations</div>
+
+      <div class="nav-item" onclick="navigateTo('attendance', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 11L12 14L22 4"/>
+            <path d="M21 12V19A2 2 0 0119 21H5A2 2 0 013 19V5A2 2 0 015 3H16"/>
+          </svg>
+        </span>
+        <span class="nav-label">Attendance</span>
+      </div>
+
+      <div class="nav-item" onclick="navigateTo('announcements', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 006 8C6 15 3 17 3 17H21C21 17 18 15 18 8Z"/>
+            <path d="M13.73 21A2 2 0 0110.27 21"/>
+          </svg>
+        </span>
+        <span class="nav-label">Announcements</span>
+      </div>
+
+      <div class="nav-item" onclick="navigateTo('settings', this)">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15A1.65 1.65 0 0018 16.65 1.65 1.65 0 0019.65 18.35L20.35 19.05A2 2 0 0120.35 21.19L19.4 22.14A2 2 0 0117.26 22.14L16.56 21.44A1.65 1.65 0 0014.91 22.8V23.5A2 2 0 0112.91 25.5H11.09A2 2 0 019.09 23.5V22.8A1.65 1.65 0 007.44 21.44L6.74 22.14A2 2 0 014.6 22.14L3.65 21.19A2 2 0 013.65 19.05L4.35 18.35A1.65 1.65 0 006 16.65 1.65 1.65 0 004.6 15H3.5A2 2 0 011.5 13V11A2 2 0 013.5 9H4.6A1.65 1.65 0 006 7.35 1.65 1.65 0 004.35 5.65L3.65 4.95A2 2 0 013.65 2.81L4.6 1.86A2 2 0 016.74 1.86L7.44 2.56A1.65 1.65 0 009.09 1.2V0.5A2 2 0 0111.09-1.5H12.91A2 2 0 0114.91 0.5V1.2A1.65 1.65 0 0016.56 2.56L17.26 1.86A2 2 0 0119.4 1.86L20.35 2.81A2 2 0 0120.35 4.95L19.65 5.65A1.65 1.65 0 0018 7.35 1.65 1.65 0 0019.4 9H20.5A2 2 0 0122.5 11V13A2 2 0 0120.5 15H19.4Z"/>
+          </svg>
+        </span>
+        <span class="nav-label">Settings</span>
+      </div>
+    </div>
+
+    <div class="sidebar-admin-info">
+      <div class="admin-avatar" id="admin-avatar-initials">AD</div>
+      <div class="admin-info-text">
+        <div class="admin-name" id="admin-display-name">Admin</div>
+        <div class="admin-role">Super Admin</div>
+      </div>
+    </div>
+
+    <div class="nav-logout">
+      <div class="nav-item" onclick="handleLogout()">
+        <span class="nav-icon" style="color:#FF4444">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5A2 2 0 013 19V5A2 2 0 015 3H9"/>
+            <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </span>
+        <span class="nav-label">Logout</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="main-content">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="page-title">Dashboard</div>
+        <div class="page-breadcrumb">AETHER 2K26 &bull; <span id="page-breadcrumb-sub">Overview</span> &bull; <span class="realtime-dot"></span> Realtime</div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-time">
+          <span id="live-time">--:--:--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ HOME SECTION ═══════════════ -->
+    <div class="section active" id="section-home">
+      <div class="analytics-grid" id="stats-grid">
+        <div class="stat-card" onclick="navigateTo('students', document.querySelector('[data-nav=students]'))">
+          <div class="stat-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21V19C17 17.9 16.6 16.9 15.8 16.2C15.1 15.4 14.1 15 13 15H5C3.9 15 2.9 15.4 2.2 16.2C1.4 16.9 1 17.9 1 19V21"/><circle cx="9" cy="7" r="4"/><path d="M23 21V19C23 17.1 21.7 15.5 20 15.1"/><path d="M16 3.1C17.7 3.5 19 5.1 19 7C19 8.9 17.7 10.5 16 10.9"/></svg>
+          </div>
+          <div class="stat-value" id="stat-total-reg">0</div>
+          <div class="stat-label">Total Registrations</div>
+          <div class="stat-glow"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(0,204,255,0.1);border-color:rgba(0,204,255,0.3)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00CCFF" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          </div>
+          <div class="stat-value" id="stat-total-teams" style="color:#00CCFF">0</div>
+          <div class="stat-label">Total Teams</div>
+          <div class="stat-glow" style="background:rgba(0,204,255,0.08)"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(0,255,136,0.1);border-color:rgba(0,255,136,0.3)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00FF88" stroke-width="2"><path d="M22 11.08V12A10 10 0 1 1 5.93 7.36"/><path d="M22 4L12 14.01L9 11.01"/></svg>
+          </div>
+          <div class="stat-value" id="stat-verified-pay" style="color:#00FF88">0</div>
+          <div class="stat-label">Verified Payments</div>
+          <div class="stat-glow" style="background:rgba(0,255,136,0.08)"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(255,184,0,0.1);border-color:rgba(255,184,0,0.3)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFB800" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div class="stat-value" id="stat-pending-pay" style="color:#FFB800">0</div>
+          <div class="stat-label">Pending Payments</div>
+          <div class="stat-glow" style="background:rgba(255,184,0,0.08)"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9L12 2L21 9V20A1 1 0 0120 21H15V15H9V21H4A1 1 0 013 20V9Z"/></svg>
+          </div>
+          <div class="stat-value" id="stat-schools">0</div>
+          <div class="stat-label">Schools Participated</div>
+          <div class="stat-glow"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(160,100,255,0.1);border-color:rgba(160,100,255,0.3)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A064FF" stroke-width="2"><path d="M14 2H6A2 2 0 004 4V20A2 2 0 006 22H18A2 2 0 0020 20V8L14 2Z"/><path d="M14 2V8H20"/></svg>
+          </div>
+          <div class="stat-value" id="stat-submissions" style="color:#A064FF">0</div>
+          <div class="stat-label">Project Submissions</div>
+          <div class="stat-glow" style="background:rgba(160,100,255,0.08)"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(0,255,136,0.08);border-color:rgba(0,255,136,0.2)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00FF88" stroke-width="2"><path d="M9 11L12 14L22 4"/><path d="M21 12V19A2 2 0 0119 21H5A2 2 0 013 19V5A2 2 0 015 3H16"/></svg>
+          </div>
+          <div class="stat-value" id="stat-attendance" style="color:#00FF88">0</div>
+          <div class="stat-label">Attendance Marked</div>
+          <div class="stat-glow" style="background:rgba(0,255,136,0.06)"></div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="chart-grid">
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title"><div class="card-title-dot"></div>Registrations Over Time</div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-reg"></canvas>
+          </div>
+        </div>
+        <div class="glass-card">
+          <div class="card-header">
+            <div class="card-title"><div class="card-title-dot"></div>Payment Status</div>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-pay"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Registrations -->
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Recent Registrations</div>
+          <button class="btn-primary" onclick="navigateTo('students', null)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21V19C17 17.9 16.6 16.9 15.8 16.2C15.1 15.4 14.1 15 13 15H5"/><circle cx="9" cy="7" r="4"/></svg>
+            View All
+          </button>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Participant ID</th><th>Name</th><th>School</th><th>Class</th><th>Payment</th><th>Team</th>
+            </tr></thead>
+            <tbody id="recent-registrations-tbody">
+              <tr><td colspan="6"><div class="empty-state"><p>Loading registrations...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ STUDENTS SECTION ═══════════════ -->
+    <div class="section" id="section-students">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Student Management</div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span style="font-size:12px;color:var(--white-40);font-family:'Space Mono',monospace"><span class="realtime-dot"></span>Live</span>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-inp" id="student-search" placeholder="Search by name, ID, school, email, phone..." oninput="filterStudents()">
+          </div>
+          <select class="filter-select" id="filter-class" onchange="filterStudents()">
+            <option value="">All Classes</option>
+            <option>9</option><option>10</option><option>11</option><option>12</option>
+          </select>
+          <select class="filter-select" id="filter-school-type" onchange="filterStudents()">
+            <option value="">All Schools</option>
+            <option value="host">Host School</option>
+            <option value="outside">Outside School</option>
+          </select>
+          <select class="filter-select" id="filter-payment" onchange="filterStudents()">
+            <option value="">All Payments</option>
+            <option value="verified">Verified</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <select class="filter-select" id="filter-team-status" onchange="filterStudents()">
+            <option value="">Team Status</option>
+            <option value="has_team">Has Team</option>
+            <option value="no_team">No Team</option>
+          </select>
+        </div>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Participant ID</th><th>Full Name</th><th>School</th><th>Class</th><th>Email</th><th>Phone</th><th>Team</th><th>Payment</th><th>QR</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="10"><div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21V19C17 17.9 16.6 16.9 15.8 16.2C15.1 15.4 14.1 15 13 15H5C3.9 15 2.9 15.4 2.2 16.2C1.4 16.9 1 17.9 1 19V21"/><circle cx="9" cy="7" r="4"/></svg><p>Loading participants...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ TEAMS SECTION ═══════════════ -->
+    <div class="section" id="section-teams">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Team Management</div>
+        </div>
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-inp" id="team-search" placeholder="Search by team name, code..." oninput="filterTeams()">
+          </div>
+          <select class="filter-select" id="filter-team-sub" onchange="filterTeams()">
+            <option value="">All Statuses</option>
+            <option value="submitted">Submitted</option>
+            <option value="not_submitted">Not Submitted</option>
+          </select>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Team Code</th><th>Team Name</th><th>Leader</th><th>Members</th><th>School</th><th>Submission</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="teams-tbody">
+              <tr><td colspan="8"><div class="empty-state"><p>Loading teams...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SUBMISSIONS SECTION ═══════════════ -->
+    <div class="section" id="section-submissions">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Idea Submissions</div>
+          <select class="filter-select" id="sort-submissions" onchange="renderSubmissions()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </div>
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-inp" id="submission-search" placeholder="Search by project title, team, tech stack..." oninput="filterSubmissions()">
+          </div>
+          <select class="filter-select" id="filter-sub-status" onchange="filterSubmissions()">
+            <option value="">All</option>
+            <option value="pending">Pending Review</option>
+            <option value="shortlisted">Shortlisted</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div id="submissions-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PAYMENTS SECTION ═══════════════ -->
+    <div class="section" id="section-payments">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Payment Verification</div>
+        </div>
+        <div class="filter-bar">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-inp" id="payment-search" placeholder="Search by name, ID, transaction ID..." oninput="filterPayments()">
+          </div>
+          <select class="filter-select" id="filter-pay-status" onchange="filterPayments()">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="verified">Verified</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Participant ID</th><th>Name</th><th>School</th><th>Txn ID</th><th>Amount</th><th>Screenshot</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="payments-tbody">
+              <tr><td colspan="8"><div class="empty-state"><p>Loading payment records...</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ QR MANAGEMENT SECTION ═══════════════ -->
+    <div class="section" id="section-qr">
+      <div class="glass-card" style="margin-bottom:24px">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>QR Scanner — Attendance Verification</div>
+          <button class="btn-primary" id="start-scan-btn" onclick="toggleQRScanner()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Start Scanner
+          </button>
+        </div>
+        <div id="qr-scanner-container" style="display:none;text-align:center;padding:20px 0">
+          <video id="qr-video" style="width:100%;max-width:400px;border-radius:12px;border:2px solid var(--gold);box-shadow:0 0 24px var(--gold-glow)"></video>
+          <p style="margin-top:12px;color:var(--white-40);font-size:13px;font-family:'Space Mono',monospace">Point camera at participant QR code</p>
+          <div id="qr-scan-result" style="margin-top:16px;display:none"></div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Participant QR Codes</div>
+          <div class="search-input-wrap" style="max-width:280px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-inp" id="qr-search" placeholder="Search participant..." oninput="filterQRGrid()">
+          </div>
+        </div>
+        <div class="qr-grid" id="qr-grid">
+          <div class="empty-state"><p>Loading QR data...</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ATTENDANCE SECTION ═══════════════ -->
+    <div class="section" id="section-attendance">
+      <div class="attendance-summary-grid">
+        <div class="att-stat">
+          <div class="att-stat-num" id="att-present">0</div>
+          <div class="att-stat-label">Present</div>
+        </div>
+        <div class="att-stat">
+          <div class="att-stat-num" id="att-absent" style="color:#FF4444">0</div>
+          <div class="att-stat-label">Absent</div>
+        </div>
+        <div class="att-stat">
+          <div class="att-stat-num" id="att-total" style="color:#00CCFF">0</div>
+          <div class="att-stat-label">Total Registered</div>
+        </div>
+        <div class="att-stat">
+          <div class="att-stat-num" id="att-pct" style="color:#00FF88">0%</div>
+          <div class="att-stat-label">Attendance Rate</div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Attendance Log</div>
+          <button class="btn-primary" onclick="exportAttendance()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th>Participant ID</th><th>Name</th><th>School</th><th>Team</th><th>Check-in Time</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="attendance-tbody">
+              <tr><td colspan="7"><div class="empty-state"><p>No attendance records yet.</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ANNOUNCEMENTS SECTION ═══════════════ -->
+    <div class="section" id="section-announcements">
+      <div class="glass-card" style="margin-bottom:24px">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Create Announcement</div>
+        </div>
+        <div style="display:grid;gap:16px">
+          <div>
+            <label class="form-label">Announcement Title</label>
+            <input type="text" id="ann-title" class="modal-input" placeholder="Enter announcement title...">
+          </div>
+          <div>
+            <label class="form-label">Message</label>
+            <textarea id="ann-body" class="modal-input modal-textarea" placeholder="Enter announcement message..."></textarea>
+          </div>
+          <div style="display:flex;gap:16px;align-items:center">
+            <div>
+              <label class="form-label">Priority</label>
+              <select id="ann-priority" class="filter-select">
+                <option value="normal">Normal</option>
+                <option value="important">Important</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <button class="btn-primary" style="margin-top:20px" onclick="createAnnouncement()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Post Announcement
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>Active Announcements</div>
+        </div>
+        <div id="announcements-list">
+          <div class="empty-state"><p>No announcements posted yet.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SETTINGS SECTION ═══════════════ -->
+    <div class="section" id="section-settings">
+      <div class="glass-card">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>System Settings</div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">Registration Control</div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Allow New Registrations</div>
+              <div class="toggle-desc">Enable or disable public registration for AETHER 2K26</div>
+            </div>
+            <div class="toggle-switch on" id="toggle-reg" onclick="toggleSetting('registrationsOpen', this)"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Allow Team Creation</div>
+              <div class="toggle-desc">Participants can create and join teams</div>
+            </div>
+            <div class="toggle-switch on" id="toggle-teams" onclick="toggleSetting('teamsOpen', this)"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Allow Idea Submissions</div>
+              <div class="toggle-desc">Enable project idea submission portal</div>
+            </div>
+            <div class="toggle-switch on" id="toggle-submissions" onclick="toggleSetting('submissionsOpen', this)"></div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">Event Details</div>
+          <div style="display:grid;gap:16px;max-width:500px">
+            <div>
+              <label class="form-label">Event Name</label>
+              <input type="text" id="settings-event-name" class="modal-input" value="AETHER 2K26" readonly>
+            </div>
+            <div>
+              <label class="form-label">Host Institution</label>
+              <input type="text" id="settings-host" class="modal-input" value="De Paul School" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">Admin Account</div>
+          <div style="display:grid;gap:12px;max-width:500px">
+            <div style="background:rgba(255,215,0,0.04);border:1px solid var(--border-gold);border-radius:10px;padding:16px">
+              <div style="font-size:13px;color:var(--white-70);margin-bottom:4px;font-family:'Space Mono',monospace;letter-spacing:1px">LOGGED IN AS</div>
+              <div style="font-size:16px;font-weight:700;color:var(--white-90)" id="settings-email-display">—</div>
+            </div>
+            <button class="btn-primary" style="max-width:200px" onclick="handleLogout()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5A2 2 0 013 19V5A2 2 0 015 3H9"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout Session
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODALS
+═══════════════════════════════════════ -->
+
+<!-- Student Profile Modal -->
+<div class="modal-overlay" id="modal-student-profile">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div class="modal-title">Participant Profile</div>
+      <button class="modal-close" onclick="closeModal('modal-student-profile')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-student-profile-body"></div>
+  </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div class="modal-overlay" id="modal-edit-student">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Participant</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-student')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-student-id">
+      <div class="modal-field"><label>Full Name</label><input type="text" id="edit-name" class="modal-input"></div>
+      <div class="modal-field"><label>School Name</label><input type="text" id="edit-school" class="modal-input"></div>
+      <div class="modal-field"><label>Class</label><input type="text" id="edit-class" class="modal-input"></div>
+      <div class="modal-field"><label>Email</label><input type="email" id="edit-email" class="modal-input"></div>
+      <div class="modal-field"><label>Phone</label><input type="tel" id="edit-phone" class="modal-input"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-reject" onclick="closeModal('modal-edit-student')">Cancel</button>
+      <button class="btn-primary" onclick="saveStudentEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Screenshot Modal -->
+<div class="modal-overlay" id="modal-payment-ss">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Payment Verification</div>
+      <button class="modal-close" onclick="closeModal('modal-payment-ss')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-payment-body"></div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-reject" id="modal-reject-pay-btn">Reject Payment</button>
+      <button class="btn-primary" id="modal-verify-pay-btn">Verify & Unlock QR</button>
+    </div>
+  </div>
+</div>
+
+<!-- Announcement Edit Modal -->
+<div class="modal-overlay" id="modal-edit-ann">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Announcement</div>
+      <button class="modal-close" onclick="closeModal('modal-edit-ann')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-ann-id">
+      <div class="modal-field"><label>Title</label><input type="text" id="edit-ann-title" class="modal-input"></div>
+      <div class="modal-field"><label>Message</label><textarea id="edit-ann-body" class="modal-input modal-textarea"></textarea></div>
+      <div class="modal-field">
+        <label>Priority</label>
+        <select id="edit-ann-priority" class="filter-select" style="width:100%">
+          <option value="normal">Normal</option>
+          <option value="important">Important</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-reject" onclick="closeModal('modal-edit-ann')">Cancel</button>
+      <button class="btn-primary" onclick="saveAnnEdit()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Modal -->
+<div class="modal-overlay" id="modal-confirm-delete">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--danger)">Confirm Delete</div>
+      <button class="modal-close" onclick="closeModal('modal-confirm-delete')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-delete-msg" style="color:var(--white-70);font-size:15px;line-height:1.6"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-view" onclick="closeModal('modal-confirm-delete')">Cancel</button>
+      <button class="btn-sm btn-delete" id="confirm-delete-action-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════════
+     SCRIPTS
+═════════════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js"></script>
+
+<script>
+// ═══════════════════════════════════════════════
+// FIREBASE CONFIGURATION
+// ═══════════════════════════════════════════════
+const firebaseConfig = {
+ apiKey: "AIzaSyCpcUM2MUsFJ7BRXYQPF4I2Qo01Au77v4A",
+  authDomain: "aether-contact-us.firebaseapp.com",
+  projectId: "aether-contact-us",
+  storageBucket: "aether-contact-us.firebasestorage.app",
+  messagingSenderId: "471798414451",
+  appId: "1:471798414451:web:d9660f107f76a0f5537e06"
+};
+
+// NOTE: Replace the above config values with your actual Firebase project configuration.
+// This dashboard connects to the same Firebase project used by index.html and dashboard.html.
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ═══════════════════════════════════════════════
+// ALLOWED ADMIN EMAILS
+// ═══════════════════════════════════════════════
+const ADMIN_EMAILS = [
+  'admin@hackaether2k26.space',
+  'school@hackaether2k26.space'
+];
+
+// ═══════════════════════════════════════════════
+// GLOBAL STATE
+// ═══════════════════════════════════════════════
+let allStudents = [];
+let allTeams = [];
+let allSubmissions = [];
+let allAnnouncements = [];
+let allAttendance = [];
+let currentAdminUser = null;
+let regChart = null;
+let payChart = null;
+let scannerActive = false;
+let scannerStream = null;
+let scannerInterval = null;
+
+// Firestore unsubscribers
+const unsubs = [];
+
+// ═══════════════════════════════════════════════
+// INITIALIZATION
+// ═══════════════════════════════════════════════
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+auth.onAuthStateChanged(user => {
+  hideLoadingOverlay();
+  if (user) {
+    if (!ADMIN_EMAILS.includes(user.email.toLowerCase())) {
+      auth.signOut();
+      showLoginWithMessage('Unauthorized access. Admins only.', 'error');
+      return;
+    }
+    currentAdminUser = user;
+    showDashboard(user);
+  } else {
+    showLogin();
+  }
+});
+
+function hideLoadingOverlay() {
+  const lo = document.getElementById('loading-overlay');
+  lo.style.opacity = '0';
+  setTimeout(() => { lo.style.display = 'none'; }, 500);
+}
+
+// ═══════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+}
+
+function showLoginWithMessage(msg, type) {
+  showLogin();
+  toast(msg, type || 'error');
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const spinner = document.getElementById('login-spinner');
+  const btnText = document.getElementById('login-btn-text');
+
+  if (!email || !password) { toast('Please enter your credentials.', 'warning'); return; }
+
+  btn.disabled = true;
+  btnText.style.display = 'none';
+  spinner.style.display = 'block';
+
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, password);
+    if (!ADMIN_EMAILS.includes(cred.user.email.toLowerCase())) {
+      await auth.signOut();
+      toast('Unauthorized access. This account is not an admin.', 'error');
+    }
+  } catch (e) {
+    let msg = 'Login failed. Check credentials.';
+    if (e.code === 'auth/user-not-found') msg = 'No admin account found with this email.';
+    if (e.code === 'auth/wrong-password') msg = 'Incorrect password.';
+    if (e.code === 'auth/invalid-credential') msg = 'Invalid credentials. Please check email and password.';
+    if (e.code === 'auth/too-many-requests') msg = 'Too many attempts. Try again later.';
+    toast(msg, 'error');
+  } finally {
+    btn.disabled = false;
+    btnText.style.display = 'block';
+    spinner.style.display = 'none';
+  }
+}
+
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+
+document.getElementById('pw-toggle-btn').addEventListener('click', () => {
+  const inp = document.getElementById('login-password');
+  const icon = document.getElementById('eye-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20C5 20 1 12 1 12A18.45 18.45 0 016.06 6.06M9.9 4.24A9.12 9.12 0 0112 4C19 4 23 12 23 12A18.5 18.5 0 0120.18 16.94M14.12 14.12A3 3 0 119.88 9.88M1 1L23 23"/>';
+  } else {
+    inp.type = 'password';
+    icon.innerHTML = '<path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z"/><circle cx="12" cy="12" r="3"/>';
+  }
+});
+
+async function handleLogout() {
+  unsubs.forEach(u => u());
+  stopQRScanner();
+  await auth.signOut();
+  toast('Logged out successfully.', 'info');
+}
+
+// ═══════════════════════════════════════════════
+// DASHBOARD INIT
+// ═══════════════════════════════════════════════
+function showDashboard(user) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+
+  const initials = user.email.substring(0, 2).toUpperCase();
+  document.getElementById('admin-avatar-initials').textContent = initials;
+  document.getElementById('admin-display-name').textContent = user.email.split('@')[0];
+  document.getElementById('settings-email-display').textContent = user.email;
+
+  startClock();
+  setupSidebarToggle();
+  attachFirestoreListeners();
+}
+
+// ═══════════════════════════════════════════════
+// CLOCK
+// ═══════════════════════════════════════════════
+function startClock() {
+  function tick() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    const s = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('live-time').textContent = `${h}:${m}:${s}`;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+// ═══════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════
+function setupSidebarToggle() {
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('sidebar-toggle');
+  btn.addEventListener('click', () => {
+    sb.classList.toggle('collapsed');
+    const ic = btn.querySelector('svg path');
+    if (sb.classList.contains('collapsed')) {
+      ic.setAttribute('d', 'M9 18L15 12L9 6');
+    } else {
+      ic.setAttribute('d', 'M15 18L9 12L15 6');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════
+const sectionMap = {
+  home: 'Dashboard', students: 'Students',
+  teams: 'Teams', submissions: 'Submissions',
+  payments: 'Payments', qr: 'QR Management',
+  attendance: 'Attendance', announcements: 'Announcements',
+  settings: 'Settings'
+};
+
+function navigateTo(section, navEl) {
+  // Hide all sections
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  // Remove active from all nav items
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const sec = document.getElementById(`section-${section}`);
+  if (sec) sec.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+
+  document.getElementById('page-title').textContent = sectionMap[section] || section;
+  document.getElementById('page-breadcrumb-sub').textContent = sectionMap[section] || section;
+}
+
+// ═══════════════════════════════════════════════
+// FIRESTORE REALTIME LISTENERS
+// ═══════════════════════════════════════════════
+function attachFirestoreListeners() {
+  // Participants
+  const u1 = db.collection('participants').onSnapshot(snap => {
+    allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    updateDashboardStats();
+    renderStudents();
+    renderPayments();
+    renderQRGrid();
+    renderAttendance();
+    updateBadges();
+    renderRecentRegistrations();
+    updateCharts();
+  });
+  unsubs.push(u1);
+
+  // Teams
+  const u2 = db.collection('teams').onSnapshot(snap => {
+    allTeams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    updateDashboardStats();
+    renderTeams();
+    updateBadges();
+    updateCharts();
+  });
+  unsubs.push(u2);
+
+  // Submissions
+  const u3 = db.collection('submissions').onSnapshot(snap => {
+    allSubmissions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    updateDashboardStats();
+    renderSubmissions();
+    updateBadges();
+  });
+  unsubs.push(u3);
+
+  // Announcements
+  const u4 = db.collection('announcements').orderBy('createdAt', 'desc').onSnapshot(snap => {
+    allAnnouncements = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderAnnouncements();
+  });
+  unsubs.push(u4);
+
+  // Settings
+  const u5 = db.collection('settings').doc('eventConfig').onSnapshot(snap => {
+    if (snap.exists) {
+      const d = snap.data();
+      setToggleState('toggle-reg', d.registrationsOpen !== false);
+      setToggleState('toggle-teams', d.teamsOpen !== false);
+      setToggleState('toggle-submissions', d.submissionsOpen !== false);
+    }
+  });
+  unsubs.push(u5);
+}
+
+// ═══════════════════════════════════════════════
+// STATS UPDATE
+// ═══════════════════════════════════════════════
+function updateDashboardStats() {
+  animateCounter('stat-total-reg', allStudents.length);
+  animateCounter('stat-total-teams', allTeams.length);
+
+  const verified = allStudents.filter(s => s.paymentStatus === 'verified').length;
+  const pending = allStudents.filter(s => s.paymentStatus === 'pending' || !s.paymentStatus).length;
+  const schools = [...new Set(allStudents.map(s => s.schoolName).filter(Boolean))].length;
+  const attendance = allStudents.filter(s => s.attended).length;
+
+  animateCounter('stat-verified-pay', verified);
+  animateCounter('stat-pending-pay', pending);
+  animateCounter('stat-schools', schools);
+  animateCounter('stat-submissions', allSubmissions.length);
+  animateCounter('stat-attendance', attendance);
+
+  // Attendance section
+  document.getElementById('att-present').textContent = attendance;
+  document.getElementById('att-absent').textContent = allStudents.length - attendance;
+  document.getElementById('att-total').textContent = allStudents.length;
+  document.getElementById('att-pct').textContent = allStudents.length
+    ? Math.round((attendance / allStudents.length) * 100) + '%'
+    : '0%';
+}
+
+function animateCounter(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const start = parseInt(el.textContent) || 0;
+  const diff = target - start;
+  const steps = 20;
+  let step = 0;
+  const t = setInterval(() => {
+    step++;
+    el.textContent = Math.round(start + diff * (step / steps));
+    if (step >= steps) { el.textContent = target; clearInterval(t); }
+  }, 20);
+}
+
+function updateBadges() {
+  document.getElementById('badge-students').textContent = allStudents.length;
+  document.getElementById('badge-teams').textContent = allTeams.length;
+  document.getElementById('badge-submissions').textContent = allSubmissions.length;
+  const pending = allStudents.filter(s => s.paymentStatus === 'pending' || !s.paymentStatus).length;
+  document.getElementById('badge-pending-pay').textContent = pending;
+}
+
+// ═══════════════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════════════
+function updateCharts() {
+  updateRegChart();
+  updatePayChart();
+}
+
+function updateRegChart() {
+  const ctx = document.getElementById('chart-reg');
+  if (!ctx) return;
+
+  // Group by date
+  const counts = {};
+  allStudents.forEach(s => {
+    if (s.registeredAt && s.registeredAt.toDate) {
+      const d = s.registeredAt.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+      counts[d] = (counts[d] || 0) + 1;
+    }
+  });
+  const labels = Object.keys(counts).slice(-7);
+  const data = labels.map(l => counts[l]);
+
+  if (regChart) regChart.destroy();
+  regChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.length ? labels : ['No Data'],
+      datasets: [{
+        label: 'Registrations',
+        data: data.length ? data : [0],
+        borderColor: '#FFD700',
+        backgroundColor: 'rgba(255,215,0,0.08)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: '#FFD700',
+        pointRadius: 4,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(255,215,0,0.06)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(255,215,0,0.06)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } }, beginAtZero: true }
+      }
+    }
+  });
+}
+
+function updatePayChart() {
+  const ctx = document.getElementById('chart-pay');
+  if (!ctx) return;
+
+  const verified = allStudents.filter(s => s.paymentStatus === 'verified').length;
+  const pending = allStudents.filter(s => s.paymentStatus === 'pending' || !s.paymentStatus).length;
+  const rejected = allStudents.filter(s => s.paymentStatus === 'rejected').length;
+
+  if (payChart) payChart.destroy();
+  payChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Verified', 'Pending', 'Rejected'],
+      datasets: [{
+        data: [verified, pending, rejected],
+        backgroundColor: ['rgba(0,255,136,0.7)', 'rgba(255,184,0,0.7)', 'rgba(255,68,68,0.7)'],
+        borderColor: ['#00FF88', '#FFB800', '#FF4444'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: 'rgba(255,255,255,0.7)', font: { size: 11, family: 'Rajdhani' } } } },
+      cutout: '65%'
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// RECENT REGISTRATIONS
+// ═══════════════════════════════════════════════
+function renderRecentRegistrations() {
+  const tbody = document.getElementById('recent-registrations-tbody');
+  const recent = [...allStudents]
+    .sort((a, b) => (b.registeredAt?.seconds || 0) - (a.registeredAt?.seconds || 0))
+    .slice(0, 10);
+
+  if (!recent.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><p>No registrations yet.</p></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = recent.map(s => `
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--gold)">${s.participantId || s.id?.slice(0,8) || '—'}</span></td>
+      <td>${s.fullName || s.name || '—'}</td>
+      <td>${s.schoolName || '—'}</td>
+      <td>${s.class || '—'}</td>
+      <td>${payBadge(s.paymentStatus)}</td>
+      <td><span style="font-size:12px;color:var(--white-70)">${s.teamCode || 'No Team'}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+// STUDENTS RENDER
+// ═══════════════════════════════════════════════
+let filteredStudents = [];
+
+function filterStudents() {
+  const q = document.getElementById('student-search').value.toLowerCase();
+  const cls = document.getElementById('filter-class').value;
+  const schoolType = document.getElementById('filter-school-type').value;
+  const pay = document.getElementById('filter-payment').value;
+  const team = document.getElementById('filter-team-status').value;
+
+  filteredStudents = allStudents.filter(s => {
+    const name = (s.fullName || s.name || '').toLowerCase();
+    const pid = (s.participantId || '').toLowerCase();
+    const school = (s.schoolName || '').toLowerCase();
+    const email = (s.email || '').toLowerCase();
+    const phone = (s.phone || '').toLowerCase();
+    const matchQ = !q || name.includes(q) || pid.includes(q) || school.includes(q) || email.includes(q) || phone.includes(q);
+    const matchClass = !cls || String(s.class) === cls;
+    const isHost = school.includes('de paul') || school.includes('depaul');
+    const matchSchool = !schoolType || (schoolType === 'host' ? isHost : !isHost);
+    const matchPay = !pay || s.paymentStatus === pay || (!s.paymentStatus && pay === 'pending');
+    const hasTeam = !!(s.teamCode || s.teamId);
+    const matchTeam = !team || (team === 'has_team' ? hasTeam : !hasTeam);
+    return matchQ && matchClass && matchSchool && matchPay && matchTeam;
+  });
+  renderStudents(filteredStudents);
+}
+
+function renderStudents(data) {
+  const list = data || allStudents;
+  const tbody = document.getElementById('students-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21V19C17 17.9 16.6 16.9 15.8 16.2C15.1 15.4 14.1 15 13 15H5C3.9 15 2.9 15.4 2.2 16.2C1.4 16.9 1 17.9 1 19V21"/><circle cx="9" cy="7" r="4"/></svg><p>No participants found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(s => {
+    const pid = s.participantId || s.id?.slice(0, 8) || '—';
+    return `
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${pid}</span></td>
+      <td>${s.fullName || s.name || '—'}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.schoolName || '—'}</td>
+      <td>${s.class || '—'}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.email || '—'}</td>
+      <td>${s.phone || '—'}</td>
+      <td>${s.teamCode ? `<span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--info)">${s.teamCode}</span>` : '<span style="color:var(--white-40)">None</span>'}</td>
+      <td>${payBadge(s.paymentStatus)}</td>
+      <td>${s.qrUnlocked ? '<span class="badge badge-success">Unlocked</span>' : '<span class="badge badge-danger">Locked</span>'}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-sm btn-view" onclick="viewStudentProfile('${s.id}')">View</button>
+          <button class="btn-sm btn-edit" onclick="openEditStudent('${s.id}')">Edit</button>
+          <button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Verify</button>
+          <button class="btn-sm btn-delete" onclick="confirmDelete('participant','${s.id}','${s.fullName || s.name || s.id}')">Del</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function payBadge(status) {
+  if (status === 'verified') return '<span class="badge badge-success">Verified</span>';
+  if (status === 'rejected') return '<span class="badge badge-danger">Rejected</span>';
+  return '<span class="badge badge-warning">Pending</span>';
+}
+
+// ═══════════════════════════════════════════════
+// STUDENT PROFILE
+// ═══════════════════════════════════════════════
+function viewStudentProfile(id) {
+  const s = allStudents.find(x => x.id === id);
+  if (!s) return;
+  const pid = s.participantId || id.slice(0, 8);
+  const body = document.getElementById('modal-student-profile-body');
+  body.innerHTML = `
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        ${row('Participant ID', `<span style="font-family:'Space Mono',monospace;color:var(--gold)">${pid}</span>`)}
+        ${row('Full Name', s.fullName || s.name || '—')}
+        ${row('School', s.schoolName || '—')}
+        ${row('Class', s.class || '—')}
+        ${row('Email', s.email || '—')}
+        ${row('Phone', s.phone || '—')}
+        ${row('Team Code', s.teamCode || 'No Team')}
+        ${row('Payment Status', payBadge(s.paymentStatus))}
+        ${row('QR Access', s.qrUnlocked ? '<span class="badge badge-success">Unlocked</span>' : '<span class="badge badge-danger">Locked</span>')}
+        ${row('Attended', s.attended ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-neutral">No</span>')}
+        ${s.registeredAt ? row('Registered', s.registeredAt.toDate ? s.registeredAt.toDate().toLocaleString() : s.registeredAt) : ''}
+      </div>
+      <div style="text-align:center;padding:16px">
+        <div style="margin-bottom:8px;font-family:'Space Mono',monospace;font-size:10px;color:var(--white-40);letter-spacing:2px">QR ACCESS PASS</div>
+        ${s.qrUnlocked ? `<div id="profile-qr-${id}" class="qr-box" style="display:inline-block"></div>` : `<div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:10px;padding:24px 32px;color:var(--danger);font-size:13px;font-family:'Space Mono',monospace">QR LOCKED<br><span style="font-size:10px;margin-top:6px;display:block;color:var(--white-40)">Verify payment to unlock</span></div>`}
+        <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="btn-sm btn-verify" onclick="verifyParticipant('${id}');closeModal('modal-student-profile')">Verify</button>
+          <button class="btn-sm btn-reject" onclick="rejectPayment('${id}');closeModal('modal-student-profile')">Reject Pay</button>
+          <button class="btn-sm btn-view" onclick="markAttendance('${id}')">Mark Present</button>
+        </div>
+      </div>
+    </div>
+  `;
+  openModal('modal-student-profile');
+
+  if (s.qrUnlocked) {
+    setTimeout(() => {
+      const qrEl = document.getElementById(`profile-qr-${id}`);
+      if (qrEl) {
+        new QRCode(qrEl, {
+          text: JSON.stringify({ participantId: pid, name: s.fullName || s.name, event: 'AETHER 2K26' }),
+          width: 160, height: 160,
+          colorDark: '#000', colorLight: '#ffffff'
+        });
+      }
+    }, 100);
+  }
+}
+
+function row(k, v) {
+  return `<div class="profile-detail-row"><div class="profile-detail-key">${k}</div><div class="profile-detail-val">${v}</div></div>`;
+}
+
+// ═══════════════════════════════════════════════
+// EDIT STUDENT
+// ═══════════════════════════════════════════════
+function openEditStudent(id) {
+  const s = allStudents.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('edit-student-id').value = id;
+  document.getElementById('edit-name').value = s.fullName || s.name || '';
+  document.getElementById('edit-school').value = s.schoolName || '';
+  document.getElementById('edit-class').value = s.class || '';
+  document.getElementById('edit-email').value = s.email || '';
+  document.getElementById('edit-phone').value = s.phone || '';
+  openModal('modal-edit-student');
+}
+
+async function saveStudentEdit() {
+  const id = document.getElementById('edit-student-id').value;
+  try {
+    await db.collection('participants').doc(id).update({
+      fullName: document.getElementById('edit-name').value,
+      schoolName: document.getElementById('edit-school').value,
+      class: document.getElementById('edit-class').value,
+      email: document.getElementById('edit-email').value,
+      phone: document.getElementById('edit-phone').value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('Participant updated successfully.', 'success');
+    closeModal('modal-edit-student');
+  } catch (e) {
+    toast('Failed to update: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// VERIFY / REJECT PARTICIPANT
+// ═══════════════════════════════════════════════
+async function verifyParticipant(id) {
+  try {
+    await db.collection('participants').doc(id).update({
+      paymentStatus: 'verified',
+      qrUnlocked: true,
+      verifiedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      verifiedBy: currentAdminUser?.email
+    });
+    toast('Payment verified. QR access unlocked.', 'success');
+  } catch (e) {
+    toast('Verification failed: ' + e.message, 'error');
+  }
+}
+
+async function rejectPayment(id) {
+  try {
+    await db.collection('participants').doc(id).update({
+      paymentStatus: 'rejected',
+      qrUnlocked: false,
+      rejectedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('Payment rejected.', 'warning');
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// DELETE
+// ═══════════════════════════════════════════════
+function confirmDelete(collection, id, name) {
+  document.getElementById('confirm-delete-msg').textContent =
+    `Are you sure you want to permanently delete "${name}"? This action cannot be undone.`;
+  const btn = document.getElementById('confirm-delete-action-btn');
+  btn.onclick = () => deleteDoc(collection, id);
+  openModal('modal-confirm-delete');
+}
+
+async function deleteDoc(collection, id) {
+  try {
+    await db.collection(collection === 'participant' ? 'participants' : collection).doc(id).delete();
+    toast('Deleted successfully.', 'success');
+    closeModal('modal-confirm-delete');
+  } catch (e) {
+    toast('Delete failed: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// TEAMS RENDER
+// ═══════════════════════════════════════════════
+let filteredTeams = [];
+
+function filterTeams() {
+  const q = document.getElementById('team-search').value.toLowerCase();
+  const sub = document.getElementById('filter-team-sub').value;
+
+  filteredTeams = allTeams.filter(t => {
+    const name = (t.teamName || '').toLowerCase();
+    const code = (t.teamCode || '').toLowerCase();
+    const matchQ = !q || name.includes(q) || code.includes(q);
+    const hasSub = allSubmissions.some(s => s.teamCode === t.teamCode || s.teamId === t.id);
+    const matchSub = !sub || (sub === 'submitted' ? hasSub : !hasSub);
+    return matchQ && matchSub;
+  });
+  renderTeams(filteredTeams);
+}
+
+function renderTeams(data) {
+  const list = data || allTeams;
+  const tbody = document.getElementById('teams-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>No teams found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(t => {
+    const members = allStudents.filter(s => s.teamCode === t.teamCode || s.teamId === t.id);
+    const hasSub = allSubmissions.some(s => s.teamCode === t.teamCode || s.teamId === t.id);
+    const status = t.status || 'active';
+    return `
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${t.teamCode || '—'}</span></td>
+      <td style="font-weight:700;color:var(--white-90)">${t.teamName || '—'}</td>
+      <td>${t.leaderName || t.leader || '—'}</td>
+      <td><span style="font-size:13px">${members.length} member${members.length !== 1 ? 's' : ''}</span></td>
+      <td>${t.schoolName || members[0]?.schoolName || '—'}</td>
+      <td>${hasSub ? '<span class="badge badge-success">Submitted</span>' : '<span class="badge badge-neutral">Pending</span>'}</td>
+      <td>${teamStatusBadge(status)}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-sm btn-shortlist" onclick="updateTeamStatus('${t.id}','shortlisted')">Shortlist</button>
+          <button class="btn-sm btn-reject" onclick="updateTeamStatus('${t.id}','rejected')">Reject</button>
+          <button class="btn-sm btn-delete" onclick="confirmDelete('teams','${t.id}','${t.teamName || t.id}')">Remove</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function teamStatusBadge(s) {
+  if (s === 'shortlisted') return '<span class="badge badge-gold">Shortlisted</span>';
+  if (s === 'rejected') return '<span class="badge badge-danger">Rejected</span>';
+  if (s === 'winner') return '<span class="badge badge-success">Winner</span>';
+  return '<span class="badge badge-neutral">Active</span>';
+}
+
+async function updateTeamStatus(id, status) {
+  try {
+    await db.collection('teams').doc(id).update({ status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    toast(`Team status updated to "${status}".`, 'success');
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SUBMISSIONS RENDER
+// ═══════════════════════════════════════════════
+let filteredSubs = [];
+
+function filterSubmissions() {
+  const q = document.getElementById('submission-search').value.toLowerCase();
+  const status = document.getElementById('filter-sub-status').value;
+
+  filteredSubs = allSubmissions.filter(s => {
+    const title = (s.projectTitle || s.title || '').toLowerCase();
+    const team = (s.teamName || '').toLowerCase();
+    const tech = (s.techStack || '').toLowerCase();
+    const matchQ = !q || title.includes(q) || team.includes(q) || tech.includes(q);
+    const matchStatus = !status || s.status === status || (!s.status && status === 'pending');
+    return matchQ && matchStatus;
+  });
+  renderSubmissions();
+}
+
+function renderSubmissions() {
+  const container = document.getElementById('submissions-list');
+  const sort = document.getElementById('sort-submissions').value;
+  let list = filteredSubs.length || document.getElementById('submission-search').value || document.getElementById('filter-sub-status').value
+    ? filteredSubs : allSubmissions;
+
+  list = [...list].sort((a, b) => {
+    const ta = a.submittedAt?.seconds || 0;
+    const tb = b.submittedAt?.seconds || 0;
+    return sort === 'newest' ? tb - ta : ta - tb;
+  });
+
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6A2 2 0 004 4V20A2 2 0 006 22H18A2 2 0 0020 20V8L14 2Z"/></svg><p>No submissions found.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = list.map(s => {
+    const title = s.projectTitle || s.title || '—';
+    const team = s.teamName || s.teamCode || '—';
+    const desc = s.description || s.ideaDescription || '—';
+    const problem = s.problemStatement || '';
+    const tech = s.techStack || '';
+    const status = s.status || 'pending';
+    const members = allStudents.filter(x => x.teamCode === s.teamCode).map(x => x.fullName || x.name).filter(Boolean);
+
+    return `
+    <div class="submission-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <div>
+          <div class="submission-title">${title}</div>
+          <div class="submission-team">Team: ${team}</div>
+        </div>
+        ${subStatusBadge(status)}
+      </div>
+      ${desc !== '—' ? `<div class="submission-desc">${desc.slice(0, 200)}${desc.length > 200 ? '...' : ''}</div>` : ''}
+      ${problem ? `<div style="font-size:13px;color:var(--white-70);margin-bottom:10px"><strong style="color:var(--white-40);font-size:11px;letter-spacing:1px;font-family:'Space Mono',monospace">PROBLEM: </strong>${problem.slice(0, 150)}</div>` : ''}
+      <div class="submission-meta">
+        ${tech ? `<span class="badge badge-info">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          ${tech}
+        </span>` : ''}
+        ${members.slice(0, 3).map(m => `<span class="badge badge-neutral">${m}</span>`).join('')}
+        ${s.submittedAt ? `<span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--white-40);margin-left:auto">${s.submittedAt.toDate ? s.submittedAt.toDate().toLocaleString() : ''}</span>` : ''}
+      </div>
+      <div class="action-btns" style="margin-top:14px">
+        <button class="btn-sm btn-shortlist" onclick="updateSubStatus('${s.id}','shortlisted')">Shortlist</button>
+        <button class="btn-sm btn-verify" onclick="updateSubStatus('${s.id}','approved')">Approve</button>
+        <button class="btn-sm btn-reject" onclick="updateSubStatus('${s.id}','rejected')">Reject</button>
+        <button class="btn-sm btn-delete" onclick="confirmDelete('submissions','${s.id}','${title}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function subStatusBadge(s) {
+  if (s === 'approved') return '<span class="badge badge-success">Approved</span>';
+  if (s === 'shortlisted') return '<span class="badge badge-gold">Shortlisted</span>';
+  if (s === 'rejected') return '<span class="badge badge-danger">Rejected</span>';
+  return '<span class="badge badge-neutral">Pending Review</span>';
+}
+
+async function updateSubStatus(id, status) {
+  try {
+    await db.collection('submissions').doc(id).update({ status, reviewedAt: firebase.firestore.FieldValue.serverTimestamp(), reviewedBy: currentAdminUser?.email });
+    toast(`Submission ${status}.`, 'success');
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// PAYMENTS RENDER
+// ═══════════════════════════════════════════════
+let filteredPayments = [];
+
+function filterPayments() {
+  const q = document.getElementById('payment-search').value.toLowerCase();
+  const status = document.getElementById('filter-pay-status').value;
+
+  filteredPayments = allStudents.filter(s => {
+    const name = (s.fullName || s.name || '').toLowerCase();
+    const pid = (s.participantId || '').toLowerCase();
+    const txn = (s.transactionId || s.txnId || '').toLowerCase();
+    const matchQ = !q || name.includes(q) || pid.includes(q) || txn.includes(q);
+    const matchStatus = !status || s.paymentStatus === status || (!s.paymentStatus && status === 'pending');
+    return matchQ && matchStatus;
+  });
+  renderPayments(filteredPayments);
+}
+
+function renderPayments(data) {
+  const list = data || allStudents;
+  const tbody = document.getElementById('payments-tbody');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>No payment records found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(s => {
+    const pid = s.participantId || s.id?.slice(0, 8) || '—';
+    const txn = s.transactionId || s.txnId || '—';
+    const amt = s.paymentAmount || s.amount || '—';
+    const hasSS = !!(s.paymentScreenshot || s.screenshotUrl);
+    return `
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${pid}</span></td>
+      <td>${s.fullName || s.name || '—'}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.schoolName || '—'}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:11px">${txn}</span></td>
+      <td>${amt !== '—' ? `Rs. ${amt}` : '—'}</td>
+      <td>${hasSS ? `<button class="btn-sm btn-view" onclick="viewPaymentScreenshot('${s.id}')">View SS</button>` : '<span style="color:var(--white-40);font-size:12px">None</span>'}</td>
+      <td>${payBadge(s.paymentStatus)}</td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Verify</button>
+          <button class="btn-sm btn-reject" onclick="rejectPayment('${s.id}')">Reject</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function viewPaymentScreenshot(id) {
+  const s = allStudents.find(x => x.id === id);
+  if (!s) return;
+  const body = document.getElementById('modal-payment-body');
+  const ssUrl = s.paymentScreenshot || s.screenshotUrl;
+  body.innerHTML = `
+    <div style="display:grid;gap:16px">
+      ${row('Participant', s.fullName || s.name || '—')}
+      ${row('School', s.schoolName || '—')}
+      ${row('Transaction ID', `<span style="font-family:'Space Mono',monospace;color:var(--gold)">${s.transactionId || s.txnId || '—'}</span>`)}
+      ${row('Amount', s.paymentAmount ? `Rs. ${s.paymentAmount}` : '—')}
+      ${row('Current Status', payBadge(s.paymentStatus))}
+      ${ssUrl ? `<div style="margin-top:8px"><div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--white-40);margin-bottom:8px;letter-spacing:2px">PAYMENT SCREENSHOT</div><div class="payment-ss-wrap"><img src="${ssUrl}" alt="Payment Screenshot" onerror="this.parentElement.innerHTML='<p style=padding:20px;color:var(--white-40);font-size:13px>Image could not be loaded.</p>'"></div></div>` : '<div style="color:var(--white-40);font-size:13px">No screenshot uploaded.</div>'}
+    </div>
+  `;
+  const verBtn = document.getElementById('modal-verify-pay-btn');
+  const rejBtn = document.getElementById('modal-reject-pay-btn');
+  verBtn.onclick = () => { verifyParticipant(id); closeModal('modal-payment-ss'); };
+  rejBtn.onclick = () => { rejectPayment(id); closeModal('modal-payment-ss'); };
+  openModal('modal-payment-ss');
+}
+
+// ═══════════════════════════════════════════════
+// QR MANAGEMENT
+// ═══════════════════════════════════════════════
+function filterQRGrid() {
+  const q = document.getElementById('qr-search').value.toLowerCase();
+  const filtered = allStudents.filter(s => {
+    const name = (s.fullName || s.name || '').toLowerCase();
+    const pid = (s.participantId || '').toLowerCase();
+    return !q || name.includes(q) || pid.includes(q);
+  });
+  renderQRGrid(filtered);
+}
+
+function renderQRGrid(data) {
+  const list = data || allStudents.filter(s => s.qrUnlocked);
+  const grid = document.getElementById('qr-grid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>No QR codes available. Verify payments to unlock QR access.</p></div>`;
+    return;
+  }
+
+  const unlockedList = list.filter(s => s.qrUnlocked);
+  if (!unlockedList.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><p>No QR codes unlocked yet.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = unlockedList.map(s => {
+    const pid = s.participantId || s.id?.slice(0, 8);
+    return `
+    <div class="qr-card" id="qr-card-${s.id}">
+      <div id="qr-${s.id}"></div>
+      <div class="qr-card-name">${s.fullName || s.name || '—'}</div>
+      <div class="qr-card-id">${pid}</div>
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+        <button class="btn-sm btn-reject" onclick="disableQR('${s.id}')">Disable</button>
+        <button class="btn-sm btn-view" onclick="markAttendance('${s.id}')">Mark Present</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Generate QR codes
+  setTimeout(() => {
+    unlockedList.forEach(s => {
+      const el = document.getElementById(`qr-${s.id}`);
+      if (el && !el.querySelector('canvas, img')) {
+        try {
+          new QRCode(el, {
+            text: JSON.stringify({ participantId: s.participantId || s.id, name: s.fullName || s.name, event: 'AETHER 2K26', school: s.schoolName }),
+            width: 120, height: 120,
+            colorDark: '#000000', colorLight: '#ffffff'
+          });
+        } catch(e) {}
+      }
+    });
+  }, 200);
+}
+
+async function disableQR(id) {
+  try {
+    await db.collection('participants').doc(id).update({ qrUnlocked: false });
+    toast('QR access disabled.', 'warning');
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// QR SCANNER
+// ═══════════════════════════════════════════════
+function toggleQRScanner() {
+  if (scannerActive) {
+    stopQRScanner();
+  } else {
+    startQRScanner();
+  }
+}
+
+async function startQRScanner() {
+  const container = document.getElementById('qr-scanner-container');
+  const btn = document.getElementById('start-scan-btn');
+  const video = document.getElementById('qr-video');
+  container.style.display = 'block';
+  btn.textContent = 'Stop Scanner';
+  scannerActive = true;
+
+  try {
+    scannerStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    video.srcObject = scannerStream;
+    video.play();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    scannerInterval = setInterval(() => {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imgData.data, imgData.width, imgData.height);
+        if (code) {
+          handleScannedQR(code.data);
+        }
+      }
+    }, 200);
+  } catch (e) {
+    toast('Camera access denied or unavailable.', 'error');
+    stopQRScanner();
+  }
+}
+
+function stopQRScanner() {
+  if (scannerStream) {
+    scannerStream.getTracks().forEach(t => t.stop());
+    scannerStream = null;
+  }
+  if (scannerInterval) { clearInterval(scannerInterval); scannerInterval = null; }
+  scannerActive = false;
+  document.getElementById('qr-scanner-container').style.display = 'none';
+  document.getElementById('start-scan-btn').textContent = 'Start Scanner';
+}
+
+async function handleScannedQR(data) {
+  stopQRScanner();
+  try {
+    const parsed = JSON.parse(data);
+    const pid = parsed.participantId;
+    const student = allStudents.find(s => s.participantId === pid || s.id === pid);
+    if (student) {
+      await markAttendance(student.id, true);
+    } else {
+      toast(`QR scanned but no participant found for ID: ${pid}`, 'warning');
+    }
+  } catch (e) {
+    toast('Invalid QR code format.', 'error');
+  }
+}
+
+async function markAttendance(id, fromScan) {
+  const s = allStudents.find(x => x.id === id);
+  if (!s) return;
+  if (s.attended) { if (fromScan) toast(`${s.fullName || s.name} already checked in.`, 'info'); return; }
+  try {
+    await db.collection('participants').doc(id).update({
+      attended: true,
+      attendanceTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Log to attendance collection
+    await db.collection('attendance').add({
+      participantId: s.participantId || id,
+      participantName: s.fullName || s.name,
+      schoolName: s.schoolName,
+      teamCode: s.teamCode || null,
+      markedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      markedBy: currentAdminUser?.email
+    });
+    toast(`${s.fullName || s.name} marked as present.`, 'success');
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// ATTENDANCE RENDER
+// ═══════════════════════════════════════════════
+function renderAttendance() {
+  const tbody = document.getElementById('attendance-tbody');
+  if (!allStudents.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No participants found.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = allStudents.map(s => {
+    const ts = s.attendanceTimestamp;
+    const time = ts && ts.toDate ? ts.toDate().toLocaleTimeString() : '—';
+    return `
+    <tr>
+      <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${s.participantId || s.id?.slice(0,8) || '—'}</span></td>
+      <td>${s.fullName || s.name || '—'}</td>
+      <td>${s.schoolName || '—'}</td>
+      <td>${s.teamCode || '—'}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:11px">${time}</td>
+      <td>${s.attended ? '<span class="badge badge-success">Present</span>' : '<span class="badge badge-danger">Absent</span>'}</td>
+      <td>
+        ${!s.attended ? `<button class="btn-sm btn-verify" onclick="markAttendance('${s.id}')">Mark Present</button>` : '<span style="color:var(--white-40);font-size:12px">Checked In</span>'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function exportAttendance() {
+  const rows = [['Participant ID','Name','School','Team','Attended','Time']];
+  allStudents.forEach(s => {
+    const ts = s.attendanceTimestamp;
+    const time = ts && ts.toDate ? ts.toDate().toLocaleString() : '';
+    rows.push([s.participantId || s.id, s.fullName || s.name || '', s.schoolName || '', s.teamCode || '', s.attended ? 'Yes' : 'No', time]);
+  });
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'AETHER_2K26_Attendance.csv';
+  a.click();
+  toast('Attendance exported.', 'success');
+}
+
+// ═══════════════════════════════════════════════
+// ANNOUNCEMENTS
+// ═══════════════════════════════════════════════
+async function createAnnouncement() {
+  const title = document.getElementById('ann-title').value.trim();
+  const body = document.getElementById('ann-body').value.trim();
+  const priority = document.getElementById('ann-priority').value;
+  if (!title || !body) { toast('Please fill in title and message.', 'warning'); return; }
+
+  try {
+    await db.collection('announcements').add({
+      title, body, priority,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy: currentAdminUser?.email,
+      active: true
+    });
+    document.getElementById('ann-title').value = '';
+    document.getElementById('ann-body').value = '';
+    toast('Announcement posted successfully.', 'success');
+  } catch (e) {
+    toast('Failed to post: ' + e.message, 'error');
+  }
+}
+
+function renderAnnouncements() {
+  const container = document.getElementById('announcements-list');
+  if (!allAnnouncements.length) {
+    container.innerHTML = `<div class="empty-state"><p>No announcements posted yet.</p></div>`;
+    return;
+  }
+  container.innerHTML = allAnnouncements.map(a => {
+    const time = a.createdAt?.toDate ? a.createdAt.toDate().toLocaleString() : 'Recently';
+    const prioColors = { urgent: 'var(--danger)', important: 'var(--warning)', normal: 'var(--gold)' };
+    const prioColor = prioColors[a.priority] || prioColors.normal;
+    return `
+    <div class="announcement-card">
+      <div class="announcement-card-header">
+        <div>
+          <div class="announcement-title">${a.title}</div>
+          <div class="announcement-time">${time}</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <span style="font-size:10px;font-family:'Space Mono',monospace;color:${prioColor};text-transform:uppercase;letter-spacing:1px">${a.priority || 'normal'}</span>
+          <button class="btn-sm btn-edit" onclick="openEditAnn('${a.id}')">Edit</button>
+          <button class="btn-sm btn-delete" onclick="confirmDelete('announcements','${a.id}','${a.title}')">Delete</button>
+        </div>
+      </div>
+      <div class="announcement-body">${a.body}</div>
+    </div>`;
+  }).join('');
+}
+
+function openEditAnn(id) {
+  const a = allAnnouncements.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('edit-ann-id').value = id;
+  document.getElementById('edit-ann-title').value = a.title || '';
+  document.getElementById('edit-ann-body').value = a.body || '';
+  document.getElementById('edit-ann-priority').value = a.priority || 'normal';
+  openModal('modal-edit-ann');
+}
+
+async function saveAnnEdit() {
+  const id = document.getElementById('edit-ann-id').value;
+  try {
+    await db.collection('announcements').doc(id).update({
+      title: document.getElementById('edit-ann-title').value,
+      body: document.getElementById('edit-ann-body').value,
+      priority: document.getElementById('edit-ann-priority').value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('Announcement updated.', 'success');
+    closeModal('modal-edit-ann');
+  } catch (e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SETTINGS TOGGLES
+// ═══════════════════════════════════════════════
+function setToggleState(id, on) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (on) el.classList.add('on'); else el.classList.remove('on');
+}
+
+async function toggleSetting(key, el) {
+  const on = el.classList.contains('on');
+  el.classList.toggle('on');
+  try {
+    await db.collection('settings').doc('eventConfig').set({ [key]: !on }, { merge: true });
+    toast(`Setting updated.`, 'success');
+  } catch (e) {
+    el.classList.toggle('on'); // revert
+    toast('Failed to update setting: ' + e.message, 'error');
+  }
+}
+
+// ═══════════════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════════════
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => {
+    if (e.target === el) el.classList.remove('open');
+  });
+});
+
+// ═══════════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ═══════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(() => {
+    t.style.transition = 'opacity 0.4s, transform 0.4s';
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(20px)';
+    setTimeout(() => t.remove(), 400);
+  }, 3500);
+}
+
+// ═══════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ═══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>
