@@ -517,6 +517,94 @@ body::after {
 .status-reject  { background:rgba(255,59,107,.1); border:1px solid rgba(255,59,107,.3); color:var(--error); }
 .status-active  { background:rgba(255,107,0,.1); border:1px solid rgba(255,107,0,.3); color:var(--saffron); }
 
+/* ===================== PAYMENT UPLOAD FORM ===================== */
+.pay-upload-section {
+  margin-top:20px;
+  border-top:1px solid rgba(255,107,0,0.15);
+  padding-top:20px;
+}
+.pay-upload-title {
+  font-family:var(--font-display); font-size:.85rem; font-weight:700;
+  color:var(--saffron-light); letter-spacing:.08em; margin-bottom:16px;
+  text-transform:uppercase;
+}
+.pay-form-row {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;
+}
+@media(max-width:520px){ .pay-form-row { grid-template-columns:1fr; } }
+.pay-form-group { display:flex; flex-direction:column; gap:6px; }
+.pay-form-label {
+  font-size:.72rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--text-muted); font-family:var(--font-mono);
+}
+.pay-form-input {
+  width:100%; background:rgba(255,107,0,0.05);
+  border:1px solid rgba(255,107,0,0.22);
+  border-radius:var(--radius-md); padding:10px 13px;
+  color:var(--text-primary); font-family:var(--font-mono);
+  font-size:.85rem; outline:none; transition:border-color .2s, box-shadow .2s;
+}
+.pay-form-input:focus {
+  border-color:var(--saffron);
+  box-shadow:0 0 0 3px rgba(255,107,0,0.12);
+}
+.pay-form-input::placeholder { color:rgba(255,255,255,0.2); }
+.pay-ss-upload-wrap {
+  border:2px dashed rgba(255,107,0,0.3);
+  border-radius:var(--radius-md); padding:20px;
+  text-align:center; cursor:pointer; transition:all .25s ease;
+  background:rgba(255,107,0,0.03); margin-bottom:14px; position:relative;
+}
+.pay-ss-upload-wrap:hover, .pay-ss-upload-wrap.dragover {
+  border-color:var(--saffron); background:rgba(255,107,0,0.07);
+}
+.pay-ss-upload-wrap input[type=file] {
+  position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+}
+.pay-ss-icon { font-size:2rem; margin-bottom:8px; }
+.pay-ss-label { font-size:.82rem; color:var(--text-secondary); font-family:var(--font-body); }
+.pay-ss-hint  { font-size:.72rem; color:var(--text-muted); margin-top:4px; font-family:var(--font-body); }
+.pay-ss-preview {
+  width:100%; max-height:220px; object-fit:contain;
+  border-radius:var(--radius-md); margin-bottom:14px;
+  border:1px solid rgba(255,107,0,0.25);
+  display:none;
+}
+.pay-submitted-box {
+  background:rgba(0,229,160,0.05); border:1px solid rgba(0,229,160,0.2);
+  border-radius:var(--radius-md); padding:16px;
+  margin-top:18px;
+}
+.pay-submitted-title {
+  font-size:.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--success); font-family:var(--font-mono); margin-bottom:12px;
+}
+.pay-submitted-row {
+  display:flex; justify-content:space-between; align-items:center;
+  font-size:.82rem; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.pay-submitted-row:last-child { border-bottom:none; }
+.pay-submitted-row span:first-child { color:var(--text-muted); font-family:var(--font-body); }
+.pay-submitted-row span:last-child  { font-family:var(--font-mono); font-weight:700; color:var(--text-primary); }
+.pay-ss-thumb {
+  width:100%; max-height:160px; object-fit:contain;
+  border-radius:var(--radius-md); margin-top:10px;
+  border:1px solid rgba(255,255,255,0.1); cursor:pointer;
+}
+.pay-resubmit-btn {
+  margin-top:12px; font-size:.75rem; color:var(--text-muted);
+  background:none; border:1px solid rgba(255,255,255,0.15);
+  border-radius:var(--radius-md); padding:6px 14px; cursor:pointer;
+  font-family:var(--font-body); transition:all .2s;
+}
+.pay-resubmit-btn:hover { border-color:var(--saffron); color:var(--saffron); }
+.rejected-note {
+  background:rgba(255,59,107,0.07); border:1px solid rgba(255,59,107,0.25);
+  border-radius:var(--radius-md); padding:12px 14px;
+  font-size:.8rem; color:var(--error); font-family:var(--font-body);
+  margin-bottom:16px; line-height:1.5;
+}
+
 /* ===================== ENTRY QR PANEL ===================== */
 .qr-panel-wrap { display:flex; gap:28px; flex-wrap:wrap; }
 .qr-card-box {
@@ -573,6 +661,7 @@ body::after {
 }
 #qr-fullscreen-modal.open { display:flex; }
 @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes spin360 { to{transform:rotate(360deg)} }
 .qr-fullscreen-inner {
   text-align:center; padding:40px 32px;
   background:rgba(255,255,255,0.04);
@@ -1033,19 +1122,90 @@ body::after {
             UPI ID: <span style="color:var(--saffron);font-family:var(--font-mono)">aether2k26@paytm</span>
           </div>
         </div>
+
         <div class="payment-info">
           <div class="payment-info-row"><span>Amount</span><span style="color:var(--saffron)">₹100.00</span></div>
           <div class="payment-info-row"><span>Participant ID</span><span id="pay-pid">—</span></div>
           <div class="payment-info-row"><span>Event</span><span>AETHER 2K26</span></div>
           <div class="payment-info-row"><span>Status</span><span id="pay-status-txt">—</span></div>
+          <!-- Shows UTR & Txn ID once submitted -->
+          <div class="payment-info-row" id="pay-utr-row" style="display:none">
+            <span>UTR Number</span><span id="pay-utr-display">—</span>
+          </div>
+          <div class="payment-info-row" id="pay-txn-row" style="display:none">
+            <span>Transaction ID</span><span id="pay-txn-display">—</span>
+          </div>
         </div>
+
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
           <div id="pay-badge-el"></div>
           <div style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-body)">Admin verifies within 2–4 hrs</div>
         </div>
-        <div style="padding:11px 14px;background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.18);border-radius:var(--radius-md);font-size:.8rem;color:var(--text-secondary);font-family:var(--font-body);line-height:1.6">
-          ⚠️ After payment, mention your Participant ID in the UPI remarks. Admin will verify and unlock your entry QR automatically.
+
+        <!-- ── UPLOAD FORM (shown when pending/rejected/not yet submitted) ── -->
+        <div id="pay-upload-form-wrap">
+
+          <!-- Rejection note shown only when rejected -->
+          <div class="rejected-note" id="pay-rejected-note" style="display:none">
+            ❌ Your previous payment was rejected. Please re-upload a valid payment screenshot with correct details.
+          </div>
+
+          <div class="pay-upload-section">
+            <div class="pay-upload-title">📤 Submit Payment Proof</div>
+
+            <div class="pay-form-row">
+              <div class="pay-form-group">
+                <label class="pay-form-label">UTR Number *</label>
+                <input class="pay-form-input" type="text" id="pay-utr-input"
+                  placeholder="e.g. 123456789012" maxlength="22"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+              </div>
+              <div class="pay-form-group">
+                <label class="pay-form-label">Transaction ID *</label>
+                <input class="pay-form-input" type="text" id="pay-txn-input"
+                  placeholder="e.g. TXN9876543210">
+              </div>
+            </div>
+
+            <div class="pay-form-group" style="margin-bottom:14px">
+              <label class="pay-form-label">Payment Screenshot *</label>
+            </div>
+
+            <div class="pay-ss-upload-wrap" id="pay-ss-drop-zone"
+              ondragover="event.preventDefault();this.classList.add('dragover')"
+              ondragleave="this.classList.remove('dragover')"
+              ondrop="handleSSFileDrop(event)">
+              <input type="file" id="pay-ss-file-input" accept="image/*" onchange="handleSSFileSelect(event)">
+              <div id="pay-ss-placeholder">
+                <div class="pay-ss-icon">📸</div>
+                <div class="pay-ss-label">Tap to upload or drag & drop screenshot</div>
+                <div class="pay-ss-hint">JPG, PNG or WEBP · Max 5MB</div>
+              </div>
+            </div>
+            <img id="pay-ss-preview-img" class="pay-ss-preview" alt="Payment screenshot preview">
+
+            <button class="btn btn-primary" id="pay-submit-btn" onclick="submitPaymentProof()" style="width:100%;justify-content:center;padding:13px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+              Submit Payment Proof
+            </button>
+          </div>
         </div>
+
+        <!-- ── SUBMITTED DETAILS (shown after submission, pending admin review) ── -->
+        <div id="pay-submitted-details" style="display:none">
+          <div class="pay-submitted-box">
+            <div class="pay-submitted-title">✅ Payment Proof Submitted — Awaiting Review</div>
+            <div class="pay-submitted-row"><span>UTR Number</span><span id="pay-sub-utr">—</span></div>
+            <div class="pay-submitted-row"><span>Transaction ID</span><span id="pay-sub-txn">—</span></div>
+            <div class="pay-submitted-row"><span>Submitted On</span><span id="pay-sub-date">—</span></div>
+            <div style="margin-top:12px">
+              <div style="font-size:.72rem;color:var(--text-muted);font-family:var(--font-mono);letter-spacing:.1em;margin-bottom:8px">SCREENSHOT</div>
+              <img id="pay-sub-ss-img" class="pay-ss-thumb" alt="Submitted screenshot" onclick="window.open(this.src,'_blank')">
+            </div>
+            <button class="pay-resubmit-btn" onclick="showPayResubmit()">↩ Re-submit with different details</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1309,6 +1469,9 @@ import {
   collection, query, where, getDocs, onSnapshot,
   serverTimestamp, orderBy, limit
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import {
+  getStorage, ref as storageRef, uploadBytes, getDownloadURL
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 
 // ── Firebase Config ──────────────────────────────────────────
 const firebaseConfig = {
@@ -1320,9 +1483,10 @@ const firebaseConfig = {
   appId: "1:471798414451:web:d9660f107f76a0f5537e06"
 };
 
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
+const app     = initializeApp(firebaseConfig);
+const auth    = getAuth(app);
+const db      = getFirestore(app);
+const storage = getStorage(app);
 
 let currentUser     = null;
 let currentUserData = null;
@@ -1551,6 +1715,7 @@ function initDashboard(){
   document.getElementById('pay-pid').textContent = data.participantId||'—';
   makeQR('pay-qr-code', `upi://pay?pa=aether2k26@paytm&pn=AETHER2K26&am=100&cu=INR&tn=${data.participantId}`, 144);
   renderPaymentStatus(data.paymentStatus);
+  renderPaymentUploadSection(data);
 
   // Entry QR
   renderEntryQR(data);
@@ -1574,9 +1739,10 @@ function initDashboard(){
       currentUserData = d;
       // Payment update
       renderPaymentStatus(d.paymentStatus);
+      renderPaymentUploadSection(d);
       renderEntryQR(d);
       renderPaymentBadgeEl('id-pay-badge', d.paymentStatus);
-      document.getElementById('ov-pay').textContent = (d.paymentStatus==='paid'||d.paymentStatus==='verified') ? 'Paid ✅' : d.paymentStatus==='rejected' ? 'Rejected ❌' : 'Pending ⏳';
+      document.getElementById('ov-pay').textContent = (d.paymentStatus==='paid'||d.paymentStatus==='verified') ? 'Paid ✅' : d.paymentStatus==='rejected' ? 'Rejected ❌' : d.paymentStatus==='pending_review' ? 'Under Review 🔍' : 'Pending ⏳';
       renderPaymentBadge('pf-payment', d.paymentStatus);
       // Team update
       loadTeam(d);
@@ -1594,9 +1760,12 @@ function renderPaymentStatus(status){
   } else if(status==='rejected'){
     txt.textContent='Rejected ❌'; txt.style.color='var(--error)';
     bdg.innerHTML='<div class="status-badge status-reject">❌ Payment Rejected</div>';
+  } else if(status==='pending_review'){
+    txt.textContent='Under Review 🔍'; txt.style.color='var(--info)';
+    bdg.innerHTML='<div class="status-badge" style="background:rgba(0,204,255,0.1);border:1px solid rgba(0,204,255,0.3);color:var(--info)">🔍 Under Review</div>';
   } else {
-    txt.textContent='Pending Review ⏳'; txt.style.color='var(--warning)';
-    bdg.innerHTML='<div class="status-badge status-pending">⏳ Pending Verification</div>';
+    txt.textContent='Pending Submission ⏳'; txt.style.color='var(--warning)';
+    bdg.innerHTML='<div class="status-badge status-pending">⏳ Not Yet Submitted</div>';
   }
 }
 
@@ -1605,6 +1774,7 @@ function renderPaymentBadgeEl(elId, status){
   if(!el) return;
   if(status==='paid'||status==='verified'){ el.className='status-badge status-paid'; el.textContent='✅ Payment Verified'; }
   else if(status==='rejected'){ el.className='status-badge status-reject'; el.textContent='❌ Payment Rejected'; }
+  else if(status==='pending_review'){ el.className='status-badge'; el.style.cssText='background:rgba(0,204,255,.1);border:1px solid rgba(0,204,255,.3);color:var(--info)'; el.textContent='🔍 Under Review'; }
   else { el.className='status-badge status-pending'; el.textContent='⏳ Payment Pending'; }
 }
 
@@ -1613,7 +1783,151 @@ function renderPaymentBadge(elId, status){
   if(!el) return;
   if(status==='paid'||status==='verified') el.innerHTML='<div class="status-badge status-paid" style="font-size:.75rem">✅ Verified</div>';
   else if(status==='rejected') el.innerHTML='<div class="status-badge status-reject" style="font-size:.75rem">❌ Rejected</div>';
+  else if(status==='pending_review') el.innerHTML='<div class="status-badge" style="font-size:.75rem;background:rgba(0,204,255,.1);border:1px solid rgba(0,204,255,.3);color:var(--info)">🔍 Under Review</div>';
   else el.innerHTML='<div class="status-badge status-pending" style="font-size:.75rem">⏳ Pending</div>';
+}
+
+// ── Payment Upload Form ────────────────────────────────────────
+let selectedSSFile = null;
+
+function handleSSFileSelect(event) {
+  const file = event.target.files[0];
+  if (file) previewSSFile(file);
+}
+
+function handleSSFileDrop(event) {
+  event.preventDefault();
+  document.getElementById('pay-ss-drop-zone').classList.remove('dragover');
+  const file = event.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) previewSSFile(file);
+  else showToast('Please drop an image file.', 'warning');
+}
+
+function previewSSFile(file) {
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('File too large. Max 5MB.', 'warning'); return;
+  }
+  selectedSSFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('pay-ss-preview-img');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('pay-ss-placeholder').innerHTML =
+      `<div style="font-size:.8rem;color:var(--success)">✅ ${file.name}</div><div class="pay-ss-hint" style="margin-top:4px">Tap to change</div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitPaymentProof() {
+  const utr = document.getElementById('pay-utr-input').value.trim();
+  const txn = document.getElementById('pay-txn-input').value.trim();
+
+  if (!utr) { showToast('Please enter your UTR number.', 'warning'); return; }
+  if (!txn) { showToast('Please enter your Transaction ID.', 'warning'); return; }
+  if (!selectedSSFile) { showToast('Please upload your payment screenshot.', 'warning'); return; }
+
+  const btn = document.getElementById('pay-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin360 .8s linear infinite"><path d="M21 12a9 9 0 1 1-6.22-8.56"/></svg> Uploading...`;
+
+  try {
+    const uid = currentUser.uid;
+    const pid = currentUserData.participantId;
+
+    // Upload screenshot to Firebase Storage
+    const fileExt = selectedSSFile.name.split('.').pop();
+    const filePath = `payment-screenshots/${uid}_${Date.now()}.${fileExt}`;
+    const fileRef = storageRef(storage, filePath);
+    await uploadBytes(fileRef, selectedSSFile);
+    const downloadUrl = await getDownloadURL(fileRef);
+
+    // Save to Firestore
+    await updateDoc(doc(db, 'participants', uid), {
+      utrNumber: utr,
+      transactionId: txn,
+      paymentScreenshot: downloadUrl,
+      paymentAmount: 100,
+      paymentSubmittedAt: serverTimestamp(),
+      paymentStatus: 'pending_review'
+    });
+
+    showToast('Payment proof submitted! Admin will verify shortly.', 'success');
+
+    // Update local data and refresh UI
+    currentUserData.utrNumber = utr;
+    currentUserData.transactionId = txn;
+    currentUserData.paymentScreenshot = downloadUrl;
+    currentUserData.paymentStatus = 'pending_review';
+    renderPaymentUploadSection(currentUserData);
+
+  } catch (err) {
+    console.error(err);
+    showToast('Upload failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Submit Payment Proof`;
+  }
+}
+
+function renderPaymentUploadSection(data) {
+  const status = data.paymentStatus;
+  const formWrap      = document.getElementById('pay-upload-form-wrap');
+  const submittedWrap = document.getElementById('pay-submitted-details');
+  const rejectedNote  = document.getElementById('pay-rejected-note');
+  const utrRow        = document.getElementById('pay-utr-row');
+  const txnRow        = document.getElementById('pay-txn-row');
+
+  // Show UTR & Txn ID in info box if available
+  if (data.utrNumber) {
+    document.getElementById('pay-utr-display').textContent = data.utrNumber;
+    utrRow.style.display = 'flex';
+  }
+  if (data.transactionId) {
+    document.getElementById('pay-txn-display').textContent = data.transactionId;
+    txnRow.style.display = 'flex';
+  }
+
+  if (status === 'verified' || status === 'paid') {
+    // Fully verified — hide both form and pending box
+    formWrap.style.display      = 'none';
+    submittedWrap.style.display = 'none';
+
+  } else if (status === 'pending_review' && data.paymentScreenshot) {
+    // Submitted, awaiting admin — show submitted details, hide form
+    formWrap.style.display      = 'none';
+    submittedWrap.style.display = 'block';
+    document.getElementById('pay-sub-utr').textContent = data.utrNumber || '—';
+    document.getElementById('pay-sub-txn').textContent = data.transactionId || '—';
+    const submittedAt = data.paymentSubmittedAt?.toDate?.();
+    document.getElementById('pay-sub-date').textContent =
+      submittedAt ? submittedAt.toLocaleString('en-IN') : 'Just now';
+    const ssImg = document.getElementById('pay-sub-ss-img');
+    ssImg.src = data.paymentScreenshot;
+    ssImg.style.display = 'block';
+
+  } else if (status === 'rejected') {
+    // Rejected — show form with rejection note
+    formWrap.style.display      = 'block';
+    submittedWrap.style.display = 'none';
+    rejectedNote.style.display  = 'block';
+
+  } else {
+    // Default: pending / not submitted yet
+    formWrap.style.display      = 'block';
+    submittedWrap.style.display = 'none';
+    rejectedNote.style.display  = 'none';
+  }
+}
+
+function showPayResubmit() {
+  // Allow student to re-submit (e.g. if they made a typo)
+  selectedSSFile = null;
+  document.getElementById('pay-submitted-details').style.display = 'none';
+  document.getElementById('pay-upload-form-wrap').style.display  = 'block';
+  document.getElementById('pay-ss-preview-img').style.display    = 'none';
+  document.getElementById('pay-utr-input').value = currentUserData.utrNumber || '';
+  document.getElementById('pay-txn-input').value = currentUserData.transactionId || '';
 }
 
 // ── Entry QR ──────────────────────────────────────────────────
@@ -1647,9 +1961,17 @@ function renderEntryQR(data){
     lock.style.display='none';
     dlBtn.disabled=false; expBtn.disabled=false;
     if(qrInfo.status) qrInfo.status.innerHTML='<span style="color:var(--success);font-weight:800">✅ Unlocked</span>';
+  } else if(data.paymentStatus==='pending_review'){
+    lock.style.display='flex';
+    dlBtn.disabled=true; expBtn.disabled=true;
+    lock.querySelector('.lock-icon').textContent='🔍';
+    lock.querySelector('.lock-text').innerHTML='UNDER REVIEW<br><span style="font-size:.65rem;font-weight:400;opacity:.8">Admin is verifying your payment</span>';
+    if(qrInfo.status) qrInfo.status.innerHTML='<span style="color:var(--info);font-weight:800">🔍 Under Review</span>';
   } else {
     lock.style.display='flex';
     dlBtn.disabled=true; expBtn.disabled=true;
+    lock.querySelector('.lock-icon').textContent='🔒';
+    lock.querySelector('.lock-text').innerHTML='PAYMENT PENDING<br><span style="font-size:.65rem;font-weight:400;opacity:.8">Complete payment to unlock</span>';
     if(qrInfo.status) qrInfo.status.innerHTML='<span style="color:var(--warning);font-weight:800">⏳ Locked — Pending Payment</span>';
   }
 }
