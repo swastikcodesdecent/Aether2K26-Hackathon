@@ -1747,10 +1747,10 @@
         <div class="data-table-wrap">
           <table class="data-table">
             <thead><tr>
-              <th>Team Code</th><th>Team Name</th><th>Leader</th><th>Members</th><th>School</th><th>Submission</th><th>Status</th><th>Actions</th>
+              <th>Team Name</th><th>Leader</th><th>School</th><th>Members</th><th>Submission</th><th>Status</th><th>Actions</th>
             </tr></thead>
             <tbody id="teams-tbody">
-              <tr><td colspan="8"><div class="empty-state"><p>Loading teams...</p></div></td></tr>
+              <tr><td colspan="7"><div class="empty-state"><p>Loading teams...</p></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -1808,7 +1808,7 @@
               <th>Participant ID</th><th>Name</th><th>School</th><th>UTR No.</th><th>Txn ID</th><th>Amount</th><th>Screenshot</th><th>Status</th><th>Actions</th>
             </tr></thead>
             <tbody id="payments-tbody">
-              <tr><td colspan="8"><div class="empty-state"><p>Loading payment records...</p></div></td></tr>
+              <tr><td colspan="9"><div class="empty-state"><p>Loading payment records...</p></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -1944,21 +1944,21 @@
               <div class="toggle-label">Allow New Registrations</div>
               <div class="toggle-desc">Enable or disable public registration for AETHER 2K26</div>
             </div>
-            <div class="toggle-switch on" id="toggle-reg" onclick="toggleSetting('registrationsOpen', this)"></div>
+            <div class="toggle-switch" id="toggle-reg" onclick="toggleSetting('registrationsOpen', this)"></div>
           </div>
           <div class="toggle-row">
             <div>
               <div class="toggle-label">Allow Team Creation</div>
               <div class="toggle-desc">Participants can create and join teams</div>
             </div>
-            <div class="toggle-switch on" id="toggle-teams" onclick="toggleSetting('teamsOpen', this)"></div>
+            <div class="toggle-switch" id="toggle-teams" onclick="toggleSetting('teamsOpen', this)"></div>
           </div>
           <div class="toggle-row">
             <div>
               <div class="toggle-label">Allow Idea Submissions</div>
               <div class="toggle-desc">Enable project idea submission portal</div>
             </div>
-            <div class="toggle-switch on" id="toggle-submissions" onclick="toggleSetting('submissionsOpen', this)"></div>
+            <div class="toggle-switch" id="toggle-submissions" onclick="toggleSetting('submissionsOpen', this)"></div>
           </div>
         </div>
 
@@ -2371,12 +2371,26 @@ function attachFirestoreListeners() {
   unsubs.push(u4);
 
   // Settings
-  const u5 = db.collection('settings').doc('eventConfig').onSnapshot(snap => {
+  const u5 = db.collection('settings').doc('eventConfig').onSnapshot(async snap => {
     if (snap.exists) {
       const d = snap.data();
-      setToggleState('toggle-reg', d.registrationsOpen !== false);
-      setToggleState('toggle-teams', d.teamsOpen !== false);
-      setToggleState('toggle-submissions', d.submissionsOpen !== false);
+      setToggleState('toggle-reg',         d.registrationsOpen === true);
+      setToggleState('toggle-teams',       d.teamsOpen         === true);
+      setToggleState('toggle-submissions', d.submissionsOpen   === true);
+    } else {
+      // Doc doesn't exist yet — create it with defaults ON
+      try {
+        await db.collection('settings').doc('eventConfig').set({
+          registrationsOpen: true,
+          teamsOpen: true,
+          submissionsOpen: true
+        });
+      } catch(e) {
+        // If we can't create, show defaults as ON
+        setToggleState('toggle-reg', true);
+        setToggleState('toggle-teams', true);
+        setToggleState('toggle-submissions', true);
+      }
     }
   });
   unsubs.push(u5);
@@ -2752,7 +2766,7 @@ function filterTeams() {
   const sub = document.getElementById('filter-team-sub').value;
 
   filteredTeams = allTeams.filter(t => {
-    const name = (t.teamName || '').toLowerCase();
+    const name = (t.name || t.teamName || '').toLowerCase();
     const code = (t.teamCode || '').toLowerCase();
     const matchQ = !q || name.includes(q) || code.includes(q);
     const hasSub = allSubmissions.some(s => s.teamCode === t.teamCode || s.teamId === t.id);
@@ -2766,27 +2780,27 @@ function renderTeams(data) {
   const list = data || allTeams;
   const tbody = document.getElementById('teams-tbody');
   if (!list.length) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>No teams found.</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No teams found.</p></div></td></tr>`;
     return;
   }
   tbody.innerHTML = list.map(t => {
     const members = allStudents.filter(s => s.teamCode === t.teamCode || s.teamId === t.id);
+    const leader = t.leaderName || t.leader || members.find(m => m.uid === t.leaderId)?.fullName || members.find(m => m.uid === t.leaderId)?.name || members[0]?.fullName || members[0]?.name || '—';
+    const school = t.schoolName || members[0]?.schoolName || '—';
     const hasSub = allSubmissions.some(s => s.teamCode === t.teamCode || s.teamId === t.id);
     const status = t.status || 'active';
+    const memberNames = members.map(m => m.fullName || m.name).filter(Boolean).join(', ') || `${members.length} member${members.length !== 1 ? 's' : ''}`;
     return `
     <tr>
-      <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${t.teamCode || '—'}</span></td>
-      <td style="font-weight:700;color:var(--white-90)">${t.teamName || '—'}</td>
-      <td>${t.leaderName || t.leader || '—'}</td>
-      <td><span style="font-size:13px">${members.length} member${members.length !== 1 ? 's' : ''}</span></td>
-      <td>${t.schoolName || members[0]?.schoolName || '—'}</td>
+      <td style="font-weight:700;color:var(--white-90)">${t.name || t.teamName || '—'}</td>
+      <td>${leader}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${school}</td>
+      <td><span style="font-size:12px;color:var(--white-70)" title="${memberNames}">${members.length} member${members.length !== 1 ? 's' : ''}</span></td>
       <td>${hasSub ? '<span class="badge badge-success">Submitted</span>' : '<span class="badge badge-neutral">Pending</span>'}</td>
       <td>${teamStatusBadge(status)}</td>
       <td>
         <div class="action-btns">
-          <button class="btn-sm btn-shortlist" onclick="updateTeamStatus('${t.id}','shortlisted')">Shortlist</button>
-          <button class="btn-sm btn-reject" onclick="updateTeamStatus('${t.id}','rejected')">Reject</button>
-          <button class="btn-sm btn-delete" onclick="confirmDelete('teams','${t.id}','${t.teamName || t.id}')">Remove</button>
+          <button class="btn-sm btn-verify" onclick="updateTeamStatus('${t.id}','shortlisted')">Accept</button>
         </div>
       </td>
     </tr>`;
@@ -3124,15 +3138,16 @@ async function markAttendance(id, fromScan) {
       attended: true,
       attendanceTimestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
-    // Log to attendance collection
-    await db.collection('attendance').add({
+    // Log to attendance collection — strip any undefined values
+    const logEntry = {
       participantId: s.participantId || id,
-      participantName: s.fullName || s.name,
-      schoolName: s.schoolName,
-      teamCode: s.teamCode || null,
+      participantName: s.fullName || s.name || 'Unknown',
       markedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      markedBy: currentAdminUser?.email
-    });
+      markedBy: currentAdminUser?.email || 'admin'
+    };
+    if (s.schoolName) logEntry.schoolName = s.schoolName;
+    if (s.teamCode)   logEntry.teamCode   = s.teamCode;
+    await db.collection('attendance').add(logEntry);
     toast(`${s.fullName || s.name} marked as present.`, 'success');
   } catch (e) {
     toast('Failed: ' + e.message, 'error');
@@ -3269,13 +3284,16 @@ function setToggleState(id, on) {
 }
 
 async function toggleSetting(key, el) {
-  const on = el.classList.contains('on');
-  el.classList.toggle('on');
+  const isCurrentlyOn = el.classList.contains('on');
+  const newValue = !isCurrentlyOn;
+  // Optimistically update UI
+  if (newValue) el.classList.add('on'); else el.classList.remove('on');
   try {
-    await db.collection('settings').doc('eventConfig').set({ [key]: !on }, { merge: true });
-    toast(`Setting updated.`, 'success');
+    await db.collection('settings').doc('eventConfig').set({ [key]: newValue }, { merge: true });
+    toast(`${newValue ? 'Enabled' : 'Disabled'} successfully.`, 'success');
   } catch (e) {
-    el.classList.toggle('on'); // revert
+    // Revert on failure
+    if (isCurrentlyOn) el.classList.add('on'); else el.classList.remove('on');
     toast('Failed to update setting: ' + e.message, 'error');
   }
 }
