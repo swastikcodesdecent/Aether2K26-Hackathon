@@ -1044,7 +1044,44 @@ body::after {
           <div style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-body)">Admin verifies within 2–4 hrs</div>
         </div>
         <div style="padding:11px 14px;background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.18);border-radius:var(--radius-md);font-size:.8rem;color:var(--text-secondary);font-family:var(--font-body);line-height:1.6">
-          After payment, mention your Participant ID in the UPI remarks. Admin will verify and unlock your entry QR automatically.
+          After payment, mention your Participant ID in the UPI remarks, then submit your UTR No. and Transaction ID below for quick verification.
+        </div>
+
+        <!-- ── Payment Detail Submission Form ── -->
+        <div id="pay-submit-section" style="margin-top:22px">
+          <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:var(--saffron-light);font-family:var(--font-mono);margin-bottom:14px;display:flex;align-items:center;gap:8px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Submit Payment Details
+          </div>
+          <div id="pay-already-submitted" class="hidden" style="padding:14px 16px;background:rgba(0,229,160,0.07);border:1px solid rgba(0,229,160,0.25);border-radius:var(--radius-md);margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span style="font-size:.85rem;font-weight:800;color:var(--success)">Details Submitted — Awaiting Verification</span>
+            </div>
+            <div style="font-size:.78rem;color:var(--text-muted);font-family:var(--font-body);display:grid;gap:4px">
+              <div>UTR No: <span id="pay-submitted-utr" style="color:var(--text-primary);font-family:var(--font-mono);font-weight:700">—</span></div>
+              <div>Transaction ID: <span id="pay-submitted-txn" style="color:var(--text-primary);font-family:var(--font-mono);font-weight:700">—</span></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" style="margin-top:12px;font-size:.7rem" onclick="editPaymentDetails()">Edit Details</button>
+          </div>
+          <div id="pay-form-fields">
+            <div style="display:grid;gap:13px;margin-bottom:14px">
+              <div class="form-group">
+                <label class="form-label" for="pay-utr-input">UTR Number <span style="color:var(--error)">*</span></label>
+                <input class="form-input" id="pay-utr-input" type="text" placeholder="e.g. 412345678901" maxlength="22" spellcheck="false" autocomplete="off" style="font-family:var(--font-mono);letter-spacing:.04em">
+                <div style="font-size:.68rem;color:var(--text-muted);font-family:var(--font-body);margin-top:4px">12-digit Unique Transaction Reference from your UPI app</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="pay-txn-input">Transaction ID <span style="color:var(--error)">*</span></label>
+                <input class="form-input" id="pay-txn-input" type="text" placeholder="e.g. T2412345ABCXYZ" maxlength="30" spellcheck="false" autocomplete="off" style="font-family:var(--font-mono);letter-spacing:.04em">
+                <div style="font-size:.68rem;color:var(--text-muted);font-family:var(--font-body);margin-top:4px">Transaction ID shown in payment confirmation / bank SMS</div>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="pay-submit-btn" onclick="handleSubmitPaymentDetails()" style="width:100%">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Submit for Verification
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1551,6 +1588,7 @@ function initDashboard(){
   document.getElementById('pay-pid').textContent = data.participantId||'—';
   makeQR('pay-qr-code', `upi://pay?pa=aether2k26@paytm&pn=AETHER2K26&am=100&cu=INR&tn=${data.participantId}`, 144);
   renderPaymentStatus(data.paymentStatus);
+  loadPaymentDetails(data);
 
   // Entry QR
   renderEntryQR(data);
@@ -1896,6 +1934,57 @@ window.editProject = function(){
     techStack = p.techStack||[]; renderTechTags();
   }
 };
+
+// ── Payment Detail Submission ─────────────────────────────────
+window.handleSubmitPaymentDetails = async function(){
+  const utr = document.getElementById('pay-utr-input').value.trim();
+  const txn = document.getElementById('pay-txn-input').value.trim();
+  if(!utr){ showToast('Please enter your UTR Number','error'); return; }
+  if(!txn){ showToast('Please enter your Transaction ID','error'); return; }
+
+  const btn = document.getElementById('pay-submit-btn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  try {
+    await updateDoc(doc(db,'participants',currentUser.uid),{
+      utrNumber: utr,
+      transactionId: txn,
+      paymentStatus: currentUserData.paymentStatus === 'verified' ? 'verified' : 'pending',
+      paymentSubmittedAt: serverTimestamp()
+    });
+    currentUserData.utrNumber = utr;
+    currentUserData.transactionId = txn;
+    renderSubmittedPaymentDetails(utr, txn);
+    showToast('Payment details submitted! Admin will verify soon.','success');
+  } catch(e){
+    showToast('Failed to submit. Please try again.','error');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Submit for Verification';
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Submit for Verification';
+  }
+};
+
+function renderSubmittedPaymentDetails(utr, txn){
+  document.getElementById('pay-submitted-utr').textContent = utr || '—';
+  document.getElementById('pay-submitted-txn').textContent = txn || '—';
+  document.getElementById('pay-already-submitted').classList.remove('hidden');
+  document.getElementById('pay-form-fields').classList.add('hidden');
+}
+
+window.editPaymentDetails = function(){
+  document.getElementById('pay-already-submitted').classList.add('hidden');
+  document.getElementById('pay-form-fields').classList.remove('hidden');
+  const utr = currentUserData?.utrNumber || '';
+  const txn = currentUserData?.transactionId || '';
+  document.getElementById('pay-utr-input').value = utr;
+  document.getElementById('pay-txn-input').value = txn;
+};
+
+function loadPaymentDetails(data){
+  if(data.utrNumber && data.transactionId){
+    renderSubmittedPaymentDetails(data.utrNumber, data.transactionId);
+  }
+}
 
 // ── Logout ────────────────────────────────────────────────────
 window.handleLogout = async function(){
