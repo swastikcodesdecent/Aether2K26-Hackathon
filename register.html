@@ -1167,6 +1167,20 @@ try {
     const regOpen = data.registrationsOpen !== false; // default open if not set
     applyRegistrationState(regOpen);
   });
+
+  // ── Live registered count ──
+  onSnapshot(doc(db, 'meta', 'stats'), (snap) => {
+    const el = document.getElementById('stat-reg');
+    if (!el) return;
+    if (snap.exists() && snap.data().registered != null) {
+      el.textContent = snap.data().registered;
+    } else {
+      // Fallback: count participants collection directly
+      getDocs(collection(db, 'participants')).then(s => {
+        el.textContent = s.size;
+      }).catch(() => { el.textContent = '—'; });
+    }
+  });
 } catch(e) {
   console.warn('Firebase init failed — running in DEMO mode');
   DEMO_MODE = true;
