@@ -1170,13 +1170,18 @@ body::after {
       <div class="panel-sub">Teams of exactly 2 members. Create or join a team using a team code.</div>
 
       <div id="team-no-team">
+        <!-- Banner shown when teams are closed -->
+        <div id="team-closed-banner" style="display:none;padding:14px 18px;background:rgba(255,59,107,0.08);border:1px solid rgba(255,59,107,0.3);border-radius:14px;margin-bottom:16px;align-items:center;gap:12px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span style="font-size:.85rem;font-weight:700;color:var(--error)">Team creation & joining is currently disabled by the admin.</span>
+        </div>
         <div class="glass team-card">
           <div class="team-empty">
             <span class="team-empty-icon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>
             <p style="font-weight:700;margin-bottom:6px">You're not in a team yet</p>
             <p style="font-size:.82rem">Create a new team or join with a partner's code.</p>
           </div>
-          <div class="team-actions">
+          <div id="team-actions-wrap" class="team-actions">
             <button class="btn btn-primary" onclick="openModal('modal-create-team')">+ Create Team</button>
             <button class="btn btn-ghost" onclick="openModal('modal-join-team')">Join with Code</button>
           </div>
@@ -1230,6 +1235,11 @@ body::after {
       </div>
 
       <div id="project-form-container" class="hidden">
+        <!-- Banner shown when submissions are closed -->
+        <div id="project-closed-banner" style="display:none;padding:14px 18px;background:rgba(255,59,107,0.08);border:1px solid rgba(255,59,107,0.3);border-radius:14px;margin-bottom:16px;align-items:center;gap:12px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--error)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span style="font-size:.85rem;font-weight:700;color:var(--error)">Project submissions are currently closed by the admin.</span>
+        </div>
         <div id="project-submitted-view" class="glass hidden" style="padding:26px;max-width:580px;margin-bottom:18px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
             <div style="font-size:.82rem;color:var(--saffron);font-weight:800;letter-spacing:.05em">SUBMITTED PROJECT</div>
@@ -1261,7 +1271,7 @@ body::after {
               </div>
               <div class="tag-wrap" id="tech-tags"></div>
             </div>
-            <button class="btn btn-primary" type="submit" style="width:100%">Submit Project Idea</button>
+            <button class="btn btn-primary" id="proj-submit-btn" type="submit" style="width:100%">Submit Project Idea</button>
           </form>
         </div>
       </div>
@@ -1365,7 +1375,15 @@ let currentUser     = null;
 let currentUserData = null;
 let teamUnsubscribe = null;
 let annUnsubscribe  = null;
+let settingsUnsub   = null;
 let techStack       = [];
+
+// Live event settings — updated by Firestore listener
+const eventSettings = {
+  registrationsOpen: true,
+  teamsOpen:         true,
+  submissionsOpen:   true
+};
 
 // ── Helpers ──────────────────────────────────────────────────
 function showToast(msg, type='info') {
@@ -1605,6 +1623,9 @@ function initDashboard(){
   // Load announcements (realtime)
   loadAnnouncements();
 
+  // Load & enforce event settings (realtime)
+  loadEventSettings();
+
   // Realtime participant listener (payment updates)
   onSnapshot(doc(db,'participants',currentUser.uid), snap=>{
     if(snap.exists()){
@@ -1690,6 +1711,34 @@ function renderEntryQR(data){
     dlBtn.disabled=true; expBtn.disabled=true;
     if(qrInfo.status) qrInfo.status.innerHTML='<span style="color:var(--warning);font-weight:800">Locked — Pending Payment</span>';
   }
+}
+
+// ── Event Settings (realtime) ─────────────────────────────────
+function loadEventSettings(){
+  if(settingsUnsub) settingsUnsub();
+  settingsUnsub = onSnapshot(doc(db,'settings','eventConfig'), snap=>{
+    if(snap.exists()){
+      const d = snap.data();
+      eventSettings.registrationsOpen = d.registrationsOpen !== false;
+      eventSettings.teamsOpen         = d.teamsOpen         !== false;
+      eventSettings.submissionsOpen   = d.submissionsOpen   !== false;
+    }
+    applySettingsGates();
+  });
+}
+
+function applySettingsGates(){
+  // ── Teams gate ────────────────────────────────────────────
+  const teamActionsWrap  = document.getElementById('team-actions-wrap');
+  const teamClosedBanner = document.getElementById('team-closed-banner');
+  if(teamActionsWrap)   teamActionsWrap.style.display   = eventSettings.teamsOpen ? 'flex' : 'none';
+  if(teamClosedBanner)  teamClosedBanner.style.display  = eventSettings.teamsOpen ? 'none' : 'flex';
+
+  // ── Project/Submission gate ───────────────────────────────
+  const projClosedBanner = document.getElementById('project-closed-banner');
+  if(projClosedBanner)  projClosedBanner.style.display  = eventSettings.submissionsOpen ? 'none' : 'flex';
+  const projSubmitBtn    = document.getElementById('proj-submit-btn');
+  if(projSubmitBtn)     projSubmitBtn.disabled           = !eventSettings.submissionsOpen;
 }
 
 // ── Announcements ─────────────────────────────────────────────
@@ -1818,6 +1867,7 @@ async function loadTeam(data){
 
 // ── Create Team ───────────────────────────────────────────────
 window.handleCreateTeam = async function(){
+  if(!eventSettings.teamsOpen){ showToast('Team creation is currently closed by admin','error'); closeModal('modal-create-team'); return; }
   const name = document.getElementById('create-team-name').value.trim();
   if(!name){ showToast('Enter a team name','error'); return; }
   const uid  = currentUser.uid;
@@ -1840,6 +1890,7 @@ window.handleCreateTeam = async function(){
 
 // ── Join Team ─────────────────────────────────────────────────
 window.handleJoinTeam = async function(){
+  if(!eventSettings.teamsOpen){ showToast('Team joining is currently closed by admin','error'); closeModal('modal-join-team'); return; }
   const code = document.getElementById('join-team-code').value.trim().toUpperCase();
   if(!code){ showToast('Enter a team code','error'); return; }
   try {
@@ -1884,6 +1935,7 @@ window.removeTech = i=>{ techStack.splice(i,1); renderTechTags(); };
 
 window.handleProjectSubmit = async function(e){
   e.preventDefault();
+  if(!eventSettings.submissionsOpen){ showToast('Project submissions are currently closed by admin','error'); return; }
   const title   = document.getElementById('proj-title').value.trim();
   const problem = document.getElementById('proj-problem').value.trim();
   const desc    = document.getElementById('proj-desc').value.trim();
