@@ -962,6 +962,25 @@ footer span { color: var(--saffron); }
           <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
         </div>
 
+        <!-- REGISTRATION CLOSED BANNER -->
+        <div id="reg-closed-banner" class="hidden" style="
+          background: rgba(255,59,107,0.08);
+          border: 1px solid rgba(255,59,107,0.35);
+          border-radius: var(--radius-md);
+          padding: 24px 20px;
+          text-align: center;
+          margin-bottom: 8px;
+        ">
+          <div style="font-size:2rem;margin-bottom:10px">🔒</div>
+          <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--error);letter-spacing:0.05em;margin-bottom:6px">
+            Registrations Closed
+          </div>
+          <p style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5">
+            New registrations are currently closed by the admin.<br/>
+            Please check back later or contact the organizers.
+          </p>
+        </div>
+
         <!-- REGISTER FORM -->
         <form id="form-register" class="auth-form" onsubmit="handleRegister(event)">
           <div class="form-group">
@@ -1142,9 +1161,40 @@ try {
   db = getFirestore(app);
   // Load announcements for landing page immediately (no auth required)
   setTimeout(() => loadLandingAnnouncements(), 500);
+  // ── Listen for admin settings in real-time ──
+  onSnapshot(doc(db, 'settings', 'eventConfig'), (snap) => {
+    const data = snap.exists() ? snap.data() : {};
+    const regOpen = data.registrationsOpen !== false; // default open if not set
+    applyRegistrationState(regOpen);
+  });
 } catch(e) {
   console.warn('Firebase init failed — running in DEMO mode');
   DEMO_MODE = true;
+}
+
+// ── Apply registration open/closed state to the UI ──
+function applyRegistrationState(isOpen) {
+  const form       = document.getElementById('form-register');
+  const banner     = document.getElementById('reg-closed-banner');
+  const tab        = document.getElementById('tab-register');
+  const btn        = document.getElementById('btn-register');
+  if (!form || !banner) return;
+  if (isOpen) {
+    form.classList.remove('hidden');
+    banner.classList.add('hidden');
+    if (tab)  { tab.disabled = false; tab.style.opacity = ''; tab.style.cursor = ''; }
+    if (btn)  { btn.disabled = false; }
+  } else {
+    form.classList.add('hidden');
+    banner.classList.remove('hidden');
+    // Switch to login tab so the user can still sign in
+    if (tab) {
+      tab.disabled = true;
+      tab.style.opacity = '0.4';
+      tab.style.cursor  = 'not-allowed';
+    }
+    switchAuthTab('login');
+  }
 }
 
 // ==================== HELPERS ====================
@@ -1266,6 +1316,18 @@ let demoTeams = {};
 window.handleRegister = async function(e) {
   e.preventDefault();
   const btn = document.getElementById('btn-register');
+
+  // ── Guard: double-check registrations are still open ──
+  if (!DEMO_MODE) {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'eventConfig'));
+      if (snap.exists() && snap.data().registrationsOpen === false) {
+        showToast('Registrations are currently closed.', 'error');
+        return;
+      }
+    } catch(_) {}
+  }
+
   btn.disabled = true; btn.textContent = 'Registering...';
 
   const name = document.getElementById('reg-name').value.trim();
