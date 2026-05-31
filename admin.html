@@ -3071,23 +3071,35 @@ function renderPayments(data) {
     const txn = s.transactionId || s.txnId || '—';
     const amt = s.paymentAmount || s.amount || '100';
     const hasSS = !!(s.paymentScreenshot || s.screenshotUrl);
-    const hasDetails = s.utrNumber || s.transactionId || s.txnId || s.paymentStatus === 'submitted';
+    const status = s.paymentStatus || 'pending';
+
+    let actionBtns;
+    if (status === 'verified' || status === 'paid') {
+      actionBtns = `
+        <button class="btn-sm btn-verify" style="opacity:.5;cursor:default" disabled title="Already verified">✓ Verified</button>
+        <button class="btn-sm btn-reject" onclick="rejectPayment('${s.id}')" title="Revoke verification">Revoke</button>`;
+    } else if (status === 'rejected') {
+      actionBtns = `
+        <button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Accept</button>
+        <span style="color:var(--danger);font-size:11px;font-family:'Space Mono',monospace">Rejected</span>`;
+    } else {
+      // pending / submitted / anything else — always show both buttons
+      actionBtns = `
+        <button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Accept</button>
+        <button class="btn-sm btn-reject" onclick="rejectPayment('${s.id}')">Reject</button>`;
+    }
+
     return `
     <tr>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${pid}</span></td>
       <td>${s.fullName || s.name || '—'}</td>
-      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.schoolName || '—'}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.schoolName || s.school || '—'}</td>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--info)">${utr}</span></td>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px">${txn}</span></td>
       <td>${amt !== '—' ? `Rs. ${amt}` : 'Rs. 100'}</td>
       <td>${hasSS ? `<button class="btn-sm btn-view" onclick="viewPaymentScreenshot('${s.id}')">View SS</button>` : '<span style="color:var(--white-40);font-size:12px">None</span>'}</td>
       <td>${payBadge(s.paymentStatus)}</td>
-      <td>
-        <div class="action-btns">
-          ${hasDetails ? `<button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Accept</button>
-          <button class="btn-sm btn-reject" onclick="rejectPayment('${s.id}')">Reject</button>` : `<span style="color:var(--white-40);font-size:11px;font-family:'Space Mono',monospace">Awaiting details</span>`}
-        </div>
-      </td>
+      <td><div class="action-btns">${actionBtns}</div></td>
     </tr>`;
   }).join('');
 }
