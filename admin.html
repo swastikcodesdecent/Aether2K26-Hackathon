@@ -3238,39 +3238,63 @@ function stopQRScanner() {
 
 async function handleScannedQR(data) {
   stopQRScanner();
+  console.log('[QR] Raw scanned data:', data);
+
   try {
     let pid = null;
+    let parsed = null;
 
-    // Try JSON format first: { participantId: "...", name: "...", ... }
+    // Try JSON format
     try {
-      const parsed = JSON.parse(data);
-      pid = parsed.participantId || parsed.id || parsed.uid || null;
+      parsed = JSON.parse(data);
+      console.log('[QR] Parsed JSON:', parsed);
+      // Accept any key that looks like an identifier
+      pid = parsed.participantId
+         || parsed.id
+         || parsed.uid
+         || parsed.userId
+         || parsed.user_id
+         || parsed.participant_id
+         || null;
     } catch (_) {
-      // QR is a plain string — treat it directly as the ID
+      // Plain string QR — use as-is
       pid = data.trim();
+      console.log('[QR] Plain string id:', pid);
     }
 
+    console.log('[QR] Resolved pid:', pid);
+    console.log('[QR] allStudents count:', allStudents.length);
+    console.log('[QR] Sample student fields:', allStudents.slice(0,2).map(s => ({
+      id: s.id, participantId: s.participantId, uid: s.uid, name: s.name, fullName: s.fullName
+    })));
+
     if (!pid) {
-      toast('QR code contains no recognisable participant ID.', 'error');
+      const preview = data.length > 60 ? data.slice(0, 60) + '…' : data;
+      toast(`QR has no ID field. Raw: ${preview}`, 'error');
+      console.error('[QR] No ID field found in:', data);
       return;
     }
 
-    // Match against every possible ID field stored on the student
+    const pidLower = pid.toLowerCase().trim();
+
+    // Match against every possible stored field
     const student = allStudents.find(s =>
-      s.participantId === pid ||          // exact participantId match
-      s.id === pid ||                     // Firebase doc UID match
-      (s.id && s.id.startsWith(pid)) ||   // QR was truncated to 8 chars
-      (s.participantId && s.participantId.toLowerCase() === pid.toLowerCase())
+      s.participantId === pid ||
+      s.participantId?.toLowerCase() === pidLower ||
+      s.id === pid ||
+      s.uid === pid ||
+      (s.id && s.id.startsWith(pid)) ||     // truncated UID
+      (pid.length >= 6 && s.id && pid.startsWith(s.id.slice(0, pid.length))) // reverse truncation
     );
 
     if (student) {
       await markAttendance(student.id, true);
     } else {
       toast(`QR scanned but no participant found for ID: ${pid}`, 'warning');
-      console.warn('[QR] scanned pid:', pid, '| allStudents sample:', allStudents.slice(0,3).map(s => ({ id: s.id, participantId: s.participantId })));
+      console.warn('[QR] No match found. pid:', pid, '| allStudents:', allStudents.map(s => ({ id: s.id, participantId: s.participantId })));
     }
   } catch (e) {
-    console.error('[QR] handleScannedQR error:', e);
+    console.error('[QR] handleScannedQR error:', e, '| raw data:', data);
     toast('Invalid QR code format.', 'error');
   }
 }
