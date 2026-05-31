@@ -3071,7 +3071,7 @@ function renderPayments(data) {
     const txn = s.transactionId || s.txnId || '—';
     const amt = s.paymentAmount || s.amount || '100';
     const hasSS = !!(s.paymentScreenshot || s.screenshotUrl);
-    const hasDetails = s.utrNumber || s.transactionId || s.txnId;
+    const hasDetails = s.utrNumber || s.transactionId || s.txnId || s.paymentStatus === 'submitted';
     return `
     <tr>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${pid}</span></td>
