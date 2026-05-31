@@ -1604,7 +1604,7 @@ function initDashboard(){
 }
 
 // ── Payment Renderers ─────────────────────────────────────────
-async function submitPaymentDetails() {
+window.submitPaymentDetails = async function submitPaymentDetails() {
   const utr  = document.getElementById('pay-utr').value.trim();
   const txn  = document.getElementById('pay-txn').value.trim();
   const msg  = document.getElementById('pay-submit-msg');
@@ -1625,11 +1625,11 @@ async function submitPaymentDetails() {
   try {
     const uid = currentUser?.uid;
     if (!uid) throw new Error('Not logged in');
-    await db.collection('participants').doc(uid).update({
+    await updateDoc(doc(db, 'participants', uid), {
       utrNumber:     utr,
       transactionId: txn || null,
       paymentStatus: 'submitted',
-      paymentSubmittedAt: firebase.firestore.FieldValue.serverTimestamp()
+      paymentSubmittedAt: serverTimestamp()
     });
     msg.style.display = 'block';
     msg.style.background = 'rgba(0,229,160,0.1)';
