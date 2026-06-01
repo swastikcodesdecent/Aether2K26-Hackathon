@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AETHER 2K26 — De Paul School Hackathon</title>
+<title>AETHER 2K26 — Online Hackathon</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fira+Code:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -291,11 +291,17 @@ h1,h2,h3 { font-family: var(--font-display); letter-spacing: 0.02em; }
 .hero-title {
   font-size: clamp(3.5rem, 10vw, 8rem);
   font-weight: 900; line-height: 0.95;
-  background: linear-gradient(135deg, #fff 0%, var(--saffron-light) 50%, var(--saffron) 100%);
+  background: linear-gradient(135deg, #fff 0%, var(--saffron-light) 40%, var(--saffron) 70%, #FF3D00 100%);
+  background-size: 200% 200%;
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 10px;
   filter: drop-shadow(0 0 40px var(--saffron-glow));
+  animation: gradientShift 4s ease-in-out infinite alternate;
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
 .hero-subtitle {
   font-family: var(--font-display);
@@ -673,6 +679,145 @@ footer span { color: var(--saffron); }
 }
 .copy-btn:hover { background: rgba(255,107,0,0.15); }
 
+/* ===================== SCANLINE OVERLAY ===================== */
+.hero::after {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* ===================== SVG ICONS ===================== */
+.ico {
+  display: inline-block; width: 1em; height: 1em;
+  vertical-align: middle; flex-shrink: 0;
+}
+.ico-lg  { width: 2.2rem; height: 2.2rem; }
+.ico-xl  { width: 3rem;   height: 3rem; }
+.ico-2xl { width: 3.5rem; height: 3.5rem; }
+
+/* ===================== PASSWORD TOGGLE ===================== */
+.input-password-wrap { position: relative; }
+.input-password-wrap .form-input { padding-right: 50px; }
+.pw-toggle {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 1.1rem; padding: 4px;
+  transition: color 0.2s; line-height: 1;
+}
+.pw-toggle:hover { color: var(--saffron); }
+
+/* ===================== FORM VALIDATION STATES ===================== */
+.form-input.valid {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px rgba(0,229,160,0.15);
+}
+.form-input.invalid {
+  border-color: var(--error);
+  box-shadow: 0 0 0 2px rgba(255,59,107,0.15);
+}
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex; align-items: center; gap: 5px;
+  min-height: 18px;
+  transition: color 0.2s;
+}
+.field-hint.ok  { color: var(--success); }
+.field-hint.err { color: var(--error); }
+
+/* ===================== REGISTER PROGRESS BAR ===================== */
+.reg-progress-wrap { margin-bottom: 24px; }
+.reg-progress-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.72rem; color: var(--text-muted);
+  margin-bottom: 8px; font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+.reg-progress-bar {
+  height: 3px; background: rgba(255,255,255,0.08);
+  border-radius: 2px; overflow: hidden;
+}
+.reg-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--saffron), var(--saffron-light));
+  border-radius: 2px;
+  transition: width 0.4s var(--transition);
+  box-shadow: 0 0 8px var(--saffron-glow);
+  width: 0%;
+}
+
+/* ===================== CONFETTI ===================== */
+.confetti-piece {
+  position: fixed; width: 8px; height: 8px;
+  border-radius: 2px; pointer-events: none; z-index: 9999;
+  animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+/* ===================== AUTH CARD ACCENT ===================== */
+.auth-card { position: relative; }
+.auth-card::before {
+  content: '';
+  position: absolute; top: -1px; left: 20%; right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--saffron), transparent);
+  border-radius: 2px;
+}
+
+/* ===================== EVENT INFO STRIP ===================== */
+.event-info-strip {
+  display: flex; gap: 0;
+  background: rgba(255,107,0,0.06);
+  border: 1px solid rgba(255,107,0,0.15);
+  border-radius: var(--radius-md);
+  overflow: hidden; margin-bottom: 24px;
+}
+.event-info-item {
+  flex: 1; padding: 12px 14px; text-align: center;
+  border-right: 1px solid rgba(255,107,0,0.1);
+}
+.event-info-item:last-child { border-right: none; }
+.event-info-val {
+  font-family: var(--font-mono); font-size: 0.78rem;
+  color: var(--saffron); font-weight: 700; white-space: nowrap;
+}
+.event-info-lbl {
+  font-size: 0.65rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;
+}
+
+/* ===================== SMOOTH FORM FIELD ENTRANCE ===================== */
+.auth-form .form-group {
+  animation: slideInField 0.35s var(--transition) both;
+}
+.auth-form .form-group:nth-child(1) { animation-delay: 0.05s; }
+.auth-form .form-group:nth-child(2) { animation-delay: 0.10s; }
+.auth-form .form-group:nth-child(3) { animation-delay: 0.15s; }
+.auth-form .form-group:nth-child(4) { animation-delay: 0.20s; }
+.auth-form .form-group:nth-child(5) { animation-delay: 0.25s; }
+@keyframes slideInField {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ===================== MOBILE EXTRAS ===================== */
+@media (max-width: 480px) {
+  .nav-logo { font-size: 1.1rem; }
+  .event-info-strip { flex-direction: column; }
+  .event-info-item { border-right: none; border-bottom: 1px solid rgba(255,107,0,0.1); }
+  .event-info-item:last-child { border-bottom: none; }
+}
+
 /* ===================== FLOATING PARTICLES ===================== */
 .particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .particle {
@@ -694,6 +839,111 @@ footer span { color: var(--saffron); }
 
 <!-- TOAST CONTAINER -->
 <div id="toast-container"></div>
+
+<!-- SVG SPRITE (hidden) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <!-- bolt / lightning -->
+  <symbol id="ico-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+  </symbol>
+  <!-- users / team -->
+  <symbol id="ico-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </symbol>
+  <!-- award / trophy -->
+  <symbol id="ico-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="6"/>
+    <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+  </symbol>
+  <!-- graduation cap -->
+  <symbol id="ico-grad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+  </symbol>
+  <!-- shield -->
+  <symbol id="ico-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+  </symbol>
+  <!-- wifi / online -->
+  <symbol id="ico-wifi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+    <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
+  </symbol>
+  <!-- trophy (filled style for prizes) -->
+  <symbol id="ico-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 9H4a2 2 0 0 1-2-2V5h4"/><path d="M18 9h2a2 2 0 0 0 2-2V5h-4"/>
+    <path d="M6 5h12v5a6 6 0 0 1-12 0V5z"/>
+    <path d="M9 19h6"/><path d="M8 23h8"/><path d="M12 15v4"/>
+  </symbol>
+  <!-- medal silver -->
+  <symbol id="ico-medal-silver" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="15" r="6"/><path d="m8 9-4-4h16l-4 4"/>
+    <line x1="12" y1="9" x2="12" y2="7"/>
+  </symbol>
+  <!-- medal bronze -->
+  <symbol id="ico-medal-bronze" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="15" r="6"/><path d="m8 9-4-4h16l-4 4"/>
+    <line x1="12" y1="9" x2="12" y2="7"/>
+  </symbol>
+  <!-- star (for crown/first place) -->
+  <symbol id="ico-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </symbol>
+  <!-- check circle (success) -->
+  <symbol id="ico-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
+  </symbol>
+  <!-- clipboard -->
+  <symbol id="ico-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+  </symbol>
+  <!-- broadcast / announce -->
+  <symbol id="ico-broadcast" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>
+  </symbol>
+  <!-- alert triangle (warning) -->
+  <symbol id="ico-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
+  <!-- siren / urgent -->
+  <symbol id="ico-siren" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5.5 16a7.5 7.5 0 0 1 13 0"/><circle cx="12" cy="14" r="1"/>
+    <line x1="12" y1="4" x2="12" y2="6"/><line x1="6" y1="6" x2="7.5" y2="7.5"/>
+    <line x1="18" y1="6" x2="16.5" y2="7.5"/>
+    <rect x="3" y="16" width="18" height="4" rx="1"/>
+  </symbol>
+  <!-- eye (show password) -->
+  <symbol id="ico-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+  </symbol>
+  <!-- eye-off (hide password) -->
+  <symbol id="ico-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </symbol>
+  <!-- heart -->
+  <symbol id="ico-heart" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+  </symbol>
+  <!-- globe (online) -->
+  <symbol id="ico-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="2" y1="12" x2="22" y2="12"/>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </symbol>
+  <!-- code / dev -->
+  <symbol id="ico-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+  </symbol>
+  <!-- video / virtual event -->
+  <symbol id="ico-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+  </symbol>
+</svg>
 
 <!-- NAVBAR -->
 <nav id="navbar">
@@ -718,17 +968,17 @@ footer span { color: var(--saffron); }
 
     <div class="hero-badge z1">
       <span class="badge-dot"></span>
-      Registrations Open — De Paul School
+      Registrations Open — Online Hackathon
     </div>
     <h1 class="hero-title z1">AETHER<br>2K26</h1>
-    <p class="hero-subtitle z1">NATIONAL TECH HACKATHON</p>
+    <p class="hero-subtitle z1">NATIONAL ONLINE HACKATHON</p>
     <p class="hero-desc z1">
-      A 6-hour innovation marathon where the brightest young minds build tomorrow's solutions.
-      Code, create, compete — and claim your place in the future.
+      A 6-hour online innovation marathon where the brightest young minds build tomorrow's solutions.
+      Code, create, compete — from anywhere in India.
     </p>
     <div class="hero-cta z1">
       <button class="btn btn-primary" onclick="showPage('auth')" style="font-size:1rem;padding:16px 40px">
-        ⚡ Register Now
+        <svg class="ico" style="width:1.1rem;height:1.1rem"><use href="#ico-bolt"/></svg> Register Now
       </button>
       <button class="btn btn-ghost" onclick="document.getElementById('about-section').scrollIntoView({behavior:'smooth'})">
         Learn More ↓
@@ -739,19 +989,19 @@ footer span { color: var(--saffron); }
   <!-- TICKER -->
   <div class="ticker-wrap">
     <div class="ticker" id="ticker">
-      <span class="ticker-item">AETHER 2K26 — 6 HOUR HACKATHON</span>
+      <span class="ticker-item">AETHER 2K26 — 6 HOUR ONLINE HACKATHON</span>
       <span class="ticker-item">REGISTRATIONS OPEN NOW</span>
-      <span class="ticker-item">₹100 ENTRY FEE FOR VENUE ACCESS</span>
+      <span class="ticker-item">COMPETE FROM ANYWHERE IN INDIA</span>
       <span class="ticker-item">TEAMS OF 2 — FORM YOUR CREW</span>
       <span class="ticker-item">TROPHIES &amp; CERTIFICATES FOR WINNERS</span>
-      <span class="ticker-item">HOSTED BY DE PAUL SCHOOL</span>
+      <span class="ticker-item">ORGANISED BY DE PAUL SCHOOL</span>
       <span class="ticker-item">BUILD SOMETHING LEGENDARY</span>
-      <span class="ticker-item">AETHER 2K26 — 6 HOUR HACKATHON</span>
+      <span class="ticker-item">AETHER 2K26 — 6 HOUR ONLINE HACKATHON</span>
       <span class="ticker-item">REGISTRATIONS OPEN NOW</span>
-      <span class="ticker-item">₹100 ENTRY FEE FOR VENUE ACCESS</span>
+      <span class="ticker-item">COMPETE FROM ANYWHERE IN INDIA</span>
       <span class="ticker-item">TEAMS OF 2 — FORM YOUR CREW</span>
       <span class="ticker-item">TROPHIES &amp; CERTIFICATES FOR WINNERS</span>
-      <span class="ticker-item">HOSTED BY DE PAUL SCHOOL</span>
+      <span class="ticker-item">ORGANISED BY DE PAUL SCHOOL</span>
       <span class="ticker-item">BUILD SOMETHING LEGENDARY</span>
     </div>
   </div>
@@ -792,9 +1042,9 @@ footer span { color: var(--saffron); }
     <div class="stats-bar">
       <div class="stat-item"><div class="stat-num" id="stat-reg">—</div><div class="stat-lbl">Registered</div></div>
       <div class="stat-item"><div class="stat-num">6</div><div class="stat-lbl">Hours</div></div>
-      <div class="stat-item"><div class="stat-num">🏆</div><div class="stat-lbl">Trophies & Certs</div></div>
+      <div class="stat-item"><div class="stat-num"><svg class="ico" style="width:1.6rem;height:1.6rem;color:var(--saffron)"><use href="#ico-trophy"/></svg></div><div class="stat-lbl">Trophies & Certs</div></div>
       <div class="stat-item"><div class="stat-num">2</div><div class="stat-lbl">Per Team</div></div>
-      <div class="stat-item"><div class="stat-num">1</div><div class="stat-lbl">Venue</div></div>
+      <div class="stat-item"><div class="stat-num"><svg class="ico" style="width:1.6rem;height:1.6rem;color:var(--saffron)"><use href="#ico-globe"/></svg></div><div class="stat-lbl">Online</div></div>
     </div>
   </div>
 
@@ -806,34 +1056,34 @@ footer span { color: var(--saffron); }
     <p class="section-sub">More than a competition — a launchpad for your ideas.</p>
     <div class="grid-3">
       <div class="glass feature-card">
-        <span class="feature-icon">⚡</span>
+        <span class="feature-icon"><svg class="ico ico-lg" style="color:var(--saffron)"><use href="#ico-bolt"/></svg></span>
         <div class="feature-title">6-Hour Sprint</div>
         <div class="feature-desc">An intense, high-energy marathon that pushes your limits and forces creative breakthrough under real constraints.</div>
       </div>
       <div class="glass feature-card">
-        <span class="feature-icon">🤝</span>
+        <span class="feature-icon"><svg class="ico ico-lg" style="color:var(--saffron)"><use href="#ico-users"/></svg></span>
         <div class="feature-title">Team of Two</div>
         <div class="feature-desc">Partner up with one collaborator. Tight teams mean clearer communication, sharper focus, and faster execution.</div>
       </div>
       <div class="glass feature-card">
-        <span class="feature-icon">🏆</span>
+        <span class="feature-icon"><svg class="ico ico-lg" style="color:var(--saffron)"><use href="#ico-award"/></svg></span>
         <div class="feature-title">Real Recognition</div>
-        <div class="feature-desc">Compete for trophies and certificates across categories. Top performers earn prestigious recognition and bragging rights.</div>
+        <div class="feature-desc">Compete for trophies and certificates. Top performers earn prestigious recognition and bragging rights.</div>
       </div>
       <div class="glass feature-card">
-        <span class="feature-icon">🎓</span>
+        <span class="feature-icon"><svg class="ico ico-lg" style="color:var(--saffron)"><use href="#ico-grad"/></svg></span>
         <div class="feature-title">All Classes Welcome</div>
         <div class="feature-desc">Open to students from Class 9 to 12. Whether you're a veteran coder or curious beginner — there's a place for you.</div>
       </div>
       <div class="glass feature-card">
-        <span class="feature-icon">🛡️</span>
+        <span class="feature-icon"><svg class="ico ico-lg" style="color:var(--saffron)"><use href="#ico-shield"/></svg></span>
         <div class="feature-title">Digital Identity</div>
         <div class="feature-desc">Every participant gets a unique ID and an encrypted QR entry pass — your digital passport to the event.</div>
       </div>
       <div class="glass feature-card">
-        <span class="feature-icon">🔥</span>
-        <div class="feature-title">Expert Mentors</div>
-        <div class="feature-desc">Get real-time guidance from industry professionals and educators who've been where you want to go.</div>
+        <span class="feature-icon"><svg class="ico ico-lg" style="color:var(--saffron)"><use href="#ico-globe"/></svg></span>
+        <div class="feature-title">Fully Online</div>
+        <div class="feature-desc">Compete from anywhere in India. All you need is a laptop, a browser, and the drive to build something legendary.</div>
       </div>
     </div>
   </div>
@@ -846,23 +1096,23 @@ footer span { color: var(--saffron); }
     <p class="section-sub">The top teams take home serious recognition and rewards.</p>
     <div class="grid-3" style="max-width:800px;margin:0 auto">
       <div class="glass prize-card gold">
-        <span class="prize-crown">👑</span>
+        <span class="prize-crown"><svg class="ico" style="width:3rem;height:3rem;color:#FFD600"><use href="#ico-star"/></svg></span>
         <div class="prize-rank">First Place</div>
-        <div class="prize-amount" style="font-size:2.2rem">🏆</div>
+        <div class="prize-amount"><svg class="ico" style="width:2.8rem;height:2.8rem;color:#FFD600"><use href="#ico-trophy"/></svg></div>
         <div class="prize-label">Winner's Trophy</div>
         <div class="prize-label">+ Certificates</div>
       </div>
       <div class="glass prize-card silver">
-        <span class="prize-crown">🥈</span>
+        <span class="prize-crown"><svg class="ico" style="width:3rem;height:3rem;color:#C0C0C0"><use href="#ico-award"/></svg></span>
         <div class="prize-rank">Second Place</div>
-        <div class="prize-amount" style="font-size:2.2rem">🥈</div>
+        <div class="prize-amount"><svg class="ico" style="width:2.8rem;height:2.8rem;color:#C0C0C0"><use href="#ico-medal-silver"/></svg></div>
         <div class="prize-label">Runner-Up Trophy</div>
         <div class="prize-label">+ Certificates</div>
       </div>
       <div class="glass prize-card bronze">
-        <span class="prize-crown">🥉</span>
+        <span class="prize-crown"><svg class="ico" style="width:3rem;height:3rem;color:#CD7F32"><use href="#ico-award"/></svg></span>
         <div class="prize-rank">Third Place</div>
-        <div class="prize-amount" style="font-size:2.2rem">🥉</div>
+        <div class="prize-amount"><svg class="ico" style="width:2.8rem;height:2.8rem;color:#CD7F32"><use href="#ico-medal-bronze"/></svg></div>
         <div class="prize-label">Merit Trophy</div>
         <div class="prize-label">+ Certificates</div>
       </div>
@@ -880,39 +1130,39 @@ footer span { color: var(--saffron); }
       <div class="timeline">
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-time">08:00 AM</div>
-          <div class="timeline-title">Venue Opens & Check-In</div>
-          <div class="timeline-desc">QR scan at entry, collect your kit and badge.</div>
+          <div class="timeline-time">08:30 AM</div>
+          <div class="timeline-title">Platform Opens & Briefing</div>
+          <div class="timeline-desc">Log in, verify your team, get access to the problem portal.</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="timeline-time">09:00 AM</div>
           <div class="timeline-title">Opening Ceremony</div>
-          <div class="timeline-desc">Keynote, problem statements released, hacking begins.</div>
+          <div class="timeline-desc">Livestream keynote, problem statements released, hacking begins.</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="timeline-time">11:30 AM</div>
           <div class="timeline-title">Midpoint Mentoring</div>
-          <div class="timeline-desc">Mentor rounds, feedback sessions, short break.</div>
+          <div class="timeline-desc">Virtual mentor sessions, progress check-ins, short break.</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="timeline-time">03:00 PM</div>
           <div class="timeline-title">Code Freeze</div>
-          <div class="timeline-desc">Submissions close. Prepare for demos.</div>
+          <div class="timeline-desc">Submissions close. Upload your project and prepare your demo video.</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="timeline-time">03:30 PM</div>
           <div class="timeline-title">Demos & Judging</div>
-          <div class="timeline-desc">5-minute pitch + Q&A with the panel.</div>
+          <div class="timeline-desc">Live video pitch + Q&A with the panel via video call.</div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="timeline-time">05:00 PM</div>
           <div class="timeline-title">Award Ceremony</div>
-          <div class="timeline-desc">Winners announced, trophies and certificates distributed.</div>
+          <div class="timeline-desc">Winners announced live. Trophies couriered, certificates emailed.</div>
         </div>
       </div>
     </div>
@@ -921,7 +1171,7 @@ footer span { color: var(--saffron); }
       <p class="section-sub" style="text-align:left;margin-bottom:28px">Stay updated in real-time.</p>
       <div id="landing-announcements">
         <div class="announcement-item" style="opacity:0.5">
-          <div class="ann-icon">📡</div>
+          <div class="ann-icon"><svg class="ico" style="width:1.4rem;height:1.4rem;color:var(--saffron)"><use href="#ico-broadcast"/></svg></div>
           <div class="ann-content">
             <div class="ann-title">Loading announcements...</div>
             <div class="ann-time">Connecting to live feed</div>
@@ -936,8 +1186,8 @@ footer span { color: var(--saffron); }
   <!-- FOOTER -->
   <footer>
     <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:900;color:var(--saffron);margin-bottom:10px;letter-spacing:0.15em">AETHER 2K26</div>
-    <p>Hosted by <span>De Paul School</span> · All Rights Reserved · Built with ❤️ for Innovation</p>
-    <p style="margin-top:8px;font-size:0.75rem">Secured with Firebase · Glassmorphism UI</p>
+    <p>Organised by <span>De Paul School</span> · All Rights Reserved · Built with <svg class="ico" style="width:0.9rem;height:0.9rem;color:#FF3B6B"><use href="#ico-heart"/></svg> for Innovation</p>
+    <p style="margin-top:8px;font-size:0.75rem">Online Hackathon · Secured with Firebase</p>
   </footer>
 </div><!-- /page-landing -->
 
@@ -963,11 +1213,43 @@ footer span { color: var(--saffron); }
           <button class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
         </div>
 
+        <!-- EVENT INFO STRIP -->
+        <div class="event-info-strip" id="reg-event-strip">
+          <div class="event-info-item">
+            <div class="event-info-val">Aug 15</div>
+            <div class="event-info-lbl">Date</div>
+          </div>
+          <div class="event-info-item">
+            <div class="event-info-val">6 hrs</div>
+            <div class="event-info-lbl">Duration</div>
+          </div>
+          <div class="event-info-item">
+            <div class="event-info-val">Online</div>
+            <div class="event-info-lbl">Format</div>
+          </div>
+          <div class="event-info-item">
+            <div class="event-info-val">Team ×2</div>
+            <div class="event-info-lbl">Team Size</div>
+          </div>
+        </div>
+
+        <!-- REGISTER PROGRESS -->
+        <div class="reg-progress-wrap" id="reg-progress-wrap">
+          <div class="reg-progress-label">
+            <span>Profile Completion</span>
+            <span id="reg-progress-pct">0%</span>
+          </div>
+          <div class="reg-progress-bar">
+            <div class="reg-progress-fill" id="reg-progress-fill"></div>
+          </div>
+        </div>
+
         <!-- REGISTER FORM -->
         <form id="form-register" class="auth-form" onsubmit="handleRegister(event)">
           <div class="form-group">
             <label class="form-label">Full Name *</label>
             <input class="form-input" type="text" id="reg-name" placeholder="Your full name" required />
+            <div class="field-hint" id="hint-reg-name"></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <div class="form-group">
@@ -983,15 +1265,21 @@ footer span { color: var(--saffron); }
             <div class="form-group">
               <label class="form-label">Phone *</label>
               <input class="form-input" type="tel" id="reg-phone" placeholder="10-digit" required maxlength="10" />
+              <div class="field-hint" id="hint-reg-phone"></div>
             </div>
           </div>
           <div class="form-group">
             <label class="form-label">Email Address *</label>
             <input class="form-input" type="email" id="reg-email" placeholder="you@example.com" required />
+            <div class="field-hint" id="hint-reg-email"></div>
           </div>
           <div class="form-group">
             <label class="form-label">Password *</label>
-            <input class="form-input" type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6" />
+            <div class="input-password-wrap">
+              <input class="form-input" type="password" id="reg-password" placeholder="Min 6 characters" required minlength="6" />
+              <button type="button" class="pw-toggle" id="reg-pw-toggle" onclick="togglePw('reg-password','reg-pw-toggle')" title="Toggle password"><svg class="ico" style="width:1.1rem;height:1.1rem"><use href="#ico-eye"/></svg></button>
+            </div>
+            <div class="field-hint" id="hint-reg-password"></div>
           </div>
 
           <div class="form-group">
@@ -1037,7 +1325,10 @@ footer span { color: var(--saffron); }
           </div>
           <div class="form-group">
             <label class="form-label">Password</label>
-            <input class="form-input" type="password" id="login-password" placeholder="Your password" required />
+            <div class="input-password-wrap">
+              <input class="form-input" type="password" id="login-password" placeholder="Your password" required />
+              <button type="button" class="pw-toggle" id="login-pw-toggle" onclick="togglePw('login-password','login-pw-toggle')" title="Toggle password"><svg class="ico" style="width:1.1rem;height:1.1rem"><use href="#ico-eye"/></svg></button>
+            </div>
           </div>
           <button class="btn btn-primary" type="submit" id="btn-login" style="width:100%;padding:15px">
             Sign In to Dashboard
@@ -1054,11 +1345,17 @@ footer span { color: var(--saffron); }
 <!-- Registration Success Modal -->
 <div class="modal-overlay hidden" id="modal-reg-success" onclick="hideModalOutside(event,'modal-reg-success')">
   <div class="glass-heavy modal" style="text-align:center;padding:44px 36px">
-    <div style="font-size:3.5rem;margin-bottom:16px">🎉</div>
-    <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--success);margin-bottom:10px">REGISTERED SUCCESSFULLY!</div>
-    <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:20px">Your participant ID has been generated</p>
-    <div style="font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--saffron);letter-spacing:0.2em;text-shadow:0 0 20px var(--saffron-glow);margin-bottom:24px" id="modal-success-pid">—</div>
-    <p style="color:var(--text-muted);font-size:0.8rem;margin-bottom:24px">Save this ID. You'll need it for payment and entry.</p>
+    <div style="margin-bottom:16px;animation:bounceIn 0.6s var(--transition)"><svg class="ico" style="width:3.5rem;height:3.5rem;color:var(--success)"><use href="#ico-check-circle"/></svg></div>
+    <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--success);margin-bottom:10px;letter-spacing:0.08em">REGISTERED SUCCESSFULLY!</div>
+    <p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:20px">Your unique participant ID has been generated</p>
+    <div style="background:rgba(255,107,0,0.08);border:1px dashed rgba(255,107,0,0.4);border-radius:var(--radius-md);padding:20px 16px;margin-bottom:12px">
+      <div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.2em;color:var(--text-muted);margin-bottom:8px">Participant ID</div>
+      <div style="font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--saffron);letter-spacing:0.2em;text-shadow:0 0 20px var(--saffron-glow)" id="modal-success-pid">—</div>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="margin-bottom:16px" onclick="copyText(document.getElementById('modal-success-pid').textContent);this.innerHTML='<svg class=\'ico\' style=\'width:0.9rem;height:0.9rem\'><use href=\'#ico-check-circle\'/></svg> Copied!'">
+      <svg class="ico" style="width:0.9rem;height:0.9rem"><use href="#ico-clipboard"/></svg> Copy ID
+    </button>
+    <p style="color:var(--text-muted);font-size:0.78rem;margin-bottom:24px"><svg class="ico" style="width:0.85rem;height:0.85rem;color:var(--warning)"><use href="#ico-alert"/></svg> Save this ID — you'll need it to access the event platform.</p>
     <button class="btn btn-primary" style="width:100%" onclick="window.location.href='dashboard.html'">
       Go to Dashboard →
     </button>
@@ -1108,21 +1405,25 @@ function loadLandingAnnouncements() {
   const landingList = document.getElementById('landing-announcements');
   if(!landingList) return;
   if(DEMO_MODE) {
-    landingList.innerHTML = `<div class="announcement-item"><div class="ann-icon">📢</div><div class="ann-content"><div class="ann-title">No announcements yet</div><div class="ann-time">Check back soon</div></div></div>`;
+    landingList.innerHTML = `<div class="announcement-item"><div class="ann-icon"><svg class="ico" style="width:1.4rem;height:1.4rem;color:var(--saffron)"><use href="#ico-broadcast"/></svg></div><div class="ann-content"><div class="ann-title">No announcements yet</div><div class="ann-time">Check back soon</div></div></div>`;
     return;
   }
   try {
     const q = query(collection(db,'announcements'), orderBy('createdAt','desc'), limit(5));
     onSnapshot(q, snap => {
       if(!snap.docs.length) {
-        landingList.innerHTML = `<div class="announcement-item"><div class="ann-icon">📢</div><div class="ann-content"><div class="ann-title">No announcements yet</div><div class="ann-time">Check back soon</div></div></div>`;
+        landingList.innerHTML = `<div class="announcement-item"><div class="ann-icon"><svg class="ico" style="width:1.4rem;height:1.4rem;color:var(--saffron)"><use href="#ico-broadcast"/></svg></div><div class="ann-content"><div class="ann-title">No announcements yet</div><div class="ann-time">Check back soon</div></div></div>`;
         return;
       }
       landingList.innerHTML = '';
       snap.docs.forEach(d => {
         const n = d.data();
         const timeStr = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Recently';
-        const prioIcon = n.priority==='urgent' ? '🚨' : n.priority==='important' ? '⚠️' : '📢';
+        const prioIcon = n.priority==='urgent'
+          ? `<svg class="ico" style="width:1.4rem;height:1.4rem;color:var(--error)"><use href="#ico-siren"/></svg>`
+          : n.priority==='important'
+          ? `<svg class="ico" style="width:1.4rem;height:1.4rem;color:var(--warning)"><use href="#ico-alert"/></svg>`
+          : `<svg class="ico" style="width:1.4rem;height:1.4rem;color:var(--saffron)"><use href="#ico-broadcast"/></svg>`;
         const prioBadge = n.priority==='urgent' ? 'URGENT' : n.priority==='important' ? 'IMPORTANT' : 'INFO';
         landingList.insertAdjacentHTML('beforeend', `<div class="announcement-item">
           <div class="ann-icon">${prioIcon}</div>
@@ -1170,6 +1471,10 @@ window.switchAuthTab = function(tab) {
   document.getElementById('tab-login').classList.toggle('active', tab==='login');
   document.getElementById('form-register').classList.toggle('hidden', tab!=='register');
   document.getElementById('form-login').classList.toggle('hidden', tab!=='login');
+  const strip = document.getElementById('reg-event-strip');
+  const prog  = document.getElementById('reg-progress-wrap');
+  if(strip) strip.classList.toggle('hidden', tab!=='register');
+  if(prog)  prog.classList.toggle('hidden', tab!=='register');
 };
 
 window.selectSchool = function(type) {
@@ -1206,6 +1511,100 @@ function generateTeamCode() {
   s += Math.floor(100+Math.random()*900);
   return s;
 }
+
+// ==================== PASSWORD TOGGLE ====================
+window.togglePw = function(inputId, btnId) {
+  const inp = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if(!inp || !btn) return;
+  if(inp.type === 'password') {
+    inp.type = 'text';
+    btn.innerHTML = '<svg class="ico" style="width:1.1rem;height:1.1rem"><use href="#ico-eye-off"/></svg>';
+  } else {
+    inp.type = 'password';
+    btn.innerHTML = '<svg class="ico" style="width:1.1rem;height:1.1rem"><use href="#ico-eye"/></svg>';
+  }
+};
+
+// ==================== FIELD VALIDATION & PROGRESS ====================
+function setHint(id, msg, state) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = msg;
+  el.className = 'field-hint' + (state ? ' ' + state : '');
+}
+function setInputState(id, state) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.remove('valid','invalid');
+  if(state) el.classList.add(state);
+}
+function updateRegProgress() {
+  const vals = [
+    document.getElementById('reg-name')?.value.trim(),
+    document.getElementById('reg-class')?.value,
+    document.getElementById('reg-phone')?.value.trim(),
+    document.getElementById('reg-email')?.value.trim(),
+    document.getElementById('reg-password')?.value,
+  ];
+  const pct = Math.round((vals.filter(Boolean).length / vals.length) * 100);
+  const fill = document.getElementById('reg-progress-fill');
+  const lbl  = document.getElementById('reg-progress-pct');
+  if(fill) fill.style.width = pct + '%';
+  if(lbl)  lbl.textContent  = pct + '%';
+}
+setTimeout(() => {
+  const nameEl  = document.getElementById('reg-name');
+  const phoneEl = document.getElementById('reg-phone');
+  const emailEl = document.getElementById('reg-email');
+  const passEl  = document.getElementById('reg-password');
+  const classEl = document.getElementById('reg-class');
+
+  nameEl?.addEventListener('blur', () => {
+    const v = nameEl.value.trim();
+    if(v.length >= 2) { setInputState('reg-name','valid'); setHint('hint-reg-name','✓ Looks good','ok'); }
+    else if(v) { setInputState('reg-name','invalid'); setHint('hint-reg-name','At least 2 characters needed','err'); }
+    else { setInputState('reg-name',null); setHint('hint-reg-name',''); }
+    updateRegProgress();
+  });
+  phoneEl?.addEventListener('input', () => {
+    phoneEl.value = phoneEl.value.replace(/\D/g,'');
+    const v = phoneEl.value;
+    if(v.length === 10) { setInputState('reg-phone','valid'); setHint('hint-reg-phone','✓ Valid number','ok'); }
+    else if(v.length > 0) { setInputState('reg-phone','invalid'); setHint('hint-reg-phone', v.length < 10 ? `${10-v.length} more digit${10-v.length!==1?'s':''} needed` : 'Invalid','err'); }
+    else { setInputState('reg-phone',null); setHint('hint-reg-phone',''); }
+    updateRegProgress();
+  });
+  emailEl?.addEventListener('blur', () => {
+    const v = emailEl.value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    if(v && ok) { setInputState('reg-email','valid'); setHint('hint-reg-email','✓ Valid email','ok'); }
+    else if(v)  { setInputState('reg-email','invalid'); setHint('hint-reg-email','Enter a valid email address','err'); }
+    else { setInputState('reg-email',null); setHint('hint-reg-email',''); }
+    updateRegProgress();
+  });
+  passEl?.addEventListener('input', () => {
+    const v = passEl.value;
+    if(v.length >= 8)      { setInputState('reg-password','valid');   setHint('hint-reg-password','✓ Strong password','ok'); }
+    else if(v.length >= 6) { setInputState('reg-password','valid');   setHint('hint-reg-password','✓ Good — 8+ chars for stronger security','ok'); }
+    else if(v.length > 0)  { setInputState('reg-password','invalid'); setHint('hint-reg-password','Minimum 6 characters required','err'); }
+    else { setInputState('reg-password',null); setHint('hint-reg-password',''); }
+    updateRegProgress();
+  });
+  classEl?.addEventListener('change', updateRegProgress);
+}, 300);
+
+// ==================== CONFETTI ====================
+window.launchConfetti = function() {
+  const colors = ['#FF6B00','#FF9040','#FFD600','#FFFFFF','#00E5A0','#FF3B6B'];
+  for(let i=0;i<80;i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.cssText = `left:${Math.random()*100}vw;top:0;background:${colors[Math.floor(Math.random()*colors.length)]};width:${4+Math.random()*8}px;height:${4+Math.random()*8}px;border-radius:${Math.random()>0.5?'50%':'2px'};animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*0.8}s;`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 4000);
+  }
+};
 
 // ==================== COUNTDOWN ====================
 const EVENT_DATE = new Date('2026-08-15T09:00:00');
@@ -1311,6 +1710,7 @@ window.handleRegister = async function(e) {
     // Show success modal, then redirect to dashboard
     document.getElementById('modal-success-pid').textContent = pid;
     showModal('modal-reg-success');
+    if(window.launchConfetti) launchConfetti();
     btn.disabled=false; btn.textContent='Create Account & Register';
     return;
   }
@@ -1327,6 +1727,7 @@ window.handleRegister = async function(e) {
     // Show success then redirect to dashboard
     document.getElementById('modal-success-pid').textContent = pid;
     showModal('modal-reg-success');
+    if(window.launchConfetti) launchConfetti();
   } catch(err) {
     let msg = 'Registration failed. Try again.';
     if(err.code==='auth/email-already-in-use') msg='Email already registered. Please sign in.';
