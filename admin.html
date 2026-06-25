@@ -3365,7 +3365,7 @@ async function handleScannedQR(data) {
   stopQRScanner();
   try {
     const parsed = JSON.parse(data);
-    const pid = parsed.participantId;
+    const pid = parsed.participantId || parsed.pid;
     const student = allStudents.find(s => s.participantId === pid || s.id === pid);
     if (student) {
       await markAttendance(student.id, true);
