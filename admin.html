@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AETHER 2K26 — Admin Control Center</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800;900&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 
 <style>
   :root {
@@ -1283,128 +1285,14 @@
   .chart-container { height: 240px; position: relative; }
 
   /* ── RESPONSIVE ── */
-  /* ── MOBILE OVERLAY (backdrop when sidebar is open) ── */
-  .sidebar-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    z-index: 199;
-    backdrop-filter: blur(2px);
-  }
-  .sidebar-overlay.active { display: block; }
-
-  /* ── HAMBURGER BUTTON (mobile only) ── */
-  .topbar-hamburger {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--border-gold);
-    border-radius: 10px;
-    background: rgba(255,215,0,0.05);
-    cursor: pointer;
-    color: var(--gold);
-    flex-shrink: 0;
-    transition: var(--transition);
-  }
-  .topbar-hamburger:hover { background: var(--gold-glow); }
-
   @media (max-width: 768px) {
-    /* Sidebar hides off-screen; slides in as drawer */
-    .sidebar {
-      position: fixed;
-      left: -280px;
-      width: 260px !important;
-      z-index: 200;
-      transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
-    }
-    /* Show collapsed labels & badges always on mobile drawer */
-    .sidebar .sidebar-brand,
-    .sidebar .nav-label,
-    .sidebar .nav-badge,
-    .sidebar .nav-section-label,
-    .sidebar .admin-info-text { opacity: 1 !important; width: auto !important; }
-
-    .sidebar.mobile-open { left: 0; }
-
-    /* Hide the desktop collapse toggle on mobile */
-    .sidebar-toggle { display: none; }
-
-    /* Main content always full-width on mobile */
-    .main-content {
-      margin-left: 0 !important;
-      padding: 16px;
-    }
-
-    /* Show hamburger */
-    .topbar-hamburger { display: flex; }
-
-    /* Topbar layout */
-    .topbar {
-      flex-direction: row;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
-      flex-wrap: nowrap;
-    }
-    .topbar-left {
-      flex: 1;
-      min-width: 0;
-    }
-    .page-title {
-      font-size: 16px;
-      letter-spacing: 1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .page-breadcrumb { font-size: 10px; }
-    .topbar-right { flex-shrink: 0; }
-    .topbar-time { font-size: 11px; padding: 6px 10px; }
-
-    /* Analytics cards: 2-col on mobile */
-    .analytics-grid { grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 20px; }
-    .stat-card { padding: 16px 12px; }
-    .stat-number { font-size: 24px; }
-    .stat-label { font-size: 10px; }
-
-    /* Tables: horizontally scrollable */
-    .data-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-    .data-table { min-width: 600px; }
-
-    /* Chart grid: single column */
-    .chart-grid { grid-template-columns: 1fr !important; }
-    .chart-card { min-width: 0; }
-
-    /* Settings toggles: stack */
-    .toggle-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-
-    /* QR grid: 2 col */
-    .qr-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-
-    /* Modals: full-width on mobile */
-    .modal-box {
-      width: 95vw !important;
-      max-width: 95vw !important;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 20px !important;
-    }
-
-    /* Search bars full width */
-    .search-bar { width: 100%; box-sizing: border-box; }
-
-    /* Section cards */
-    .card { padding: 16px; }
-  }
-
-  @media (max-width: 420px) {
-    .analytics-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
-    .stat-number { font-size: 20px; }
-    .qr-grid { grid-template-columns: 1fr 1fr; }
-    .page-title { font-size: 14px; }
+    :root { --sidebar-w: 72px; }
+    .main-content { padding: 20px; margin-left: 72px; }
+    .sidebar.collapsed { width: 0; }
+    .sidebar:not(.collapsed) ~ .main-content { margin-left: 260px; }
+    .analytics-grid { grid-template-columns: repeat(2,1fr); }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .topbar-right { width: 100%; }
   }
 
   /* ── REALTIME STATUS ── */
@@ -1452,9 +1340,111 @@
     animation: rowIn 0.3s ease forwards;
   }
 
-  .qr-card:hover { border-color: var(--gold); box-shadow: 0 0 24px rgba(255,215,0,0.1); }
   .qr-card-name { font-size: 14px; font-weight: 700; color: var(--white-90); margin-bottom: 4px; margin-top: 12px; }
   .qr-card-id { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--gold); margin-bottom: 12px; }
+
+  /* ══════════════════════════════════════
+     AETHER 2K26 MODERN GRAPHICS & TYPOGRAPHY
+     ══════════════════════════════════════ */
+  :root {
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  /* --- Font Overrides --- */
+  body, input, select, textarea, button {
+    font-family: var(--font-body) !important;
+  }
+  .login-title, .sidebar-brand-name, .page-title, .stat-value, .card-title, .modal-title, .btn-primary, .btn-login, .att-stat-num, .loader-text {
+    font-family: var(--font-display) !important;
+  }
+  .form-label, .pw-toggle, .topbar-time, .nav-section-label, .nav-badge, .admin-role, .page-breadcrumb, .data-table th, .badge, .btn-sm, .modal-field label, .profile-detail-key, .announcement-time, .submission-team, .qr-card-id {
+    font-family: var(--font-mono) !important;
+  }
+  [style*="font-family:'Space Mono'"], [style*="font-family: 'Space Mono'"], [style*="font-family:'Space Mono',monospace"] {
+    font-family: var(--font-mono) !important;
+  }
+
+  /* --- New Animations & Transitions --- */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes adminInputGlow {
+    0%, 100% { box-shadow: 0 0 5px var(--gold-glow); border-color: rgba(255,215,0,0.3); }
+    50% { box-shadow: 0 0 15px var(--gold-glow), 0 0 0 3px var(--gold-glow); border-color: var(--gold); }
+  }
+  @keyframes pulse-green {
+    0%, 100% { box-shadow: 0 0 6px var(--success), 0 0 0 0 rgba(0,255,136,0.3); }
+    50% { box-shadow: 0 0 16px var(--success), 0 0 0 6px rgba(0,255,136,0); }
+  }
+  @keyframes pulse-dot-gold {
+    0%, 100% { box-shadow: 0 0 8px var(--gold), 0 0 0 0 rgba(255,215,0,0.3); }
+    50% { box-shadow: 0 0 20px var(--gold), 0 0 0 8px rgba(255,215,0,0); }
+  }
+  @keyframes sectionIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(6px); }
+    to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  }
+
+  /* --- Interactive Hover Enhancements --- */
+  .stat-card {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+  }
+  .stat-card:hover {
+    border-color: var(--gold) !important;
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(255,215,0,0.18), 0 0 60px rgba(255,215,0,0.06);
+  }
+  .btn-login {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .btn-login:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 0 35px rgba(255,215,0,0.5);
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%) !important;
+    background-size: 200% auto !important;
+    animation: shimmer 1.5s infinite linear;
+  }
+  .btn-primary {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 0 25px rgba(255,215,0,0.4);
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%) !important;
+    background-size: 200% auto !important;
+    animation: shimmer 1.5s infinite linear;
+  }
+  .form-input:focus, .search-inp:focus, .filter-select:focus, .modal-input:focus {
+    background: rgba(255,215,0,0.08) !important;
+    animation: adminInputGlow 2s infinite ease-in-out !important;
+    outline: none !important;
+  }
+  .realtime-dot {
+    animation: pulse-green 1.8s infinite ease-in-out !important;
+  }
+  .card-title-dot {
+    animation: pulse-dot-gold 2s infinite ease-in-out !important;
+  }
+  .nav-item {
+    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease;
+  }
+  .nav-item:hover {
+    transform: translateX(4px);
+  }
+  .nav-item.active {
+    animation: pulse-dot-gold 3s infinite ease-in-out;
+  }
+  .qr-card {
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+  .qr-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: var(--gold) !important;
+    box-shadow: 0 8px 24px rgba(255,215,0,0.15) !important;
+  }
 </style>
 </head>
 <body>
@@ -1521,9 +1511,6 @@
      DASHBOARD
 ══════════════════════════════════════ -->
 <div id="dashboard">
-
-  <!-- MOBILE OVERLAY -->
-  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
   <!-- SIDEBAR -->
   <nav class="sidebar" id="sidebar">
@@ -1680,13 +1667,6 @@
 
     <!-- TOPBAR -->
     <div class="topbar">
-      <button class="topbar-hamburger" id="topbar-hamburger" onclick="openMobileSidebar()" aria-label="Open menu">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <line x1="3" y1="12" x2="21" y2="12"/>
-          <line x1="3" y1="18" x2="21" y2="18"/>
-        </svg>
-      </button>
       <div class="topbar-left">
         <div class="page-title" id="page-title">Dashboard</div>
         <div class="page-breadcrumb">AETHER 2K26 &bull; <span id="page-breadcrumb-sub">Overview</span> &bull; <span class="realtime-dot"></span> Realtime</div>
@@ -2391,6 +2371,24 @@ function showDashboard(user) {
   startClock();
   setupSidebarToggle();
   attachFirestoreListeners();
+
+  // Check URL hash for direct navigation
+  const handleHashNavigation = () => {
+    const hash = window.location.hash.substring(1);
+    if (hash && sectionMap[hash]) {
+      const navItem = Array.from(document.querySelectorAll('.nav-item')).find(item => {
+        const onclickAttr = item.getAttribute('onclick');
+        return onclickAttr && onclickAttr.includes(`'${hash}'`);
+      });
+      navigateTo(hash, navItem);
+    }
+  };
+  
+  // Handle on load
+  handleHashNavigation();
+  
+  // Listen for dynamic hash changes
+  window.addEventListener('hashchange', handleHashNavigation);
 }
 
 // ═══════════════════════════════════════════════
@@ -2412,27 +2410,17 @@ function startClock() {
 // SIDEBAR
 // ═══════════════════════════════════════════════
 function setupSidebarToggle() {
-  const sb  = document.getElementById('sidebar');
+  const sb = document.getElementById('sidebar');
   const btn = document.getElementById('sidebar-toggle');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      sb.classList.toggle('collapsed');
-      const ic = btn.querySelector('svg path');
-      if (ic) ic.setAttribute('d', sb.classList.contains('collapsed') ? 'M9 18L15 12L9 6' : 'M15 18L9 12L15 6');
-    });
-  }
-}
-
-function openMobileSidebar() {
-  document.getElementById('sidebar').classList.add('mobile-open');
-  document.getElementById('sidebar-overlay').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeMobileSidebar() {
-  document.getElementById('sidebar').classList.remove('mobile-open');
-  document.getElementById('sidebar-overlay').classList.remove('active');
-  document.body.style.overflow = '';
+  btn.addEventListener('click', () => {
+    sb.classList.toggle('collapsed');
+    const ic = btn.querySelector('svg path');
+    if (sb.classList.contains('collapsed')) {
+      ic.setAttribute('d', 'M9 18L15 12L9 6');
+    } else {
+      ic.setAttribute('d', 'M15 18L9 12L15 6');
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════
@@ -2458,9 +2446,6 @@ function navigateTo(section, navEl) {
 
   document.getElementById('page-title').textContent = sectionMap[section] || section;
   document.getElementById('page-breadcrumb-sub').textContent = sectionMap[section] || section;
-
-  // Close sidebar drawer on mobile after navigating
-  if (window.innerWidth <= 768) closeMobileSidebar();
 }
 
 // ═══════════════════════════════════════════════
@@ -2747,7 +2732,7 @@ function payBadge(status) {
 function viewStudentProfile(id) {
   const s = allStudents.find(x => x.id === id);
   if (!s) return;
-  const pid = s.participantId || id; // use full id, never truncated slice
+  const pid = s.participantId || id.slice(0, 8);
   const body = document.getElementById('modal-student-profile-body');
   body.innerHTML = `
     <div style="display:flex;gap:24px;flex-wrap:wrap">
@@ -3071,35 +3056,23 @@ function renderPayments(data) {
     const txn = s.transactionId || s.txnId || '—';
     const amt = s.paymentAmount || s.amount || '100';
     const hasSS = !!(s.paymentScreenshot || s.screenshotUrl);
-    const status = s.paymentStatus || 'pending';
-
-    let actionBtns;
-    if (status === 'verified' || status === 'paid') {
-      actionBtns = `
-        <button class="btn-sm btn-verify" style="opacity:.5;cursor:default" disabled title="Already verified">✓ Verified</button>
-        <button class="btn-sm btn-reject" onclick="rejectPayment('${s.id}')" title="Revoke verification">Revoke</button>`;
-    } else if (status === 'rejected') {
-      actionBtns = `
-        <button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Accept</button>
-        <span style="color:var(--danger);font-size:11px;font-family:'Space Mono',monospace">Rejected</span>`;
-    } else {
-      // pending / submitted / anything else — always show both buttons
-      actionBtns = `
-        <button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Accept</button>
-        <button class="btn-sm btn-reject" onclick="rejectPayment('${s.id}')">Reject</button>`;
-    }
-
+    const hasDetails = s.utrNumber || s.transactionId || s.txnId;
     return `
     <tr>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${pid}</span></td>
       <td>${s.fullName || s.name || '—'}</td>
-      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.schoolName || s.school || '—'}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.schoolName || '—'}</td>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--info)">${utr}</span></td>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px">${txn}</span></td>
       <td>${amt !== '—' ? `Rs. ${amt}` : 'Rs. 100'}</td>
       <td>${hasSS ? `<button class="btn-sm btn-view" onclick="viewPaymentScreenshot('${s.id}')">View SS</button>` : '<span style="color:var(--white-40);font-size:12px">None</span>'}</td>
       <td>${payBadge(s.paymentStatus)}</td>
-      <td><div class="action-btns">${actionBtns}</div></td>
+      <td>
+        <div class="action-btns">
+          ${hasDetails ? `<button class="btn-sm btn-verify" onclick="verifyParticipant('${s.id}')">Accept</button>
+          <button class="btn-sm btn-reject" onclick="rejectPayment('${s.id}')">Reject</button>` : `<span style="color:var(--white-40);font-size:11px;font-family:'Space Mono',monospace">Awaiting details</span>`}
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -3250,63 +3223,16 @@ function stopQRScanner() {
 
 async function handleScannedQR(data) {
   stopQRScanner();
-  console.log('[QR] Raw scanned data:', data);
-
   try {
-    let pid = null;
-    let parsed = null;
-
-    // Try JSON format
-    try {
-      parsed = JSON.parse(data);
-      console.log('[QR] Parsed JSON:', parsed);
-      // Accept any key that looks like an identifier
-      pid = parsed.participantId
-         || parsed.id
-         || parsed.uid
-         || parsed.userId
-         || parsed.user_id
-         || parsed.participant_id
-         || null;
-    } catch (_) {
-      // Plain string QR — use as-is
-      pid = data.trim();
-      console.log('[QR] Plain string id:', pid);
-    }
-
-    console.log('[QR] Resolved pid:', pid);
-    console.log('[QR] allStudents count:', allStudents.length);
-    console.log('[QR] Sample student fields:', allStudents.slice(0,2).map(s => ({
-      id: s.id, participantId: s.participantId, uid: s.uid, name: s.name, fullName: s.fullName
-    })));
-
-    if (!pid) {
-      const preview = data.length > 60 ? data.slice(0, 60) + '…' : data;
-      toast(`QR has no ID field. Raw: ${preview}`, 'error');
-      console.error('[QR] No ID field found in:', data);
-      return;
-    }
-
-    const pidLower = pid.toLowerCase().trim();
-
-    // Match against every possible stored field
-    const student = allStudents.find(s =>
-      s.participantId === pid ||
-      s.participantId?.toLowerCase() === pidLower ||
-      s.id === pid ||
-      s.uid === pid ||
-      (s.id && s.id.startsWith(pid)) ||     // truncated UID
-      (pid.length >= 6 && s.id && pid.startsWith(s.id.slice(0, pid.length))) // reverse truncation
-    );
-
+    const parsed = JSON.parse(data);
+    const pid = parsed.participantId;
+    const student = allStudents.find(s => s.participantId === pid || s.id === pid);
     if (student) {
       await markAttendance(student.id, true);
     } else {
       toast(`QR scanned but no participant found for ID: ${pid}`, 'warning');
-      console.warn('[QR] No match found. pid:', pid, '| allStudents:', allStudents.map(s => ({ id: s.id, participantId: s.participantId })));
     }
   } catch (e) {
-    console.error('[QR] handleScannedQR error:', e, '| raw data:', data);
     toast('Invalid QR code format.', 'error');
   }
 }
