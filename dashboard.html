@@ -1188,9 +1188,12 @@ body::after {
             <p style="font-weight:700;margin-bottom:6px">You're not in a team yet</p>
             <p style="font-size:.82rem">Create a new team or join with a partner's code.</p>
           </div>
-          <div class="team-actions">
+          <div class="team-actions" id="team-actions-container">
             <button class="btn btn-primary" onclick="openModal('modal-create-team')">+ Create Team</button>
             <button class="btn btn-ghost" onclick="openModal('modal-join-team')">Join with Code</button>
+          </div>
+          <div id="team-disabled-msg" class="hidden" style="color:var(--warning);font-size:.82rem;margin-top:10px;text-align:center;font-family:var(--font-body)">
+            Team creation/joining is currently closed by the organizers.
           </div>
         </div>
       </div>
@@ -1273,7 +1276,12 @@ body::after {
               </div>
               <div class="tag-wrap" id="tech-tags"></div>
             </div>
-            <button class="btn btn-primary" type="submit" style="width:100%">Submit Project Idea</button>
+            <div id="project-submit-container">
+              <button class="btn btn-primary" type="submit" style="width:100%">Submit Project Idea</button>
+            </div>
+            <div id="project-disabled-msg" class="hidden" style="color:var(--warning);font-size:.85rem;margin-top:10px;text-align:center;font-family:var(--font-body)">
+              Idea submissions are currently closed by the organizers.
+            </div>
           </form>
         </div>
       </div>
@@ -1377,6 +1385,7 @@ let currentUser     = null;
 let currentUserData = null;
 let teamUnsubscribe = null;
 let annUnsubscribe  = null;
+let configUnsubscribe = null;
 let techStack       = [];
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -1632,6 +1641,40 @@ function initDashboard(){
       renderUserPaymentDetails(d);
       // Team update
       loadTeam(d);
+    }
+  });
+
+  // Realtime settings listener (toggles)
+  if(configUnsubscribe) configUnsubscribe();
+  configUnsubscribe = onSnapshot(doc(db, 'settings', 'eventConfig'), snap=>{
+    if(snap.exists()){
+      const config = snap.data();
+      const teamsOpen = config.teamsOpen !== false;
+      const submissionsOpen = config.submissionsOpen !== false;
+      
+      const teamActions = document.getElementById('team-actions-container');
+      const teamDisabledMsg = document.getElementById('team-disabled-msg');
+      if (teamActions && teamDisabledMsg) {
+        if (teamsOpen) {
+          teamActions.style.display = 'flex';
+          teamDisabledMsg.classList.add('hidden');
+        } else {
+          teamActions.style.display = 'none';
+          teamDisabledMsg.classList.remove('hidden');
+        }
+      }
+      
+      const submitContainer = document.getElementById('project-submit-container');
+      const submitDisabledMsg = document.getElementById('project-disabled-msg');
+      if (submitContainer && submitDisabledMsg) {
+        if (submissionsOpen) {
+          submitContainer.style.display = 'block';
+          submitDisabledMsg.classList.add('hidden');
+        } else {
+          submitContainer.style.display = 'none';
+          submitDisabledMsg.classList.remove('hidden');
+        }
+      }
     }
   });
 }
