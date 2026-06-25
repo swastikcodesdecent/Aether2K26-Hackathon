@@ -2621,7 +2621,17 @@ function navigateTo(section, navEl) {
 function attachFirestoreListeners() {
   // Participants
   const u1 = db.collection('participants').onSnapshot(snap => {
-    allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allStudents = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data,
+        fullName: data.fullName || data.name || '—',
+        schoolName: data.schoolName || data.school || '—',
+        name: data.name || data.fullName || '—',
+        school: data.school || data.schoolName || '—'
+      };
+    });
     updateDashboardStats();
     filterStudents();
     filterPayments();
@@ -2965,9 +2975,13 @@ function openEditStudent(id) {
 async function saveStudentEdit() {
   const id = document.getElementById('edit-student-id').value;
   try {
+    const nameVal = document.getElementById('edit-name').value;
+    const schoolVal = document.getElementById('edit-school').value;
     await db.collection('participants').doc(id).update({
-      fullName: document.getElementById('edit-name').value,
-      schoolName: document.getElementById('edit-school').value,
+      fullName: nameVal,
+      name: nameVal,
+      schoolName: schoolVal,
+      school: schoolVal,
       class: document.getElementById('edit-class').value,
       email: document.getElementById('edit-email').value,
       phone: document.getElementById('edit-phone').value,
