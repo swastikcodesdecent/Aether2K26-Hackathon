@@ -2098,6 +2098,21 @@
         </div>
       </div>
 
+      <!-- QR Scanner inside Attendance -->
+      <div class="glass-card" style="margin-bottom:24px">
+        <div class="card-header">
+          <div class="card-title"><div class="card-title-dot"></div>QR Scanner — Mark Attendance</div>
+          <button class="btn-primary" id="att-start-scan-btn" onclick="toggleQRScanner('att')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Start Scanner
+          </button>
+        </div>
+        <div id="att-qr-scanner-container" style="display:none;text-align:center;padding:20px 0">
+          <video id="att-qr-video" style="width:100%;max-width:400px;border-radius:12px;border:2px solid var(--gold);box-shadow:0 0 24px var(--gold-glow)"></video>
+          <p style="margin-top:12px;color:var(--white-40);font-size:13px;font-family:'Space Mono',monospace">Point camera at participant QR code to check in</p>
+        </div>
+      </div>
+
       <div class="glass-card">
         <div class="card-header">
           <div class="card-title"><div class="card-title-dot"></div>Attendance Log</div>
@@ -2105,6 +2120,17 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15V19A2 2 0 0119 21H5A2 2 0 013 19V15"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export CSV
           </button>
+        </div>
+        <div class="filter-bar" style="margin-bottom:16px">
+          <div class="search-input-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="search-inp" id="attendance-search" placeholder="Search by name, ID, school, team..." oninput="filterAttendance()">
+          </div>
+          <select class="filter-select" id="filter-attendance-status" onchange="filterAttendance()">
+            <option value="">All Statuses</option>
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+          </select>
         </div>
         <div class="data-table-wrap">
           <table class="data-table">
@@ -2384,6 +2410,7 @@ let payChart = null;
 let scannerActive = false;
 let scannerStream = null;
 let scannerInterval = null;
+let currentScannerMode = 'qr';
 
 // Firestore unsubscribers
 const unsubs = [];
@@ -2596,10 +2623,10 @@ function attachFirestoreListeners() {
   const u1 = db.collection('participants').onSnapshot(snap => {
     allStudents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     updateDashboardStats();
-    renderStudents();
-    renderPayments();
-    renderQRGrid();
-    renderAttendance();
+    filterStudents();
+    filterPayments();
+    filterQRGrid();
+    filterAttendance();
     updateBadges();
     renderRecentRegistrations();
     updateCharts();
@@ -3310,18 +3337,22 @@ async function disableQR(id) {
 // ═══════════════════════════════════════════════
 // QR SCANNER
 // ═══════════════════════════════════════════════
-function toggleQRScanner() {
+function toggleQRScanner(mode = 'qr') {
+  currentScannerMode = mode;
   if (scannerActive) {
     stopQRScanner();
   } else {
-    startQRScanner();
+    startQRScanner(mode);
   }
 }
 
-async function startQRScanner() {
-  const container = document.getElementById('qr-scanner-container');
-  const btn = document.getElementById('start-scan-btn');
-  const video = document.getElementById('qr-video');
+async function startQRScanner(mode = 'qr') {
+  currentScannerMode = mode;
+  const container = document.getElementById(mode === 'att' ? 'att-qr-scanner-container' : 'qr-scanner-container');
+  const btn = document.getElementById(mode === 'att' ? 'att-start-scan-btn' : 'start-scan-btn');
+  const video = document.getElementById(mode === 'att' ? 'att-qr-video' : 'qr-video');
+  if (!container || !btn || !video) return;
+
   container.style.display = 'block';
   btn.textContent = 'Stop Scanner';
   scannerActive = true;
@@ -3357,8 +3388,11 @@ function stopQRScanner() {
   }
   if (scannerInterval) { clearInterval(scannerInterval); scannerInterval = null; }
   scannerActive = false;
-  document.getElementById('qr-scanner-container').style.display = 'none';
-  document.getElementById('start-scan-btn').textContent = 'Start Scanner';
+  
+  const container = document.getElementById(currentScannerMode === 'att' ? 'att-qr-scanner-container' : 'qr-scanner-container');
+  const btn = document.getElementById(currentScannerMode === 'att' ? 'att-start-scan-btn' : 'start-scan-btn');
+  if (container) container.style.display = 'none';
+  if (btn) btn.textContent = 'Start Scanner';
 }
 
 async function handleScannedQR(data) {
@@ -3404,13 +3438,38 @@ async function markAttendance(id, fromScan) {
 // ═══════════════════════════════════════════════
 // ATTENDANCE RENDER
 // ═══════════════════════════════════════════════
-function renderAttendance() {
+let filteredAttendance = [];
+
+function filterAttendance() {
+  const q = (document.getElementById('attendance-search')?.value || '').toLowerCase();
+  const status = document.getElementById('filter-attendance-status')?.value || '';
+
+  filteredAttendance = allStudents.filter(s => {
+    const name = (s.fullName || s.name || '').toLowerCase();
+    const pid = (s.participantId || s.id || '').toLowerCase();
+    const school = (s.schoolName || '').toLowerCase();
+    const team = (s.teamCode || '').toLowerCase();
+
+    const matchQ = !q || name.includes(q) || pid.includes(q) || school.includes(q) || team.includes(q);
+
+    let matchStatus = true;
+    if (status === 'present') matchStatus = s.attended;
+    else if (status === 'absent') matchStatus = !s.attended;
+
+    return matchQ && matchStatus;
+  });
+
+  renderAttendance(filteredAttendance);
+}
+
+function renderAttendance(data) {
   const tbody = document.getElementById('attendance-tbody');
-  if (!allStudents.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No participants found.</p></div></td></tr>`;
+  const list = data || allStudents;
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><p>No attendance records found.</p></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = allStudents.map(s => {
+  tbody.innerHTML = list.map(s => {
     const ts = s.attendanceTimestamp;
     const time = ts && ts.toDate ? ts.toDate().toLocaleTimeString() : '—';
     return `
