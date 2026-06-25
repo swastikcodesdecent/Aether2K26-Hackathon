@@ -508,34 +508,7 @@
     max-width: 100%;
   }
 
-  /* Custom cursor only on real pointer devices (not touch/mobile) */
-  @media (pointer: fine) {
-    body { cursor: none; }
-  }
 
-  /* AUKTAVE-style yellow arrow cursor */
-  #cursor {
-    position: fixed;
-    width: 28px;
-    height: 28px;
-    pointer-events: none;
-    z-index: 999999;
-    transform-origin: 4px 4px;
-    transition: transform 0.08s ease;
-    will-change: transform, left, top;
-    display: none; /* hidden by default, shown only on pointer:fine */
-  }
-  @media (pointer: fine) {
-    #cursor { display: block; }
-  }
-  #cursor svg {
-    width: 100%;
-    height: 100%;
-    filter: drop-shadow(0 0 6px rgba(255,255,255,0.8));
-  }
-  #cursor-ring {
-    display: none;
-  }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 4px; }
@@ -756,7 +729,7 @@
     z-index: 0;
     opacity: 0.55;
     pointer-events: none;
-    filter: blur(3px) brightness(0.45);
+    filter: blur(1px) brightness(0.45);
     transform: scale(1.04); /* prevent blur edge bleed */
     transition: opacity 1.2s ease;
   }
@@ -856,7 +829,7 @@
   }
   .hero-title {
     font-family: var(--font-head);
-    font-size: clamp(52px, 7.5vw, 96px);
+    font-size: clamp(36px, 10vw, 96px);
     font-weight: 800;
     line-height: 0.95;
     letter-spacing: 0.03em;
@@ -1008,7 +981,7 @@
   }
   .section-title {
     font-family: var(--font-head);
-    font-size: clamp(44px, 7vw, 80px);
+    font-size: clamp(32px, 8vw, 80px);
     font-weight: 800;
     line-height: 0.95;
     letter-spacing: 0.02em;
@@ -1191,7 +1164,7 @@
   }
   /* Info row below photo */
   .team-info {
-    padding: 28px 22px 28px;
+    padding: 14px 16px 16px;
     border-top: none;
     background: transparent;
     position: relative;
@@ -1199,7 +1172,7 @@
   .team-info::before {
     content: '';
     position: absolute;
-    top: 0; left: 22px; right: 22px;
+    top: 0; left: 16px; right: 16px;
     height: 2px;
     background: linear-gradient(90deg, var(--red), transparent);
   }
@@ -1210,16 +1183,13 @@
     letter-spacing: 0.03em;
     text-transform: uppercase;
     color: var(--white);
-    margin-bottom: 9px;
-    line-height: 14.9;
+    margin-bottom: 4px;
   }
   .team-role {
     font-family: var(--font-mono);
     font-size: 9px;
     letter-spacing: 0.16em;
-    color: var(--red);
-    text-transform: uppercase;
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
   .team-tags {
     display: flex;
@@ -2161,7 +2131,7 @@
     letter-spacing: 0.13em;
     color: var(--dim);
     text-transform: uppercase;
-    margin-top: 8px;
+    margin-top: 6px;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -2182,7 +2152,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    margin-top: 14px;
+    margin-top: 8px;
     font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: 0.1em;
@@ -2547,12 +2517,7 @@
   </button>
 </div>
 
-<div id="cursor">
-  <svg viewBox="0 0 20 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 2L18 11L10.5 12.5L7 21L2 2Z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1" stroke-linejoin="round"/>
-  </svg>
-</div>
-<div id="cursor-ring"></div>
+
 
 <!-- Alert bar -->
 <div class="alert-bar" id="alertBar">
@@ -2591,12 +2556,12 @@
       <li><a href="#about">About</a></li>
 <li><a href="depaul.pdf" download="rulebook.pdf">Rulebook</a></li>
       <li><a href="#tracks">Tracks</a></li>
+      <li><a href="#team">Team</a></li>
       <li><a href="#contact">Contact Us</a></li>
-            <li><a href="#team">Team</a></li>
     </ul>
 
     <!-- Glowing Register CTA -->
-    <a href="register.html"  class="nav-cta" style="background:transparent;color:#FF6600;border:1px solid #FF6600;box-shadow:0 0 14px rgba(255,102,0,0.35);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,102,0,0.12)';this.style.boxShadow='0 0 28px rgba(255,102,0,0.7)'" onmouseout="this.style.background='transparent';this.style.boxShadow='0 0 14px rgba(255,102,0,0.35)'">Register</a>
+    <a href="register.html" class="nav-cta" style="background:transparent;color:#FF6600;border:1px solid #FF6600;box-shadow:0 0 14px rgba(255,102,0,0.35);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,102,0,0.12)';this.style.boxShadow='0 0 28px rgba(255,102,0,0.7)'" onmouseout="this.style.background='transparent';this.style.boxShadow='0 0 14px rgba(255,102,0,0.35)'">Register</a>
 
     <!-- Hamburger -->
     <button class="hamburger" id="hamburger" aria-label="Menu">
@@ -2613,8 +2578,8 @@
   
   <a href="depaul.pdf" download="rulebook.pdf" onclick="closeMobileMenu()">Rulebook</a>
   <a href="#tracks" onclick="closeMobileMenu()">Tracks</a>
-  <a href="#contact" onclick="closeMobileMenu()">Contact Us</a>
   <a href="#team" onclick="closeMobileMenu()">Team</a>
+  <a href="#contact" onclick="closeMobileMenu()">Contact Us</a>
   <a href="register.html" onclick="closeMobileMenu()" style="color:#FF6600;">Register</a>
 </div>
 
@@ -2691,7 +2656,7 @@
       </div>
       <div class="ribbon-item">
         <span class="ribbon-sep"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L9.8 6H15L10.6 9.2L12.4 14.2L8 11L3.6 14.2L5.4 9.2L1 6H6.2L8 1Z" fill="#FF6600"/></svg></span>
-        <span class="ribbon-text">My love for you has zero latency 🔥 HyperNova Tech</span>
+        <span class="ribbon-text">My love for you has zero latency 🔥 Aether 2K26 Tech</span>
       </div>
       <!-- duplicate for seamless loop -->
       <div class="ribbon-item">
@@ -2716,7 +2681,7 @@
       </div>
       <div class="ribbon-item">
         <span class="ribbon-sep"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L9.8 6H15L10.6 9.2L12.4 14.2L8 11L3.6 14.2L5.4 9.2L1 6H6.2L8 1Z" fill="#FF6600"/></svg></span>
-        <span class="ribbon-text">My love for you has zero latency 🔥 HyperNova Tech</span>
+        <span class="ribbon-text">My love for you has zero latency 🔥 Aether 2K26 Tech</span>
       </div>
     </div>
   </div>
@@ -2786,27 +2751,17 @@
 
   <div class="partner-cards reveal">
     <div class="partner-card">
-      <div class="partner-icon-wrap"><svg class="partner-svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 4l14 10v14H2V14L16 4z"/><path d="M11 28V20h10v8"/><path d="M16 4v6"/><circle cx="16" cy="13" r="2.5"/></svg></div>
+      <div class="partner-icon-wrap"><svg class="partner-svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="8" width="24" height="16" rx="2"/><path d="M10 8V6a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/><path d="M16 16v2M10 16h12"/></svg></div>
       <div class="partner-content">
-        <h3>Catalyst @ Amity University Kolkata</h3>
-        <p>Our participation in the Catalyst Hackathon at AUK represents our connection with the broader innovation and academic community. We actively engage with institutions fostering next-generation technology talent.</p>
-        <a href="#hackathon">Learn About Our Journey →</a>
+        <h3>VMC Tech India</h3>
+        <p>Co-powering Aether 2K26 — VMC Tech India brings industry expertise, mentorship, and professional-grade infrastructure to the campus hackathon, helping students bridge the gap between academic learning and real-world technology practice.</p>
       </div>
     </div>
     <div class="partner-card">
-      <div class="partner-icon-wrap"><svg class="partner-svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="12" r="4"/><circle cx="22" cy="12" r="4"/><path d="M4 26c0-3.3 2.7-6 6-6h12c3.3 0 6 2.7 6 6"/><path d="M16 8v16"/></svg></div>
+      <div class="partner-icon-wrap"><svg class="partner-svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="16,3 29,10 29,22 16,29 3,22 3,10"/><polygon points="16,9 23,13 23,19 16,23 9,19 9,13"/><circle cx="16" cy="16" r="2.5"/></svg></div>
       <div class="partner-content">
-        <h3>Open for Collaboration</h3>
-        <p>HyperNova Tech is actively seeking partnerships with startups, enterprises, academic institutions, and fellow innovators. If you have a bold vision that requires intelligent technology solutions, let's build it together.</p>
-        <a href="#contact">Get in Touch →</a>
-      </div>
-    </div>
-    <div class="partner-card">
-      <div class="partner-icon-wrap"><svg class="partner-svg" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="16" cy="16" r="12"/><path d="M4 16h24M16 4a18 18 0 0 1 4 12 18 18 0 0 1-4 12 18 18 0 0 1-4-12 18 18 0 0 1 4-12z"/></svg></div>
-      <div class="partner-content">
-        <h3>Innovation Ecosystem</h3>
-        <p>We believe in the power of the innovation ecosystem. HyperNova Tech is actively building relationships with tech communities, open-source projects, and fellow builders across India and beyond.</p>
-        <a href="#join">Join Our Network →</a>
+        <h3>Vyronix Labs</h3>
+        <p>The primary power behind Aether 2K26 — Vyronix Labs drives the vision, platform, and innovation framework of this hackathon. Their commitment to nurturing young tech talent makes this event possible and impactful for every participant.</p>
       </div>
     </div>
   </div>
@@ -2965,73 +2920,6 @@
   </div>
 </section>
 
-<!-- CONTACT -->
-<section id="contact">
-  <div class="reveal">
-    <p class="section-label">// Get In Touch</p>
-    <h2 class="section-title">CONTACT <span class="accent">US</span></h2>
-    <p class="section-desc">Have an idea? A project? A question? We're here and we're listening.</p>
-  </div>
-
-  <div class="contact-layout reveal">
-    <div class="contact-info">
-      <h3>Let's Build Something Together</h3>
-      <p>Whether you're looking to collaborate on a project, partner with HyperNova Tech, or just want to talk tech — reach out. We respond to every message with the urgency it deserves.</p>
-      <div class="contact-items">
-        <div class="contact-item">
-          <div class="contact-item-icon"><svg class="contact-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.7 2 6 4.7 6 8c0 5 6 14 6 14s6-9 6-14c0-3.3-2.7-6-6-6z"/><circle cx="12" cy="8" r="2.5"/></svg></div>
-          <div>
-            <span class="contact-item-label">Location</span>
-            <span class="contact-item-value">Kolkata, West Bengal, India</span>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-item-icon"><svg class="contact-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg></div>
-          <div>
-            <span class="contact-item-label">Institution</span>
-            <span class="contact-item-value">DE PAUL SCHOOL</span>
-          </div>
-        </div>
-     
-        <div class="contact-item">
-          <div class="contact-item-icon"><svg class="contact-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-          <div>
-            <span class="contact-item-label">Status</span>
-            <span class="contact-item-value">Coming Soon</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-card">
-      <form id="contactForm">
-        <div class="form-group">
-          <label>Your Name</label>
-          <input type="text" name="name" placeholder="Full name" required>
-        </div>
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" name="email" placeholder="your@email.com" required>
-        </div>
-        <div class="form-group">
-          <label>Subject</label>
-          <input type="text" name="subject" placeholder="What's this about?" required>
-        </div>
-        <div class="form-group">
-          <label>Message</label>
-          <textarea name="message" placeholder="Tell us about your project, idea, or collaboration proposal..." style="min-height:140px;" required></textarea>
-        </div>
-        <button type="submit" class="btn-submit">Send Message →</button>
-      </form>
-      <div class="success-msg" id="contactSuccess">
-        <h3 style="display:flex;align-items:center;gap:10px;"><svg class="success-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg> Message Sent!</h3>
-        <p>Thanks for reaching out to HyperNova Tech. Our team will contact you ASAP after reviewing your submission.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="picky-divider"><svg viewBox="0 0 1440 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,28 60,10 120,30 180,8 240,26 300,6 360,28 420,10 480,32 540,8 600,26 660,4 720,30 780,10 840,28 900,6 960,24 1020,8 1080,30 1140,10 1200,28 1260,8 1320,26 1380,12 1440,28" fill="none" stroke="rgba(255,102,0,0.35)" stroke-width="1.5"/></svg></div>
 <!-- TEAM -->
 <section id="team">
   <div class="reveal">
@@ -3144,6 +3032,73 @@
   </div>
 </section>
 
+<div class="picky-divider"><svg viewBox="0 0 1440 38" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><polyline points="0,28 60,10 120,30 180,8 240,26 300,6 360,28 420,10 480,32 540,8 600,26 660,4 720,30 780,10 840,28 900,6 960,24 1020,8 1080,30 1140,10 1200,28 1260,8 1320,26 1380,12 1440,28" fill="none" stroke="rgba(255,102,0,0.35)" stroke-width="1.5"/></svg></div>
+<!-- CONTACT -->
+<section id="contact">
+  <div class="reveal">
+    <p class="section-label">// Get In Touch</p>
+    <h2 class="section-title">CONTACT <span class="accent">US</span></h2>
+    <p class="section-desc">Have an idea? A project? A question? We're here and we're listening.</p>
+  </div>
+
+  <div class="contact-layout reveal">
+    <div class="contact-info">
+      <h3>Let's Build Something Together</h3>
+      <p>Whether you're looking to collaborate on a project, partner with Aether 2K26 Tech, or just want to talk tech — reach out. We respond to every message with the urgency it deserves.</p>
+      <div class="contact-items">
+        <div class="contact-item">
+          <div class="contact-item-icon"><svg class="contact-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C8.7 2 6 4.7 6 8c0 5 6 14 6 14s6-9 6-14c0-3.3-2.7-6-6-6z"/><circle cx="12" cy="8" r="2.5"/></svg></div>
+          <div>
+            <span class="contact-item-label">Location</span>
+            <span class="contact-item-value">Kolkata, West Bengal, India</span>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-item-icon"><svg class="contact-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L3 7v10l9 5 9-5V7L12 2z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg></div>
+          <div>
+            <span class="contact-item-label">Institution</span>
+            <span class="contact-item-value">DE PAUL SCHOOL</span>
+          </div>
+        </div>
+     
+        <div class="contact-item">
+          <div class="contact-item-icon"><svg class="contact-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <div>
+            <span class="contact-item-label">Status</span>
+            <span class="contact-item-value">Coming Soon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <form id="contactForm">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" name="name" placeholder="Full name" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" name="subject" placeholder="What's this about?" required>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea name="message" placeholder="Tell us about your project, idea, or collaboration proposal..." style="min-height:140px;" required></textarea>
+        </div>
+        <button type="submit" class="btn-submit">Send Message →</button>
+      </form>
+      <div class="success-msg" id="contactSuccess">
+        <h3 style="display:flex;align-items:center;gap:10px;"><svg class="success-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg> Message Sent!</h3>
+        <p>Thanks for reaching out to Aether 2K26 Tech. Our team will contact you ASAP after reviewing your submission.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-grid">
@@ -3220,16 +3175,7 @@ if (heroBgVideo) {
   heroBgVideo.removeAttribute('loop');
 }
 
-// AUKTAVE-style yellow arrow cursor — only on non-touch devices
-const cursor = document.getElementById('cursor');
-if (window.matchMedia('(pointer: fine)').matches) {
-  document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-  });
-}
-
-// ── Fixed header stack: measure alert bar and push nav + hero down ──
+// Scale up on interactive elements (cursor effect — pointer devices only)
 function syncHeaderOffsets() {
   const alertBar = document.getElementById('alertBar');
   const alertH = (alertBar && alertBar.style.display !== 'none') ? alertBar.offsetHeight : 0;
@@ -3253,13 +3199,7 @@ if (alertCloseBtn) {
   alertCloseBtn.removeAttribute('onclick');
 }
 window.addEventListener('resize', syncHeaderOffsets, { passive: true });
-// Scale up on interactive elements (cursor effect — pointer devices only)
-if (window.matchMedia('(pointer: fine)').matches) {
-  document.querySelectorAll('a, button, .team-card, .service-card, .project-card, .tech-badge').forEach(el => {
-    el.addEventListener('mouseenter', () => { cursor.style.transform = 'scale(1.4)'; });
-    el.addEventListener('mouseleave', () => { cursor.style.transform = 'scale(1)'; });
-  });
-}
+// ── Fixed header stack: measure alert bar and push nav + hero down ──
 
 // Particles
 const canvas = document.getElementById('particles-canvas');
@@ -3457,12 +3397,12 @@ function stopAudio() {
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyCjJ68PBmzNSmp0YKid-cB-a8F4dhgJD1g",
-    authDomain: "hypern-forms.firebaseapp.com",
-    projectId: "hypern-forms",
-    storageBucket: "hypern-forms.firebasestorage.app",
-    messagingSenderId: "593523063763",
-    appId: "1:593523063763:web:d0e22b0274410f21bd4d26"
+    apiKey: "AIzaSyCpcUM2MUsFJ7BRXYQPF4I2Qo01Au77v4A",
+    authDomain: "aether-contact-us.firebaseapp.com",
+    projectId: "aether-contact-us",
+    storageBucket: "aether-contact-us.firebasestorage.app",
+    messagingSenderId: "471798414451",
+    appId: "1:471798414451:web:d9660f107f76a0f5537e06"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -3485,9 +3425,16 @@ function stopAudio() {
         });
         form.style.display = 'none';
         document.getElementById(successId).style.display = 'block';
+        setTimeout(() => {
+          document.getElementById(successId).style.display = 'none';
+          form.reset();
+          btn.textContent = originalText;
+          btn.disabled = false;
+          form.style.display = 'block';
+        }, 5000);
       } catch (err) {
         console.error('Firebase error:', err);
-        alert('Something went wrong. Please try again.');
+        alert('Error: ' + err.message);
         btn.textContent = originalText;
         btn.disabled = false;
       }
