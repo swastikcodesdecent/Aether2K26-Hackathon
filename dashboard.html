@@ -1064,8 +1064,36 @@ body::after {
           <div id="pay-badge-el"></div>
           <div style="font-size:.75rem;color:var(--text-muted);font-family:var(--font-body)">Admin verifies within 2–4 hrs</div>
         </div>
-        <div style="padding:11px 14px;background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.18);border-radius:var(--radius-md);font-size:.8rem;color:var(--text-secondary);font-family:var(--font-body);line-height:1.6">
-          After payment, mention your Participant ID in the UPI remarks. Admin will verify and unlock your entry QR automatically.
+        <div id="payment-remarks-box" style="padding:11px 14px;background:rgba(255,214,0,0.05);border:1px solid rgba(255,214,0,0.18);border-radius:var(--radius-md);font-size:.8rem;color:var(--text-secondary);font-family:var(--font-body);line-height:1.6;margin-bottom:16px">
+          After payment, enter your UTR Number and UPI Transaction ID below to submit for admin verification.
+        </div>
+
+        <!-- UTR & Transaction ID Submission Form -->
+        <div id="payment-details-form-container" style="margin-top: 16px; border-top: 1px solid var(--white-10); padding-top: 16px;">
+          <h4 style="font-family:var(--font-heading);font-size:.85rem;color:var(--white-80);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase">Submit Payment Proof</h4>
+          <div style="display:grid;gap:12px;margin-bottom:16px">
+            <div>
+              <label for="input-utr" style="display:block;font-size:.73rem;color:var(--text-muted);margin-bottom:4px;font-family:var(--font-body)">UTR Number (12 digits)</label>
+              <input class="form-input" type="text" id="input-utr" placeholder="e.g. 123456789012" pattern="\d{12}" maxlength="12" style="width:100%;box-sizing:border-box" />
+            </div>
+            <div>
+              <label for="input-txn" style="display:block;font-size:.73rem;color:var(--text-muted);margin-bottom:4px;font-family:var(--font-body)">Transaction ID</label>
+              <input class="form-input" type="text" id="input-txn" placeholder="UPI Transaction ID" style="width:100%;box-sizing:border-box" />
+            </div>
+          </div>
+          <button class="btn-primary" id="btn-submit-pay-details" onclick="submitPaymentDetails()" style="width:100%">Submit Details</button>
+        </div>
+
+        <!-- Submitted Payment Details (read-only / status view) -->
+        <div id="payment-details-submitted-container" style="margin-top: 16px; border-top: 1px solid var(--white-10); padding-top: 16px; display:none">
+          <h4 style="font-family:var(--font-heading);font-size:.85rem;color:var(--white-80);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase">Submitted Details</h4>
+          <div class="payment-info" style="margin-bottom:12px">
+            <div class="payment-info-row"><span>UTR Number</span><span id="submitted-utr" style="color:var(--info)">—</span></div>
+            <div class="payment-info-row"><span>Transaction ID</span><span id="submitted-txn" style="color:var(--gold)">—</span></div>
+          </div>
+          <div id="pay-details-action-container">
+            <button class="btn-sm" id="btn-edit-pay-details" onclick="editPaymentDetails()" style="background:rgba(255,255,255,0.05); border:1px solid var(--white-10); color:var(--white-80); padding:6px 12px; font-size:.75rem; border-radius:var(--radius-sm); cursor:pointer; font-family:var(--font-body)">Edit Details</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1463,6 +1491,7 @@ window.openQRFullscreen = function(){
   if(currentUserData){
     const qrData = JSON.stringify({
       pid: currentUserData.participantId,
+      participantId: currentUserData.participantId,
       name: currentUserData.name,
       teamId: currentUserData.teamId || null,
       school: currentUserData.school,
@@ -1572,6 +1601,7 @@ function initDashboard(){
   document.getElementById('pay-pid').textContent = data.participantId||'—';
   makeQR('pay-qr-code', `upi://pay?pa=aether2k26@paytm&pn=AETHER2K26&am=100&cu=INR&tn=${data.participantId}`, 144);
   renderPaymentStatus(data.paymentStatus);
+  renderUserPaymentDetails(data);
 
   // Entry QR
   renderEntryQR(data);
@@ -1599,6 +1629,7 @@ function initDashboard(){
       renderPaymentBadgeEl('id-pay-badge', d.paymentStatus);
       document.getElementById('ov-pay').textContent = (d.paymentStatus==='paid'||d.paymentStatus==='verified') ? 'Paid' : d.paymentStatus==='rejected' ? 'Rejected' : 'Pending';
       renderPaymentBadge('pf-payment', d.paymentStatus);
+      renderUserPaymentDetails(d);
       // Team update
       loadTeam(d);
     }
@@ -1637,6 +1668,98 @@ function renderPaymentBadge(elId, status){
   else el.innerHTML='<div class="status-badge status-pending" style="font-size:.75rem">Pending</div>';
 }
 
+window.isEditingPaymentDetails = false;
+
+function renderUserPaymentDetails(data) {
+  const formContainer = document.getElementById('payment-details-form-container');
+  const submittedContainer = document.getElementById('payment-details-submitted-container');
+  const inputUtr = document.getElementById('input-utr');
+  const inputTxn = document.getElementById('input-txn');
+  const submittedUtr = document.getElementById('submitted-utr');
+  const submittedTxn = document.getElementById('submitted-txn');
+  const btnEdit = document.getElementById('btn-edit-pay-details');
+  const remarksBox = document.getElementById('payment-remarks-box');
+
+  if (!formContainer || !submittedContainer) return;
+
+  const isVerified = data.paymentStatus === 'paid' || data.paymentStatus === 'verified';
+  const hasDetails = !!(data.utrNumber || data.transactionId);
+
+  if (isVerified) {
+    formContainer.style.display = 'none';
+    submittedContainer.style.display = 'block';
+    if (btnEdit) btnEdit.style.display = 'none';
+    if (submittedUtr) submittedUtr.textContent = data.utrNumber || '—';
+    if (submittedTxn) submittedTxn.textContent = data.transactionId || '—';
+    if (remarksBox) remarksBox.style.display = 'none';
+  } else if (hasDetails && !window.isEditingPaymentDetails) {
+    formContainer.style.display = 'none';
+    submittedContainer.style.display = 'block';
+    if (btnEdit) btnEdit.style.display = 'block';
+    if (submittedUtr) submittedUtr.textContent = data.utrNumber || '—';
+    if (submittedTxn) submittedTxn.textContent = data.transactionId || '—';
+    if (remarksBox) remarksBox.style.display = 'block';
+  } else {
+    formContainer.style.display = 'block';
+    submittedContainer.style.display = 'none';
+    if (inputUtr && !window.isEditingPaymentDetails) inputUtr.value = data.utrNumber || '';
+    if (inputTxn && !window.isEditingPaymentDetails) inputTxn.value = data.transactionId || '';
+    if (remarksBox) remarksBox.style.display = 'block';
+  }
+}
+
+window.submitPaymentDetails = async function() {
+  const inputUtr = document.getElementById('input-utr');
+  const inputTxn = document.getElementById('input-txn');
+  
+  const utr = inputUtr ? inputUtr.value.trim() : '';
+  const txn = inputTxn ? inputTxn.value.trim() : '';
+  
+  if (!utr || !txn) {
+    showToast('Please enter both UTR Number and Transaction ID.', 'error');
+    return;
+  }
+  
+  if (!/^\d{12}$/.test(utr)) {
+    showToast('UTR Number must be exactly 12 digits.', 'error');
+    return;
+  }
+  
+  const btn = document.getElementById('btn-submit-pay-details');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+  }
+  
+  try {
+    await updateDoc(doc(db, 'participants', currentUser.uid), {
+      utrNumber: utr,
+      transactionId: txn,
+      paymentStatus: 'pending'
+    });
+    
+    window.isEditingPaymentDetails = false;
+    showToast('Payment details submitted successfully!', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Failed to submit details. Try again.', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Details';
+    }
+  }
+};
+
+window.editPaymentDetails = function() {
+  window.isEditingPaymentDetails = true;
+  const inputUtr = document.getElementById('input-utr');
+  const inputTxn = document.getElementById('input-txn');
+  if (inputUtr && currentUserData) inputUtr.value = currentUserData.utrNumber || '';
+  if (inputTxn && currentUserData) inputTxn.value = currentUserData.transactionId || '';
+  renderUserPaymentDetails(currentUserData);
+};
+
 // ── Entry QR ──────────────────────────────────────────────────
 function renderEntryQR(data){
   const lock    = document.getElementById('qr-lock-overlay');
@@ -1658,9 +1781,13 @@ function renderEntryQR(data){
   if(qrInfo.school) qrInfo.school.textContent = data.school||'—';
 
   const qrData = JSON.stringify({
-    pid: data.participantId, name: data.name,
-    teamId: data.teamId||null, school: data.school,
-    event: 'AETHER2K26', ts: Date.now()
+    pid: data.participantId,
+    participantId: data.participantId,
+    name: data.name,
+    teamId: data.teamId||null,
+    school: data.school,
+    event: 'AETHER2K26',
+    ts: Date.now()
   });
   makeQR('entry-qr-code', qrData, 170);
 
