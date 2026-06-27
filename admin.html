@@ -2764,8 +2764,13 @@ function animateCounter(id, target) {
 
 function updateBadges() {
   document.getElementById('badge-students').textContent = allStudents.length;
-  document.getElementById('badge-teams').textContent = allTeams.length;
-  document.getElementById('badge-submissions').textContent = allSubmissions.length;
+  
+  const pendingTeams = allTeams.filter(t => t.status !== 'approved' && t.status !== 'rejected').length;
+  document.getElementById('badge-teams').textContent = pendingTeams;
+  
+  const pendingSubs = allSubmissions.filter(s => s.status !== 'approved' && s.status !== 'rejected').length;
+  document.getElementById('badge-submissions').textContent = pendingSubs;
+  
   const pending = allStudents.filter(s => s.paymentStatus === 'pending' || !s.paymentStatus).length;
   document.getElementById('badge-pending-pay').textContent = pending;
 }
