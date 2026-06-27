@@ -3087,6 +3087,7 @@ function renderTeams(data) {
       <td>${teamStatusBadge(status)}</td>
       <td>
         <div class="action-btns">
+          <button class="btn-sm btn-verify" onclick="updateTeamStatus('${t.id}','approved')">Approve</button>
           <button class="btn-sm btn-shortlist" onclick="updateTeamStatus('${t.id}','shortlisted')">Shortlist</button>
           <button class="btn-sm btn-reject" onclick="updateTeamStatus('${t.id}','rejected')">Reject</button>
           <button class="btn-sm btn-delete" onclick="confirmDelete('teams','${t.id}','${t.teamName || t.id}')">Remove</button>
@@ -3097,6 +3098,7 @@ function renderTeams(data) {
 }
 
 function teamStatusBadge(s) {
+  if (s === 'approved') return '<span class="badge badge-success">Approved</span>';
   if (s === 'shortlisted') return '<span class="badge badge-gold">Shortlisted</span>';
   if (s === 'rejected') return '<span class="badge badge-danger">Rejected</span>';
   if (s === 'winner') return '<span class="badge badge-success">Winner</span>';
