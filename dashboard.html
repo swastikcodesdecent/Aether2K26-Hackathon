@@ -2047,12 +2047,47 @@ window.handleProjectSubmit = async function(e){
     await updateDoc(doc(db,'participants',uid),{projectSubmitted:true, project:projectData});
     if(currentUserData.teamId){
       await updateDoc(doc(db,'teams',currentUserData.teamId),{projectSubmitted:true, project:projectData});
+
+      // Also write/update the submission document in 'submissions' collection
+      const teamSnap = await getDoc(doc(db,'teams',currentUserData.teamId));
+      let teamName = '';
+      let teamCode = '';
+      if(teamSnap.exists()){
+        const teamData = teamSnap.data();
+        teamName = teamData.name || '';
+        teamCode = teamData.teamCode || '';
+      }
+
+      const subDocRef = doc(db, 'submissions', currentUserData.teamId);
+      const subSnap = await getDoc(subDocRef);
+      let currentStatus = 'pending';
+      if(subSnap.exists()){
+        currentStatus = subSnap.data().status || 'pending';
+      }
+
+      await setDoc(subDocRef, {
+        teamId: currentUserData.teamId,
+        teamCode: teamCode || currentUserData.teamCode || '',
+        teamName: teamName || '',
+        title: title,
+        projectTitle: title,
+        problemStatement: problem,
+        problem: problem,
+        description: desc,
+        ideaDescription: desc,
+        techStack: techStack.join(', '),
+        submittedAt: serverTimestamp(),
+        status: currentStatus
+      });
     }
     currentUserData.projectSubmitted=true; currentUserData.project=projectData;
     showToast('Project idea submitted!','success');
     document.getElementById('ov-proj').textContent='Submitted';
     renderProjectView(projectData);
-  } catch(err){ showToast('Submission failed. Try again.','error'); }
+  } catch(err){
+    console.error(err);
+    showToast('Submission failed. Try again.','error');
+  }
 };
 
 function renderProjectView(p){
