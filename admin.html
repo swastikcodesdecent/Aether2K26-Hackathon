@@ -3095,7 +3095,7 @@ function filterTeams() {
   const sub = document.getElementById('filter-team-sub').value;
 
   filteredTeams = allTeams.filter(t => {
-    const name = (t.teamName || '').toLowerCase();
+    const name = (t.name || t.teamName || '').toLowerCase();
     const code = (t.teamCode || '').toLowerCase();
     const matchQ = !q || name.includes(q) || code.includes(q);
     const hasSub = allSubmissions.some(s => s.teamCode === t.teamCode || s.teamId === t.id);
@@ -3116,11 +3116,16 @@ function renderTeams(data) {
     const members = allStudents.filter(s => s.teamCode === t.teamCode || s.teamId === t.id);
     const hasSub = allSubmissions.some(s => s.teamCode === t.teamCode || s.teamId === t.id);
     const status = t.status || 'active';
+    
+    // Find leader from team members array
+    const leader = t.members?.find(m => m.role === 'Leader' || m.uid === t.leaderId)?.name || t.leaderName || t.leader || '—';
+    const teamName = t.name || t.teamName || '—';
+
     return `
     <tr>
       <td><span style="font-family:'Space Mono',monospace;font-size:11px;color:var(--gold)">${t.teamCode || '—'}</span></td>
-      <td style="font-weight:700;color:var(--white-90)">${t.teamName || '—'}</td>
-      <td>${t.leaderName || t.leader || '—'}</td>
+      <td style="font-weight:700;color:var(--white-90)">${teamName}</td>
+      <td>${leader}</td>
       <td><span style="font-size:13px">${members.length} member${members.length !== 1 ? 's' : ''}</span></td>
       <td>${t.schoolName || members[0]?.schoolName || '—'}</td>
       <td>${hasSub ? '<span class="badge badge-success">Submitted</span>' : '<span class="badge badge-neutral">Pending</span>'}</td>
@@ -3130,7 +3135,7 @@ function renderTeams(data) {
           <button class="btn-sm btn-verify" onclick="updateTeamStatus('${t.id}','approved')">Approve</button>
           <button class="btn-sm btn-shortlist" onclick="updateTeamStatus('${t.id}','shortlisted')">Shortlist</button>
           <button class="btn-sm btn-reject" onclick="updateTeamStatus('${t.id}','rejected')">Reject</button>
-          <button class="btn-sm btn-delete" onclick="confirmDelete('teams','${t.id}','${t.teamName || t.id}')">Remove</button>
+          <button class="btn-sm btn-delete" onclick="confirmDelete('teams','${t.id}','${teamName}')">Remove</button>
         </div>
       </td>
     </tr>`;
@@ -3165,9 +3170,11 @@ function filterSubmissions() {
 
   filteredSubs = allSubmissions.filter(s => {
     const title = (s.projectTitle || s.title || '').toLowerCase();
-    const team = (s.teamName || '').toLowerCase();
+    const teamDoc = allTeams.find(t => t.id === s.teamId || (s.teamCode && t.teamCode === s.teamCode));
+    const teamName = teamDoc ? (teamDoc.name || teamDoc.teamName || '') : (s.teamName || s.teamCode || '');
+    const team = teamName.toLowerCase();
     const tech = (s.techStack || '').toLowerCase();
-    const matchQ = !q || title.includes(q) || team.includes(q) || tech.includes(q);
+    const matchQ = !q || title.includes(q) || team.includes(q) || tech.includes(q) || (s.teamCode && s.teamCode.toLowerCase().includes(q));
     const matchStatus = !status || s.status === status || (!s.status && status === 'pending');
     return matchQ && matchStatus;
   });
@@ -3193,7 +3200,8 @@ function renderSubmissions() {
 
   container.innerHTML = list.map(s => {
     const title = s.projectTitle || s.title || '—';
-    const team = s.teamName || s.teamCode || '—';
+    const teamDoc = allTeams.find(t => t.id === s.teamId || (s.teamCode && t.teamCode === s.teamCode));
+    const teamNameStr = teamDoc ? (teamDoc.name || teamDoc.teamName) : (s.teamName || s.teamCode || '—');
     const desc = s.description || s.ideaDescription || '—';
     const problem = s.problemStatement || '';
     const tech = s.techStack || '';
@@ -3205,7 +3213,7 @@ function renderSubmissions() {
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px">
         <div>
           <div class="submission-title">${title}</div>
-          <div class="submission-team">Team: ${team}</div>
+          <div class="submission-team">Team: ${teamNameStr}</div>
         </div>
         ${subStatusBadge(status)}
       </div>
