@@ -2401,6 +2401,7 @@ const ADMIN_EMAILS = [
 // ═══════════════════════════════════════════════
 let allStudents = [];
 let allTeams = [];
+let rawSubmissions = [];
 let allSubmissions = [];
 let allAnnouncements = [];
 let allAttendance = [];
@@ -2646,19 +2647,15 @@ function attachFirestoreListeners() {
   // Teams
   const u2 = db.collection('teams').onSnapshot(snap => {
     allTeams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    updateDashboardStats();
-    renderTeams();
-    updateBadges();
+    rebuildSubmissions();
     updateCharts();
   });
   unsubs.push(u2);
 
   // Submissions
   const u3 = db.collection('submissions').onSnapshot(snap => {
-    allSubmissions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    updateDashboardStats();
-    renderSubmissions();
-    updateBadges();
+    rawSubmissions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    rebuildSubmissions();
   });
   unsubs.push(u3);
 
@@ -2679,6 +2676,49 @@ function attachFirestoreListeners() {
     }
   });
   unsubs.push(u5);
+}
+
+function rebuildSubmissions() {
+  const submissionsMap = {};
+  
+  // 1. Populate using raw submissions from the submissions collection
+  rawSubmissions.forEach(s => {
+    submissionsMap[s.id] = { ...s };
+  });
+
+  // 2. Scan all teams and dynamically synthesize submissions if they submitted a project
+  allTeams.forEach(t => {
+    if (t.project && (t.projectSubmitted || t.project.title)) {
+      const existing = submissionsMap[t.id];
+      if (!existing) {
+        submissionsMap[t.id] = {
+          id: t.id,
+          teamId: t.id,
+          teamCode: t.teamCode || '',
+          teamName: t.teamName || t.name || '',
+          title: t.project.title || '',
+          projectTitle: t.project.title || '',
+          problemStatement: t.project.problem || t.project.problemStatement || '',
+          problem: t.project.problem || t.project.problemStatement || '',
+          description: t.project.description || t.project.ideaDescription || '',
+          ideaDescription: t.project.description || t.project.ideaDescription || '',
+          techStack: Array.isArray(t.project.techStack) ? t.project.techStack.join(', ') : (t.project.techStack || ''),
+          submittedAt: t.project.submittedAt || null,
+          status: t.project.status || 'pending'
+        };
+      } else {
+        if (!existing.teamCode) existing.teamCode = t.teamCode || '';
+        if (!existing.teamName) existing.teamName = t.teamName || t.name || '';
+      }
+    }
+  });
+
+  allSubmissions = Object.values(submissionsMap);
+  
+  updateDashboardStats();
+  filterSubmissions();
+  renderTeams();
+  updateBadges();
 }
 
 // ═══════════════════════════════════════════════
@@ -3198,7 +3238,11 @@ function subStatusBadge(s) {
 
 async function updateSubStatus(id, status) {
   try {
-    await db.collection('submissions').doc(id).update({ status, reviewedAt: firebase.firestore.FieldValue.serverTimestamp(), reviewedBy: currentAdminUser?.email });
+    await db.collection('submissions').doc(id).set({
+      status,
+      reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      reviewedBy: currentAdminUser?.email
+    }, { merge: true });
     toast(`Submission ${status}.`, 'success');
   } catch (e) {
     toast('Failed: ' + e.message, 'error');
